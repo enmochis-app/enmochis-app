@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>EnMochis — Ecosystem UI</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+:root{--bg:#dbe9f9;--ink:#10212a;--white:#f8fbfa;--blue:#2f6fed;--yellow:#ffd33d;--orange:#ff4b1f;--cream:#f8f1e7}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#181818;color:var(--ink);font-family:"DM Sans",sans-serif}.app{width:min(100%,430px);min-height:100vh;margin:auto;background:var(--bg);overflow:hidden;position:relative}.orange{--bg:#ff4b1f;--ink:#101010;--white:#f8f1e7}.topbar{display:flex;align-items:center;justify-content:space-between;padding:18px}.logo{border:2px solid currentColor;border-radius:4px;padding:5px 10px;font:700 14px "Space Grotesk"}.icons{display:flex;gap:7px}.icon{width:38px;height:38px;border:2px solid currentColor;background:transparent;border-radius:50%;display:grid;place-items:center}.orange .icon{border-radius:4px}.page{display:none}.page.active{display:block}.hero{padding:15px 18px 18px}.eyebrow{text-transform:uppercase;font-size:11px;font-weight:800;letter-spacing:1.5px;opacity:.65}.title{font:700 47px/.9 "Space Grotesk";letter-spacing:-3px;margin:10px 0 18px}.orange .title{text-transform:uppercase}.intro{font-size:15px;line-height:1.35;max-width:340px}.search{margin-top:18px;background:#fff;border:1px solid #0001;border-radius:15px;padding:13px;display:flex;gap:8px}.search input{border:0;outline:0;width:100%;background:transparent}.orange .search{border:2px solid #111;border-radius:3px}.section{padding:16px 18px}.head{display:flex;justify-content:space-between;align-items:end;margin-bottom:11px}.head h2{margin:0;font:700 19px "Space Grotesk"}.head a{font-size:11px;text-decoration:underline;font-weight:700}.feature{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 9px 25px #204d4320}.orange .feature{border:2px solid #111;border-radius:3px;box-shadow:7px 7px #111}.feature img{width:100%;height:225px;object-fit:cover;display:block}.feature-body{padding:15px}.feature-body h3{font:700 27px "Space Grotesk";margin:0 0 4px}.meta{font-size:12px;opacity:.65}.row{display:flex;gap:8px;overflow:auto;scrollbar-width:none}.row::-webkit-scrollbar{display:none}.card{min-width:160px;background:#fff;border-radius:15px;overflow:hidden;box-shadow:0 6px 18px #204d4317}.orange .card{border:2px solid #111;border-radius:3px;box-shadow:4px 4px #111}.card img{height:135px;width:100%;object-fit:cover}.cardbody{padding:10px}.card h3{margin:0 0 3px;font:700 16px "Space Grotesk"}.small{font-size:11px;opacity:.65}.rating{font-size:11px;font-weight:700;margin-top:7px}.number{font:700 54px/.9 "Space Grotesk";letter-spacing:-3px}.list{display:grid;gap:9px}.listitem{background:#fff;border-radius:15px;padding:12px;display:flex;gap:11px;align-items:center}.orange .listitem{border:2px solid #111;border-radius:3px}.listitem img{width:76px;height:76px;border-radius:10px;object-fit:cover}.orange .listitem img{border-radius:2px}.listitem h3{font:700 16px "Space Grotesk";margin:0 0 3px}.tag{display:inline-block;background:var(--blue);color:#fff;padding:4px 7px;border-radius:999px;font-size:9px;font-weight:800;margin-top:6px}.orange .tag{background:#ffd92f;color:#111;border-radius:2px}.map{height:190px;border-radius:17px;overflow:hidden;background:#c7d9f2;position:relative}.orange .map{border:2px solid #111;border-radius:3px}.map svg{width:100%;height:100%}.pin{position:absolute;width:28px;height:28px;border-radius:50%;background:#111;color:#fff;border:4px solid #fff;display:grid;place-items:center}.pin:nth-child(2){left:25%;top:30%}.pin:nth-child(3){left:63%;top:45%}.pin:nth-child(4){left:48%;top:72%}.pin:nth-child(5){left:79%;top:24%}.cta{margin:18px;background:#111;color:#fff;padding:21px;border-radius:17px}.orange .cta{border:2px solid #111;background:#f8f1e7;color:#111;border-radius:3px}.cta h2{font:700 29px "Space Grotesk";margin:0 0 7px}.cta p{font-size:12px;opacity:.72}.btn{display:block;border:0;width:100%;margin-top:12px;padding:14px;border-radius:999px;background:var(--blue);color:#fff;font-weight:800;text-align:center}.orange .btn{border-radius:2px;background:#111;color:#fff}.form{padding:18px}.field{margin-bottom:13px}.field label{display:block;font-size:11px;font-weight:800;text-transform:uppercase;margin-bottom:6px}.field input,.field textarea,.field select{width:100%;padding:14px;border:1px solid #0002;border-radius:12px;background:#fff;outline:0}.orange .field input,.orange .field textarea,.orange .field select{border:2px solid #111;border-radius:2px;background:#f8f1e7}.textarea{min-height:110px;resize:vertical}.bottom{position:sticky;bottom:0;z-index:20;display:grid;grid-template-columns:repeat(4,1fr);background:#fffffff0;backdrop-filter:blur(15px);padding:10px 7px calc(10px + env(safe-area-inset-bottom));border-top:1px solid #0001}.orange .bottom{background:#111;color:#fff;border-top:0}.nav{border:0;background:transparent;color:inherit;font-size:10px;font-weight:600;display:grid;gap:4px;justify-items:center}.nav span{font-size:18px}.nav.active{font-weight:900;color:var(--blue)}.orange .nav.active{color:#ffd92f}.switch{position:fixed;z-index:99;top:12px;left:50%;transform:translateX(-50%);background:#111;color:#fff;border-radius:999px;padding:4px;display:flex;gap:3px;box-shadow:0 7px 25px #0005}.switch button{border:0;background:transparent;color:#fff;padding:8px 11px;border-radius:999px;font-size:10px;font-weight:800}.switch .active{background:#fff;color:#111}.menu-panel{position:fixed;z-index:90;top:0;left:50%;transform:translateX(-50%) translateY(-110%);width:min(100%,430px);height:100vh;background:#111;color:#fff;padding:75px 25px;transition:.35s}.menu-panel.open{transform:translateX(-50%) translateY(0)}.menu-panel h2{font:700 45px/.9 "Space Grotesk";margin:0 0 30px}.menu-link{display:block;color:#fff;text-decoration:none;border-bottom:1px solid #ffffff30;padding:18px 0;font:600 18px "Space Grotesk"}.close{position:absolute;right:20px;top:20px;background:transparent;color:#fff;border:1px solid #fff;border-radius:50%;width:40px;height:40px}
+.cat-scroll{display:flex;gap:8px;overflow:auto;scrollbar-width:none;margin-top:16px}.cat-scroll::-webkit-scrollbar{display:none}.cat-chip{flex:0 0 auto;padding:9px 14px;border-radius:999px;font-size:12px;font-weight:700;background:#fff;box-shadow:0 4px 10px #204d4317;cursor:pointer;display:flex;align-items:center;gap:5px}.orange .cat-chip{border:2px solid #111;border-radius:3px;box-shadow:none}.cat-chip.chip-active{background:var(--blue);color:#fff}.orange .cat-chip.chip-active{background:#111;color:#fff}
+.catgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.catcard{border-radius:16px;padding:18px 14px;color:#fff;cursor:pointer;min-height:110px;display:flex;flex-direction:column;justify-content:space-between}.orange .catcard{border-radius:3px;border:2px solid #111;box-shadow:5px 5px #111}.catcard .cc-emoji{font-size:26px}.catcard .cc-label{font:700 16px "Space Grotesk"}.catcard .cc-count{font-size:10px;opacity:.85}
+.backlink{display:inline-block;margin:14px 18px 0;font-size:11px;font-weight:700;text-decoration:underline;cursor:pointer}
+.menu-list{display:grid;gap:2px}.menu-row{display:flex;justify-content:space-between;align-items:center;background:#fff;padding:13px 14px;border-radius:12px;margin-bottom:7px}.orange .menu-row{border:2px solid #111;border-radius:3px}.menu-row .mr-name{font:700 14px "Space Grotesk"}.menu-row .mr-desc{font-size:10px;opacity:.6;margin-top:2px}.menu-row .mr-price{font:700 15px "Space Grotesk";white-space:nowrap}
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.gallery img{width:100%;height:72px;object-fit:cover;border-radius:10px}.orange .gallery img{border-radius:2px;border:2px solid #111}
+.whatsapp-btn{display:flex;align-items:center;justify-content:center;gap:8px;border:0;width:100%;margin-top:12px;padding:14px;border-radius:999px;background:#25D366;color:#fff;font-weight:800}.orange .whatsapp-btn{border-radius:2px;border:2px solid #111}
+@media(min-width:700px){body{padding:80px 0}.app{border-radius:28px;box-shadow:0 30px 80px #0005}}
+</style>
+</head>
+<body>
+<div class="switch"><button id="blue" class="active" onclick="theme('blue')">01 AZUL</button><button id="orange" onclick="theme('orange')">02 NARANJA</button></div>
+<div class="menu-panel" id="menu"><button class="close" onclick="toggleMenu()">×</button><h2>EN<br>MOCHIS</h2><a class="menu-link" onclick="go('home');toggleMenu()">Inicio</a><a class="menu-link" onclick="go('places');toggleMenu()">Lugares destacados</a><a class="menu-link" onclick="go('weekend');toggleMenu()">Este fin de semana</a><a class="menu-link" onclick="go('join');toggleMenu()">Únete al directorio</a></div>
+
+<main class="app" id="app">
+<header class="topbar"><div class="logo">ENMOCHIS</div><div class="icons"><button class="icon">⌕</button><button class="icon" onclick="toggleMenu()">☰</button></div></header>
+
+<!-- HOME -->
+<section class="page active" id="home">
+<div class="hero"><div class="eyebrow">Descubre Los Mochis</div><h1 class="title" id="homeTitle">Buena comida,<br>cerca de ti.</h1><div class="search">⌕ <input placeholder="Buscar restaurantes, cafés, antojitos...">☷</div>
+<div class="cat-scroll">
+<div class="cat-chip" onclick="openCategory('restaurantes')">🍽️ Restaurantes</div>
+<div class="cat-chip" onclick="openCategory('cafeterias')">☕ Cafeterías</div>
+<div class="cat-chip" onclick="openCategory('snacks')">🌮 Snacks</div>
+<div class="cat-chip" onclick="openCategory('panaderias')">🥐 Panaderías</div>
+</div>
+</div>
+<section class="section"><div class="head"><h2>Destacados</h2><a onclick="go('places')">Ver todos →</a></div><article class="feature"><img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1000&q=85"><div class="feature-body"><h3>BUN SMASH</h3><div class="meta">Burgers que rompen las reglas.</div><div class="rating">★ 4.9 · 10–15 min · Cerca de ti</div></div></article></section>
+<section class="section"><div class="head"><h2>Recomendados para ti</h2><a onclick="go('weekend')">Ver todos →</a></div><div class="row"><article class="card"><img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=700&q=85"><div class="cardbody"><h3>Madre Café</h3><div class="small">Café de especialidad</div><div class="rating">★ 4.8 · 10–20 min</div></div></article><article class="card"><img src="https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=700&q=85"><div class="cardbody"><h3>Ramen Club</h3><div class="small">Ramen & más</div><div class="rating">★ 4.7 · 15–25 min</div></div></article><article class="card"><img src="https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=700&q=85"><div class="cardbody"><h3>La Esquina</h3><div class="small">Mexicana</div><div class="rating">★ 4.9 · 5–15 min</div></div></article></div></section>
+</section>
+
+<!-- PLACES -->
+<section class="page" id="places">
+<div class="hero"><div class="eyebrow">LOCAL PICKS / 01</div><h1 class="title">Lugares<br>destacados.</h1><p class="intro">Los sitios que están dando de qué hablar en Los Mochis. Descubre nuevos favoritos cerca de ti.</p></div>
+<section class="section"><div class="head"><h2>Esta semana</h2><a>Ordenar ↕</a></div><div class="list">
+<div class="listitem" onclick="go('minisite')" style="cursor:pointer"><img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=400&q=80"><div><h3>Madre Café</h3><div class="small">Café de especialidad · Centro</div><div class="rating">★ 4.8 · 124 reseñas</div><span class="tag">NUEVO</span></div></div>
+<div class="listitem"><img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=400&q=80"><div><h3>Bun Smash</h3><div class="small">Burgers · Zona Norte</div><div class="rating">★ 4.9 · 216 reseñas</div><span class="tag">FAVORITO</span></div></div>
+<div class="listitem"><img src="https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=400&q=80"><div><h3>Ramen Club</h3><div class="small">Asiática · Centro</div><div class="rating">★ 4.7 · 182 reseñas</div><span class="tag">HOT</span></div></div>
+</div></section>
+<section class="section"><div class="head"><h2>Mapa cerca de ti</h2><a>Explorar →</a></div><div class="map"><svg viewBox="0 0 430 190" preserveAspectRatio="none"><path d="M-20 30L450 145M-20 150L450 45M80 -20L230 220M350 -20L160 220" stroke="#9bb3d9" stroke-width="22" fill="none"/><path d="M-20 30L450 145M-20 150L450 45M80 -20L230 220M350 -20L160 220" stroke="#e7eff9" stroke-width="14" fill="none"/></svg><i class="pin"></i><i class="pin"></i><i class="pin"></i><i class="pin"></i></div></section>
+</section>
+
+<!-- WEEKEND -->
+<section class="page" id="weekend">
+<div class="hero"><div class="eyebrow">SÁBADO + DOMINGO</div><h1 class="title">Tu plan<br>para el<br>weekend.</h1><p class="intro">Una selección rápida para comer, tomar café y descubrir lugares nuevos este fin de semana en Los Mochis.</p></div>
+<section class="section"><div class="number">03</div><div class="meta">lugares que valen la salida.</div></section>
+<section class="section"><div class="head"><h2>Empieza con brunch</h2><a>Ver ruta →</a></div><article class="feature"><img src="https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=1000&q=85"><div class="feature-body"><h3>DOMINGO LENTO</h3><div class="meta">Brunch · 9:00–14:00 · ★ 4.9</div><div class="rating">Huevos, café, pan dulce y cero prisa.</div></div></article></section>
+<section class="section"><div class="head"><h2>Después: algo dulce</h2><a>Descubrir →</a></div><div class="row"><article class="card"><img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=700&q=85"><div class="cardbody"><h3>Dulce Pecado</h3><div class="small">Postres · ★ 4.9</div></div></article><article class="card"><img src="https://images.unsplash.com/photo-1515823064-d6e0c04616a7?auto=format&fit=crop&w=700&q=85"><div class="cardbody"><h3>Matcha Bae</h3><div class="small">Café · ★ 4.8</div></div></article></div></section>
+</section>
+
+<!-- JOIN -->
+<section class="page" id="join">
+<div class="hero"><div class="eyebrow">PARA NEGOCIOS LOCALES</div><h1 class="title">Tu negocio.<br>Tu lugar<br>en EnMochis.</h1><p class="intro">Crea un minisitio para que tus clientes encuentren tu menú, ubicación, teléfono y todo lo que necesitan para visitarte.</p></div>
+<div class="cta"><h2>Haz que te encuentren.</h2><p>Tu página, tu identidad y tu información. Sin competir con menús de otros negocios.</p><button class="btn" onclick="document.getElementById('joinForm').scrollIntoView({behavior:'smooth'})">QUIERO UNIRME →</button></div>
+<section class="section"><div class="head"><h2>¿Qué incluye?</h2></div><div class="list">
+<div class="listitem"><div class="number" style="font-size:28px">01</div><div><h3>MiniSitio</h3><div class="small">Una página diseñada para tu negocio.</div></div></div>
+<div class="listitem"><div class="number" style="font-size:28px">02</div><div><h3>Menú digital</h3><div class="small">Tus productos siempre visibles y actualizados.</div></div></div>
+<div class="listitem"><div class="number" style="font-size:28px">03</div><div><h3>Descubrimiento</h3><div class="small">Aparece en búsquedas, categorías y recomendaciones.</div></div></div>
+</div></section>
+<form class="form" id="joinForm" onsubmit="submitJoin(event)"><div class="head"><h2>Empieza aquí.</h2></div><div class="field"><label>Nombre del negocio</label><input required placeholder="Ej. Casa Verde"></div><div class="field"><label>Tu nombre</label><input required placeholder="Nombre y apellido"></div><div class="field"><label>Teléfono / WhatsApp</label><input required placeholder="+52..."></div><div class="field"><label>Cuéntanos sobre tu negocio</label><textarea class="textarea" placeholder="Tipo de negocio, categoría, qué quieres mostrar..."></textarea></div><button class="btn" type="submit">ENVIAR SOLICITUD</button></form>
+</section>
+
+<!-- CATEGORIAS -->
+<section class="page" id="categorias">
+<div class="hero"><div class="eyebrow">DIRECTORIO</div><h1 class="title">Elige una<br>categoría.</h1><p class="intro">Cada categoría tiene sus propios destacados y su directorio completo — así funcionará también por subdominio (ej. cafeterias.enmochis.app).</p></div>
+<section class="section"><div class="catgrid">
+<div class="catcard" style="background:#2f6fed" onclick="openCategory('restaurantes')"><div class="cc-emoji">🍽️</div><div><div class="cc-label">Restaurantes</div><div class="cc-count">18 lugares</div></div></div>
+<div class="catcard" style="background:#c9852c" onclick="openCategory('cafeterias')"><div class="cc-emoji">☕</div><div><div class="cc-label">Cafeterías</div><div class="cc-count">9 lugares</div></div></div>
+<div class="catcard" style="background:#e0553c" onclick="openCategory('snacks')"><div class="cc-emoji">🌮</div><div><div class="cc-label">Snacks</div><div class="cc-count">14 lugares</div></div></div>
+<div class="catcard" style="background:#8a5cd6" onclick="openCategory('panaderias')"><div class="cc-emoji">🥐</div><div><div class="cc-label">Panaderías</div><div class="cc-count">6 lugares</div></div></div>
+</div></section>
+</section>
+
+<!-- CATEGORY DETAIL -->
+<section class="page" id="category">
+<div class="backlink" onclick="go('categorias')">← Todas las categorías</div>
+<div class="hero"><div class="eyebrow" id="catEyebrow">CATEGORÍA</div><h1 class="title" id="catTitle">Cafeterías</h1></div>
+<section class="section"><div class="head"><h2>Destacados</h2><span class="small">Espacio patrocinado</span></div><div class="row" id="catFeatured"></div></section>
+<section class="section"><div class="head"><h2>Directorio completo</h2><a>Ordenar ↕</a></div><div class="list" id="catList"></div></section>
+</section>
+
+<!-- MINISITE -->
+<section class="page" id="minisite">
+<div class="backlink" onclick="go('category')">← Volver al directorio</div>
+<article class="feature" style="margin:16px 18px;"><img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1000&q=85"><div class="feature-body"><h3>RINCÓN DEL CAFÉ</h3><div class="meta">Cafetería de especialidad · Centro, Los Mochis</div><div class="rating">★ 4.8 · 124 reseñas · Abierto hasta 9pm</div></div></article>
+<section class="section"><div class="head"><h2>Galería</h2></div><div class="gallery"><img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=300&q=80"><img src="https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=300&q=80"><img src="https://images.unsplash.com/photo-1461023058943-07fcbe16d735?auto=format&fit=crop&w=300&q=80"></div></section>
+<section class="section"><div class="head"><h2>Menú</h2></div><div class="menu-list">
+<div class="menu-row"><div><div class="mr-name">Café de olla</div><div class="mr-desc">Canela, piloncillo</div></div><div class="mr-price">$45</div></div>
+<div class="menu-row"><div><div class="mr-name">Cappuccino</div><div class="mr-desc">Doble shot</div></div><div class="mr-price">$55</div></div>
+<div class="menu-row"><div><div class="mr-name">Pan dulce del día</div><div class="mr-desc">Recién horneado</div></div><div class="mr-price">$30</div></div>
+</div></section>
+<section class="section"><button class="whatsapp-btn" onclick="alert('Aquí se abriría WhatsApp con el número del negocio.')">💬 Escribir por WhatsApp</button><button class="btn" style="margin-top:8px" onclick="alert('Aquí se abriría Google Maps con la ubicación.')">📍 Cómo llegar</button></section>
+</section>
+
+<nav class="bottom"><button class="nav active" onclick="go('home')"><span>⌂</span>Inicio</button><button class="nav" onclick="go('categorias')"><span>⌕</span>Explorar</button><button class="nav" onclick="go('weekend')"><span>✦</span>Weekend</button><button class="nav" onclick="go('join')"><span>＋</span>Únete</button></nav>
+</main>
+<script>
+const CATS={
+  restaurantes:{emoji:'🍽️',name:'Restaurantes',eyebrow:'CATEGORÍA / RESTAURANTES',
+    featured:[{n:'Bun Smash',s:'Burgers · ★4.9',img:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=700&q=85'},{n:'La Esquina',s:'Mexicana · ★4.9',img:'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=700&q=85'}],
+    list:[{n:'Bun Smash',s:'Burgers · Zona Norte',r:'★4.9 · 216 reseñas',tag:'FAVORITO',img:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=400&q=80'},{n:'La Esquina',s:'Mexicana · Centro',r:'★4.9 · 98 reseñas',tag:'HOT',img:'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=400&q=80'},{n:'Ramen Club',s:'Asiática · Centro',r:'★4.7 · 182 reseñas',tag:null,img:'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=400&q=80'}]},
+  cafeterias:{emoji:'☕',name:'Cafeterías',eyebrow:'CATEGORÍA / CAFETERÍAS',
+    featured:[{n:'Rincón del Café',s:'Especialidad · ★4.8',img:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=700&q=85'},{n:'Madre Café',s:'Especialidad · ★4.8',img:'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=700&q=85'}],
+    list:[{n:'Rincón del Café',s:'Café de especialidad · Centro',r:'★4.8 · 124 reseñas',tag:'NUEVO',img:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=400&q=80',minisite:true},{n:'Madre Café',s:'Café de especialidad · Centro',r:'★4.8 · 90 reseñas',tag:null,img:'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=400&q=80'},{n:'Espresso Norte',s:'Café · Zona Norte',r:'★4.6 · 41 reseñas',tag:null,img:'https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=400&q=80'}]},
+  snacks:{emoji:'🌮',name:'Snacks',eyebrow:'CATEGORÍA / SNACKS',
+    featured:[{n:'Tacos El Güero',s:'Antojitos · ★4.9',img:'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=700&q=85'},{n:'Dorilocos MX',s:'Antojitos · ★4.7',img:'https://images.unsplash.com/photo-1615870216519-2f9fa575fa5c?auto=format&fit=crop&w=700&q=85'}],
+    list:[{n:'Tacos El Güero',s:'Antojitos · Centro',r:'★4.9 · 340 reseñas',tag:'FAVORITO',img:'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=400&q=80'},{n:'Dorilocos MX',s:'Antojitos · Zona Norte',r:'★4.7 · 88 reseñas',tag:null,img:'https://images.unsplash.com/photo-1615870216519-2f9fa575fa5c?auto=format&fit=crop&w=400&q=80'}]},
+  panaderias:{emoji:'🥐',name:'Panaderías',eyebrow:'CATEGORÍA / PANADERÍAS',
+    featured:[{n:'Dulce Pecado',s:'Repostería · ★4.9',img:'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=700&q=85'},{n:'Pan de Ayer',s:'Panadería · ★4.6',img:'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=700&q=85'}],
+    list:[{n:'Dulce Pecado',s:'Repostería · Centro',r:'★4.9 · 76 reseñas',tag:'HOT',img:'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=400&q=80'},{n:'Pan de Ayer',s:'Panadería tradicional · Centro',r:'★4.6 · 52 reseñas',tag:null,img:'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=80'}]}
+};
+function openCategory(key){
+  const c=CATS[key];
+  document.getElementById('catEyebrow').textContent=c.eyebrow;
+  document.getElementById('catTitle').textContent=c.name;
+  document.querySelectorAll('#home .cat-chip').forEach(ch=>ch.classList.remove('chip-active'));
+  document.getElementById('catFeatured').innerHTML=c.featured.map(f=>`<article class="card"><img src="${f.img}"><div class="cardbody"><h3>${f.n}</h3><div class="small">${f.s}</div></div></article>`).join('');
+  document.getElementById('catList').innerHTML=c.list.map(i=>`<div class="listitem" ${i.minisite?'onclick="go(\'minisite\')" style="cursor:pointer"':''}><img src="${i.img}"><div><h3>${i.n}</h3><div class="small">${i.s}</div><div class="rating">${i.r}</div>${i.tag?`<span class="tag">${i.tag}</span>`:''}</div></div>`).join('');
+  go('category');
+}
+function go(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});const map={home:0,categorias:1,weekend:2,join:3};if(id in map){document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));document.querySelectorAll('.nav')[map[id]].classList.add('active')}}
+function theme(t){const app=document.getElementById('app');document.getElementById('blue').classList.toggle('active',t==='blue');document.getElementById('orange').classList.toggle('active',t==='orange');app.classList.toggle('orange',t==='orange');document.getElementById('homeTitle').innerHTML=t==='orange'?'DESCUBRE<br>LO MEJOR<br>DE LOS MOCHIS.':'Buena comida,<br>cerca de ti.'}
+function toggleMenu(){document.getElementById('menu').classList.toggle('open')}
+function submitJoin(e){e.preventDefault();alert('¡Solicitud enviada! Aquí conectaríamos el formulario con tu backend/CRM.');}
+</script>
+</body>
+</html>
