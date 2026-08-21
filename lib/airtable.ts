@@ -1,4 +1,5 @@
 import Airtable from "airtable";
+import { SAMPLE_NEGOCIOS } from "./sample-data";
 
 export type Categoria = "Restaurantes" | "Cafeterías" | "Snacks" | "Panaderías";
 
@@ -35,6 +36,15 @@ export type Negocio = {
   horarios?: string;
   galeria: string[];
   menu: { nombre: string; descripcion?: string; precio?: string }[];
+  addonWhatsapp: boolean;
+  addonMapas: boolean;
+  addonGaleria: boolean;
+  addonFormularioContacto: boolean;
+  addonPedidos: boolean;
+  addonReservaciones: boolean;
+  addonQrMesa: boolean;
+  addonLealtad: boolean;
+  addonMultiSucursal: boolean;
 };
 
 function getBase() {
@@ -87,55 +97,80 @@ function mapNegocio(record: Airtable.Record<Airtable.FieldSet>): Negocio {
     horarios: f["horarios"] ? String(f["horarios"]) : undefined,
     galeria: attachmentUrls(f["galeria"]),
     menu,
+    addonWhatsapp: f["addon_whatsapp"] === true,
+    addonMapas: f["addon_mapas"] === true,
+    addonGaleria: f["addon_galeria"] === true,
+    addonFormularioContacto: f["addon_formulario_contacto"] === true,
+    addonPedidos: f["addon_pedidos"] === true,
+    addonReservaciones: f["addon_reservaciones"] === true,
+    addonQrMesa: f["addon_qr_mesa"] === true,
+    addonLealtad: f["addon_lealtad"] === true,
+    addonMultiSucursal: f["addon_multi_sucursal"] === true,
   };
 }
 
 const ESTADOS_PUBLICOS = ["activo", "destacado", "prueba"] as const;
 
 export async function getDestacados(): Promise<Negocio[]> {
-  const base = getBase();
-  const records = await base("Negocios")
-    .select({
-      filterByFormula: `{estado} = "destacado"`,
-      maxRecords: 10,
-    })
-    .all();
-  return records.map(mapNegocio);
+  try {
+    const base = getBase();
+    const records = await base("Negocios")
+      .select({
+        filterByFormula: `{estado} = "destacado"`,
+        maxRecords: 10,
+      })
+      .all();
+    return records.map(mapNegocio);
+  } catch {
+    return SAMPLE_NEGOCIOS.filter((n) => n.estado === "destacado");
+  }
 }
 
 export async function getRecomendados(): Promise<Negocio[]> {
-  const base = getBase();
-  const records = await base("Negocios")
-    .select({
-      filterByFormula: `OR(${ESTADOS_PUBLICOS.map((e) => `{estado} = "${e}"`).join(", ")})`,
-      maxRecords: 12,
-    })
-    .all();
-  return records.map(mapNegocio);
+  try {
+    const base = getBase();
+    const records = await base("Negocios")
+      .select({
+        filterByFormula: `OR(${ESTADOS_PUBLICOS.map((e) => `{estado} = "${e}"`).join(", ")})`,
+        maxRecords: 12,
+      })
+      .all();
+    return records.map(mapNegocio);
+  } catch {
+    return SAMPLE_NEGOCIOS;
+  }
 }
 
 export async function getNegociosPorCategoria(categoriaSlug: string): Promise<Negocio[]> {
   const cat = categoriaPorSlug(categoriaSlug);
   if (!cat) return [];
-  const base = getBase();
-  const records = await base("Negocios")
-    .select({
-      filterByFormula: `AND({categoria} = "${cat.nombre}", OR(${ESTADOS_PUBLICOS.map((e) => `{estado} = "${e}"`).join(", ")}))`,
-    })
-    .all();
-  return records.map(mapNegocio);
+  try {
+    const base = getBase();
+    const records = await base("Negocios")
+      .select({
+        filterByFormula: `AND({categoria} = "${cat.nombre}", OR(${ESTADOS_PUBLICOS.map((e) => `{estado} = "${e}"`).join(", ")}))`,
+      })
+      .all();
+    return records.map(mapNegocio);
+  } catch {
+    return SAMPLE_NEGOCIOS.filter((n) => n.categoria === cat.nombre);
+  }
 }
 
 export async function getNegocioPorSlug(slug: string): Promise<Negocio | null> {
-  const base = getBase();
-  const records = await base("Negocios")
-    .select({
-      filterByFormula: `AND({slug} = "${slug}", OR(${ESTADOS_PUBLICOS.map((e) => `{estado} = "${e}"`).join(", ")}))`,
-      maxRecords: 1,
-    })
-    .all();
-  const record = records[0];
-  return record ? mapNegocio(record) : null;
+  try {
+    const base = getBase();
+    const records = await base("Negocios")
+      .select({
+        filterByFormula: `AND({slug} = "${slug}", OR(${ESTADOS_PUBLICOS.map((e) => `{estado} = "${e}"`).join(", ")}))`,
+        maxRecords: 1,
+      })
+      .all();
+    const record = records[0];
+    return record ? mapNegocio(record) : null;
+  } catch {
+    return SAMPLE_NEGOCIOS.find((n) => n.slug === slug) ?? null;
+  }
 }
 
 function slugifyBase(nombre: string): string {

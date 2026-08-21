@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getNegocioPorSlug, slugPorCategoria } from "@/lib/airtable";
+import { getNegocioPorSlug, slugPorCategoria, type Negocio } from "@/lib/airtable";
 
 export const revalidate = 60;
 
@@ -13,14 +13,25 @@ function mapsHref(direccion: string) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion)}`;
 }
 
+const SERVICIOS: { addon: keyof Negocio; emoji: string; label: string }[] = [
+  { addon: "addonPedidos", emoji: "🛍️", label: "Pedidos para llevar" },
+  { addon: "addonReservaciones", emoji: "📅", label: "Reservaciones" },
+  { addon: "addonQrMesa", emoji: "📱", label: "Pide desde tu mesa (QR)" },
+  { addon: "addonLealtad", emoji: "⭐", label: "Programa de lealtad" },
+  { addon: "addonFormularioContacto", emoji: "✉️", label: "Pedidos especiales por contacto" },
+  { addon: "addonMultiSucursal", emoji: "📍", label: "Varias sucursales" },
+];
+
 export default async function NegocioPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const negocio = await getNegocioPorSlug(slug).catch(() => null);
+  const negocio = await getNegocioPorSlug(slug);
   if (!negocio) notFound();
+
+  const servicios = SERVICIOS.filter((s) => negocio[s.addon] === true);
 
   return (
     <>
@@ -45,7 +56,22 @@ export default async function NegocioPage({
         </section>
       )}
 
-      {negocio.galeria.length > 0 && (
+      {servicios.length > 0 && (
+        <section className="section">
+          <div className="head">
+            <h2>Servicios</h2>
+          </div>
+          <div className="cat-scroll">
+            {servicios.map((s) => (
+              <span key={s.addon} className="cat-chip">
+                {s.emoji} {s.label}
+              </span>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {negocio.addonGaleria && negocio.galeria.length > 0 && (
         <section className="section">
           <div className="head">
             <h2>Galería</h2>
@@ -78,7 +104,7 @@ export default async function NegocioPage({
       )}
 
       <section className="section">
-        {negocio.whatsapp && (
+        {negocio.addonWhatsapp && negocio.whatsapp && (
           <a
             className="whatsapp-btn"
             href={whatsappHref(negocio.whatsapp)}
@@ -88,7 +114,7 @@ export default async function NegocioPage({
             💬 Escribir por WhatsApp
           </a>
         )}
-        {negocio.direccion && (
+        {negocio.addonMapas && negocio.direccion && (
           <a
             className="btn"
             style={{ marginTop: 8 }}

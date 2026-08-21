@@ -7,8 +7,8 @@ export const revalidate = 60;
 
 export default async function HomePage() {
   const [destacados, recomendados] = await Promise.all([
-    getDestacados().catch(() => []),
-    getRecomendados().catch(() => []),
+    getDestacados(),
+    getRecomendados(),
   ]);
 
   return (

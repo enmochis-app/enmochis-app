@@ -14,7 +14,7 @@ export default async function CategoriaPage({
   const categoria = categoriaPorSlug(slug);
   if (!categoria) notFound();
 
-  const negocios = await getNegociosPorCategoria(slug).catch(() => []);
+  const negocios = await getNegociosPorCategoria(slug);
   const destacados = negocios.filter((n) => n.estado === "destacado");
 
   return (
