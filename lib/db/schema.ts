@@ -1,4 +1,4 @@
-import { pgTable, text, boolean, date, timestamp, integer, primaryKey } from "drizzle-orm/pg-core";
+import { pgTable, text, boolean, date, timestamp, integer, primaryKey, doublePrecision } from "drizzle-orm/pg-core";
 
 export const negocios = pgTable("negocios", {
   id: text("id")
@@ -24,9 +24,10 @@ export const negocios = pgTable("negocios", {
   contactoNombre: text("contacto_nombre"),
   telefono: text("telefono"),
   whatsapp: text("whatsapp"),
+  mensajeWhatsapp: text("mensaje_whatsapp"),
   direccion: text("direccion"),
-  googleMapsUrl: text("google_maps_url"),
-  appleMapsUrl: text("apple_maps_url"),
+  lat: doublePrecision("lat"),
+  lng: doublePrecision("lng"),
   instagram: text("instagram"),
   facebook: text("facebook"),
   horarios: text("horarios"),
@@ -34,12 +35,18 @@ export const negocios = pgTable("negocios", {
   galeria1Foto: text("galeria_1_foto"),
   galeria1Nombre: text("galeria_1_nombre"),
   galeria1Precio: text("galeria_1_precio"),
+  galeria1Unidad: text("galeria_1_unidad"),
+  galeria1Descripcion: text("galeria_1_descripcion"),
   galeria2Foto: text("galeria_2_foto"),
   galeria2Nombre: text("galeria_2_nombre"),
   galeria2Precio: text("galeria_2_precio"),
+  galeria2Unidad: text("galeria_2_unidad"),
+  galeria2Descripcion: text("galeria_2_descripcion"),
   galeria3Foto: text("galeria_3_foto"),
   galeria3Nombre: text("galeria_3_nombre"),
   galeria3Precio: text("galeria_3_precio"),
+  galeria3Unidad: text("galeria_3_unidad"),
+  galeria3Descripcion: text("galeria_3_descripcion"),
 
   menu: text("menu").notNull().default(""),
 

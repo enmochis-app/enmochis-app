@@ -7,13 +7,64 @@ import { parsearMenu } from "@/lib/negocios";
 function telHref(numero: string) {
   return `tel:${numero.replace(/[^\d+]/g, "")}`;
 }
-function waHref(numero: string, slug: string) {
-  const mensaje = `Hola, vengo de ${slug}.enmochis.app 👋`;
+function waHref(numero: string, slug: string, mensajeBase?: string) {
+  const base = mensajeBase?.trim() || "Hola 👋, quiero hacer un pedido.";
+  const mensaje = `${base} Vengo de ${slug}.enmochis.app`;
   return `https://wa.me/${numero.replace(/[^\d]/g, "")}?text=${encodeURIComponent(mensaje)}`;
+}
+function urlGoogleMaps(lat: number, lng: number, nombre: string) {
+  return `https://maps.google.com/maps?q=${lat},${lng}(${encodeURIComponent(nombre)})`;
+}
+function urlAppleMaps(lat: number, lng: number, nombre: string) {
+  return `https://maps.apple.com/?ll=${lat},${lng}&q=${encodeURIComponent(nombre)}`;
+}
+
+function CarruselGaleria({ galeria }: { galeria: Negocio["galeria"] }) {
+  const [activo, setActivo] = useState(0);
+  const items = galeria.filter((g) => g.foto);
+
+  function onScroll(e: React.UIEvent<HTMLDivElement>) {
+    const track = e.currentTarget;
+    const primera = track.firstElementChild as HTMLElement | null;
+    const anchoTarjeta = primera ? primera.getBoundingClientRect().width + 16 : 1;
+    setActivo(Math.round(track.scrollLeft / anchoTarjeta));
+  }
+
+  return (
+    <div className="mini-galeria">
+      <p className="galeria-eyebrow">Lo más pedido</p>
+      <h2 className="galeria-titulo">Galería</h2>
+      <div className="carrusel-track" onScroll={onScroll}>
+        {items.map((g, i) => (
+          <div className="tarjeta" key={i}>
+            <div className="foto-wrap">
+              <img src={g.foto} alt={g.nombre ?? ""} loading="lazy" />
+              {g.precio && (
+                <div className="tag-precio">
+                  {g.precio}
+                  {g.unidad && <small>{g.unidad}</small>}
+                </div>
+              )}
+            </div>
+            <div className="info">
+              {g.nombre && <p className="nombre">{g.nombre}</p>}
+              {g.descripcion && <p className="desc">{g.descripcion}</p>}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="dots">
+        {items.map((_, i) => (
+          <div key={i} className={`dot${i === activo ? " activo" : ""}`} />
+        ))}
+      </div>
+    </div>
+  );
 }
 
 export default function NegocioDetalle({ negocio }: { negocio: Negocio }) {
   const [pantalla, setPantalla] = useState<"inicio" | "menu">("inicio");
+  const [appleRecomendado, setAppleRecomendado] = useState(false);
   const scrimRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -30,11 +81,26 @@ export default function NegocioDetalle({ negocio }: { negocio: Negocio }) {
     window.scrollTo(0, 0);
   }, [pantalla]);
 
+  useEffect(() => {
+    const ios =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- detección de dispositivo, solo posible en el navegador
+    setAppleRecomendado(ios);
+  }, []);
+
   const accent = negocio.colorAcento || "#C8FF3D";
   const tieneAddon = (clave: string) => negocio.addons.some((a) => a.clave === clave);
-  const goMapsUrl = tieneAddon("mapas") ? negocio.googleMapsUrl || negocio.appleMapsUrl : undefined;
+
+  const tieneMapa = tieneAddon("mapas") && negocio.lat !== undefined && negocio.lng !== undefined;
+  const urlGoogle = tieneMapa ? urlGoogleMaps(negocio.lat!, negocio.lng!, negocio.nombre) : undefined;
+  const urlApple = tieneMapa ? urlAppleMaps(negocio.lat!, negocio.lng!, negocio.nombre) : undefined;
+  const urlMapaRecomendado = appleRecomendado ? urlApple : urlGoogle;
+  const urlMapaSecundario = appleRecomendado ? urlGoogle : urlApple;
+  const nombreMapaSecundario = appleRecomendado ? "Google Maps" : "Apple Maps";
+
   const addonWhatsapp = tieneAddon("whatsapp");
-  const galeriaConFoto = negocio.galeria.filter((g) => g.foto);
+  const mostrarGaleria = tieneAddon("galeria") && negocio.galeria.some((g) => g.foto);
   const categorias = parsearMenu(negocio.menu);
   const servicios = negocio.addons.filter((a) => a.comportamiento === "chip");
 
@@ -78,14 +144,35 @@ export default function NegocioDetalle({ negocio }: { negocio: Negocio }) {
           </div>
         )}
 
+        {tieneMapa && (
+          <div className="mini-mapas">
+            {negocio.direccion && <div className="mapas-direccion">{negocio.direccion}</div>}
+            <a
+              className="cta-btn mapa-principal"
+              href={urlMapaRecomendado}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ background: accent, color: "#0A0A0A" }}
+            >
+              📍 Cómo llegar
+              <span className="chip-recomendado">Recomendado</span>
+            </a>
+            <a className="mapa-secundario" href={urlMapaSecundario} target="_blank" rel="noopener noreferrer">
+              Prefiero {nombreMapaSecundario}
+            </a>
+          </div>
+        )}
+
         <div style={{ height: 240 }} />
 
         <div className="cta-float">
-          {galeriaConFoto.length > 0 && (
+          {mostrarGaleria && (
             <div className="home-thumbs">
-              {galeriaConFoto.map((g, i) => (
-                <div key={i} className="home-thumb" style={{ backgroundImage: `url(${g.foto})` }} />
-              ))}
+              {negocio.galeria
+                .filter((g) => g.foto)
+                .map((g, i) => (
+                  <div key={i} className="home-thumb" style={{ backgroundImage: `url(${g.foto})` }} />
+                ))}
             </div>
           )}
           {negocio.telefono && (
@@ -93,27 +180,14 @@ export default function NegocioDetalle({ negocio }: { negocio: Negocio }) {
               ☎ LLAMAR AHORA
             </a>
           )}
-          <div className="cta-row-pair">
-            {goMapsUrl && (
-              <a
-                className="cta-btn"
-                href={goMapsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ background: "rgba(10,10,10,0.75)", color: "#fff", border: "1.5px solid rgba(255,255,255,0.3)" }}
-              >
-                📍 CÓMO LLEGAR
-              </a>
-            )}
-            <button
-              type="button"
-              className="cta-btn"
-              onClick={() => setPantalla("menu")}
-              style={{ background: "rgba(10,10,10,0.75)", color: "#fff", border: "1.5px solid rgba(255,255,255,0.3)" }}
-            >
-              ☰ VER MENÚ
-            </button>
-          </div>
+          <button
+            type="button"
+            className="cta-btn"
+            onClick={() => setPantalla("menu")}
+            style={{ background: "rgba(10,10,10,0.75)", color: "#fff", border: "1.5px solid rgba(255,255,255,0.3)" }}
+          >
+            ☰ VER MENÚ
+          </button>
         </div>
       </div>
 
@@ -126,24 +200,7 @@ export default function NegocioDetalle({ negocio }: { negocio: Negocio }) {
           <span className="mt-title">{negocio.nombre.toUpperCase()}</span>
         </div>
 
-        {galeriaConFoto.length > 0 && (
-          <div className="carousel-wrap">
-            <div className="land-section-title">Lo más pedido</div>
-            <div className="carousel">
-              {negocio.galeria.map((g, i) =>
-                g.foto ? (
-                  <div className="prod-card" key={i}>
-                    <div className="prod-photo" style={{ backgroundImage: `url(${g.foto})` }} />
-                    <div className="prod-body">
-                      {g.nombre && <div className="prod-name">{g.nombre}</div>}
-                      {g.precio && <div className="prod-price">{g.precio}</div>}
-                    </div>
-                  </div>
-                ) : null
-              )}
-            </div>
-          </div>
-        )}
+        {mostrarGaleria && <CarruselGaleria galeria={negocio.galeria} />}
 
         <div className="menu-section">
           <div className="menu-main-title">THE MENU</div>
@@ -177,13 +234,13 @@ export default function NegocioDetalle({ negocio }: { negocio: Negocio }) {
         <button type="button" className="activo" onClick={() => setPantalla("inicio")}>
           <span className="icon-ic">🏠</span>INICIO
         </button>
-        {goMapsUrl && (
-          <a href={goMapsUrl} target="_blank" rel="noopener noreferrer">
+        {tieneMapa && (
+          <a href={urlMapaRecomendado} target="_blank" rel="noopener noreferrer">
             <span className="icon-ic">📍</span>MAPA
           </a>
         )}
         {addonWhatsapp && negocio.whatsapp && (
-          <a href={waHref(negocio.whatsapp, negocio.slug)} target="_blank" rel="noopener noreferrer">
+          <a href={waHref(negocio.whatsapp, negocio.slug, negocio.mensajeWhatsapp)} target="_blank" rel="noopener noreferrer">
             <span className="icon-ic">💬</span>WHATSAPP
           </a>
         )}

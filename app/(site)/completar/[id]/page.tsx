@@ -28,9 +28,8 @@ export default function CompletarPage({
   const [descripcionLarga, setDescripcionLarga] = useState("");
   const [telefono, setTelefono] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
+  const [mensajeWhatsapp, setMensajeWhatsapp] = useState("");
   const [direccion, setDireccion] = useState("");
-  const [googleMapsUrl, setGoogleMapsUrl] = useState("");
-  const [appleMapsUrl, setAppleMapsUrl] = useState("");
   const [instagram, setInstagram] = useState("");
   const [facebook, setFacebook] = useState("");
   const [horarios, setHorarios] = useState("");
@@ -40,10 +39,16 @@ export default function CompletarPage({
   const [colorAcento, setColorAcento] = useState("#C8FF3D");
   const [galeria1Nombre, setGaleria1Nombre] = useState("");
   const [galeria1Precio, setGaleria1Precio] = useState("");
+  const [galeria1Unidad, setGaleria1Unidad] = useState("");
+  const [galeria1Descripcion, setGaleria1Descripcion] = useState("");
   const [galeria2Nombre, setGaleria2Nombre] = useState("");
   const [galeria2Precio, setGaleria2Precio] = useState("");
+  const [galeria2Unidad, setGaleria2Unidad] = useState("");
+  const [galeria2Descripcion, setGaleria2Descripcion] = useState("");
   const [galeria3Nombre, setGaleria3Nombre] = useState("");
   const [galeria3Precio, setGaleria3Precio] = useState("");
+  const [galeria3Unidad, setGaleria3Unidad] = useState("");
+  const [galeria3Descripcion, setGaleria3Descripcion] = useState("");
 
   const cargar = useCallback(async () => {
     const res = await fetch(`/api/negocios/${id}/completar`);
@@ -59,9 +64,8 @@ export default function CompletarPage({
     setDescripcionLarga(n.descripcionLarga ?? "");
     setTelefono(n.telefono ?? "");
     setWhatsapp(n.whatsapp ?? "");
+    setMensajeWhatsapp(n.mensajeWhatsapp ?? "");
     setDireccion(n.direccion ?? "");
-    setGoogleMapsUrl(n.googleMapsUrl ?? "");
-    setAppleMapsUrl(n.appleMapsUrl ?? "");
     setInstagram(n.instagram ?? "");
     setFacebook(n.facebook ?? "");
     setHorarios(n.horarios ?? "");
@@ -70,10 +74,16 @@ export default function CompletarPage({
     setColorAcento(n.colorAcento ?? "#C8FF3D");
     setGaleria1Nombre(n.galeria[0]?.nombre ?? "");
     setGaleria1Precio(n.galeria[0]?.precio ?? "");
+    setGaleria1Unidad(n.galeria[0]?.unidad ?? "");
+    setGaleria1Descripcion(n.galeria[0]?.descripcion ?? "");
     setGaleria2Nombre(n.galeria[1]?.nombre ?? "");
     setGaleria2Precio(n.galeria[1]?.precio ?? "");
+    setGaleria2Unidad(n.galeria[1]?.unidad ?? "");
+    setGaleria2Descripcion(n.galeria[1]?.descripcion ?? "");
     setGaleria3Nombre(n.galeria[2]?.nombre ?? "");
     setGaleria3Precio(n.galeria[2]?.precio ?? "");
+    setGaleria3Unidad(n.galeria[2]?.unidad ?? "");
+    setGaleria3Descripcion(n.galeria[2]?.descripcion ?? "");
     setCargando(false);
   }, [id]);
 
@@ -95,9 +105,8 @@ export default function CompletarPage({
           descripcionLarga,
           telefono,
           whatsapp,
+          mensajeWhatsapp,
           direccion,
-          googleMapsUrl,
-          appleMapsUrl,
           instagram,
           facebook,
           horarios,
@@ -106,10 +115,16 @@ export default function CompletarPage({
           colorAcento,
           galeria_1_nombre: galeria1Nombre,
           galeria_1_precio: galeria1Precio,
+          galeria_1_unidad: galeria1Unidad,
+          galeria_1_descripcion: galeria1Descripcion,
           galeria_2_nombre: galeria2Nombre,
           galeria_2_precio: galeria2Precio,
+          galeria_2_unidad: galeria2Unidad,
+          galeria_2_descripcion: galeria2Descripcion,
           galeria_3_nombre: galeria3Nombre,
           galeria_3_precio: galeria3Precio,
+          galeria_3_unidad: galeria3Unidad,
+          galeria_3_descripcion: galeria3Descripcion,
         }),
       });
       const body = await res.json();
@@ -188,16 +203,16 @@ export default function CompletarPage({
           <input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} />
         </div>
         <div className="field">
+          <label>Mensaje de WhatsApp (opcional)</label>
+          <input
+            value={mensajeWhatsapp}
+            onChange={(e) => setMensajeWhatsapp(e.target.value)}
+            placeholder="Hola 👋, quiero hacer un pedido."
+          />
+        </div>
+        <div className="field">
           <label>Dirección</label>
           <input value={direccion} onChange={(e) => setDireccion(e.target.value)} />
-        </div>
-        <div className="field">
-          <label>Link de Google Maps</label>
-          <input value={googleMapsUrl} onChange={(e) => setGoogleMapsUrl(e.target.value)} placeholder="https://maps.google.com/?q=..." />
-        </div>
-        <div className="field">
-          <label>Link de Apple Maps (opcional)</label>
-          <input value={appleMapsUrl} onChange={(e) => setAppleMapsUrl(e.target.value)} placeholder="https://maps.apple.com/?q=..." />
         </div>
         <div className="field">
           <label>Instagram</label>
@@ -260,9 +275,9 @@ export default function CompletarPage({
             <h2>Galería (3 productos)</h2>
           </div>
           {[
-            { n: 1, campo: "galeria_1_foto", nombre: galeria1Nombre, setNombre: setGaleria1Nombre, precio: galeria1Precio, setPrecio: setGaleria1Precio, foto: negocio.galeria[0]?.foto },
-            { n: 2, campo: "galeria_2_foto", nombre: galeria2Nombre, setNombre: setGaleria2Nombre, precio: galeria2Precio, setPrecio: setGaleria2Precio, foto: negocio.galeria[1]?.foto },
-            { n: 3, campo: "galeria_3_foto", nombre: galeria3Nombre, setNombre: setGaleria3Nombre, precio: galeria3Precio, setPrecio: setGaleria3Precio, foto: negocio.galeria[2]?.foto },
+            { n: 1, campo: "galeria_1_foto", nombre: galeria1Nombre, setNombre: setGaleria1Nombre, precio: galeria1Precio, setPrecio: setGaleria1Precio, unidad: galeria1Unidad, setUnidad: setGaleria1Unidad, descripcion: galeria1Descripcion, setDescripcion: setGaleria1Descripcion, foto: negocio.galeria[0]?.foto },
+            { n: 2, campo: "galeria_2_foto", nombre: galeria2Nombre, setNombre: setGaleria2Nombre, precio: galeria2Precio, setPrecio: setGaleria2Precio, unidad: galeria2Unidad, setUnidad: setGaleria2Unidad, descripcion: galeria2Descripcion, setDescripcion: setGaleria2Descripcion, foto: negocio.galeria[1]?.foto },
+            { n: 3, campo: "galeria_3_foto", nombre: galeria3Nombre, setNombre: setGaleria3Nombre, precio: galeria3Precio, setPrecio: setGaleria3Precio, unidad: galeria3Unidad, setUnidad: setGaleria3Unidad, descripcion: galeria3Descripcion, setDescripcion: setGaleria3Descripcion, foto: negocio.galeria[2]?.foto },
           ].map((g) => (
             <div key={g.n} style={{ marginBottom: 16 }}>
               <ImageUploadField
@@ -279,6 +294,14 @@ export default function CompletarPage({
               <div className="field">
                 <label>Precio</label>
                 <input value={g.precio} onChange={(e) => g.setPrecio(e.target.value)} />
+              </div>
+              <div className="field">
+                <label>Unidad (ej. &quot;x kilo&quot;, &quot;c/u&quot;)</label>
+                <input value={g.unidad} onChange={(e) => g.setUnidad(e.target.value)} />
+              </div>
+              <div className="field">
+                <label>Descripción corta</label>
+                <input value={g.descripcion} onChange={(e) => g.setDescripcion(e.target.value)} />
               </div>
             </div>
           ))}

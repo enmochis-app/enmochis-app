@@ -63,7 +63,7 @@ export function parsearMenu(texto: string): CategoriaMenu[] {
   return categorias;
 }
 
-export type ItemGaleria = { foto?: string; nombre?: string; precio?: string };
+export type ItemGaleria = { foto?: string; nombre?: string; precio?: string; unidad?: string; descripcion?: string };
 
 export type ComportamientoAddon = "chip" | "especial";
 
@@ -96,9 +96,10 @@ export type Negocio = {
   contactoNombre?: string;
   telefono?: string;
   whatsapp?: string;
+  mensajeWhatsapp?: string;
   direccion?: string;
-  googleMapsUrl?: string;
-  appleMapsUrl?: string;
+  lat?: number;
+  lng?: number;
   instagram?: string;
   facebook?: string;
   horarios?: string;
@@ -113,9 +114,9 @@ function u(v: string | null | undefined): string | undefined {
 
 function mapNegocio(row: NegocioRow, addonsDelNegocio: Addon[]): Negocio {
   const galeria: ItemGaleria[] = [
-    { foto: u(row.galeria1Foto), nombre: u(row.galeria1Nombre), precio: u(row.galeria1Precio) },
-    { foto: u(row.galeria2Foto), nombre: u(row.galeria2Nombre), precio: u(row.galeria2Precio) },
-    { foto: u(row.galeria3Foto), nombre: u(row.galeria3Nombre), precio: u(row.galeria3Precio) },
+    { foto: u(row.galeria1Foto), nombre: u(row.galeria1Nombre), precio: u(row.galeria1Precio), unidad: u(row.galeria1Unidad), descripcion: u(row.galeria1Descripcion) },
+    { foto: u(row.galeria2Foto), nombre: u(row.galeria2Nombre), precio: u(row.galeria2Precio), unidad: u(row.galeria2Unidad), descripcion: u(row.galeria2Descripcion) },
+    { foto: u(row.galeria3Foto), nombre: u(row.galeria3Nombre), precio: u(row.galeria3Precio), unidad: u(row.galeria3Unidad), descripcion: u(row.galeria3Descripcion) },
   ].filter((g) => g.foto || g.nombre);
 
   return {
@@ -135,9 +136,10 @@ function mapNegocio(row: NegocioRow, addonsDelNegocio: Addon[]): Negocio {
     contactoNombre: u(row.contactoNombre),
     telefono: u(row.telefono),
     whatsapp: u(row.whatsapp),
+    mensajeWhatsapp: u(row.mensajeWhatsapp),
     direccion: u(row.direccion),
-    googleMapsUrl: u(row.googleMapsUrl),
-    appleMapsUrl: u(row.appleMapsUrl),
+    lat: row.lat ?? undefined,
+    lng: row.lng ?? undefined,
     instagram: u(row.instagram),
     facebook: u(row.facebook),
     horarios: u(row.horarios),
@@ -320,18 +322,25 @@ export type DatosNegocio = {
   fechaProximaRenovacion?: string;
   telefono?: string;
   whatsapp?: string;
+  mensajeWhatsapp?: string;
   direccion?: string;
-  googleMapsUrl?: string;
-  appleMapsUrl?: string;
+  lat?: number;
+  lng?: number;
   instagram?: string;
   facebook?: string;
   horarios?: string;
   galeria_1_nombre?: string;
   galeria_1_precio?: string;
+  galeria_1_unidad?: string;
+  galeria_1_descripcion?: string;
   galeria_2_nombre?: string;
   galeria_2_precio?: string;
+  galeria_2_unidad?: string;
+  galeria_2_descripcion?: string;
   galeria_3_nombre?: string;
   galeria_3_precio?: string;
+  galeria_3_unidad?: string;
+  galeria_3_descripcion?: string;
   menu?: string;
   /** Claves del catálogo de addons (ver getCatalogoAddons) que debe tener activos este negocio. */
   addons?: string[];
@@ -350,18 +359,25 @@ function filaParaGuardar(datos: Partial<DatosNegocio>) {
   if (datos.fechaProximaRenovacion !== undefined) fila.fechaProximaRenovacion = datos.fechaProximaRenovacion || null;
   if (datos.telefono !== undefined) fila.telefono = datos.telefono;
   if (datos.whatsapp !== undefined) fila.whatsapp = datos.whatsapp;
+  if (datos.mensajeWhatsapp !== undefined) fila.mensajeWhatsapp = datos.mensajeWhatsapp;
   if (datos.direccion !== undefined) fila.direccion = datos.direccion;
-  if (datos.googleMapsUrl !== undefined) fila.googleMapsUrl = datos.googleMapsUrl;
-  if (datos.appleMapsUrl !== undefined) fila.appleMapsUrl = datos.appleMapsUrl;
+  if (datos.lat !== undefined) fila.lat = datos.lat;
+  if (datos.lng !== undefined) fila.lng = datos.lng;
   if (datos.instagram !== undefined) fila.instagram = datos.instagram;
   if (datos.facebook !== undefined) fila.facebook = datos.facebook;
   if (datos.horarios !== undefined) fila.horarios = datos.horarios;
   if (datos.galeria_1_nombre !== undefined) fila.galeria1Nombre = datos.galeria_1_nombre;
   if (datos.galeria_1_precio !== undefined) fila.galeria1Precio = datos.galeria_1_precio;
+  if (datos.galeria_1_unidad !== undefined) fila.galeria1Unidad = datos.galeria_1_unidad;
+  if (datos.galeria_1_descripcion !== undefined) fila.galeria1Descripcion = datos.galeria_1_descripcion;
   if (datos.galeria_2_nombre !== undefined) fila.galeria2Nombre = datos.galeria_2_nombre;
   if (datos.galeria_2_precio !== undefined) fila.galeria2Precio = datos.galeria_2_precio;
+  if (datos.galeria_2_unidad !== undefined) fila.galeria2Unidad = datos.galeria_2_unidad;
+  if (datos.galeria_2_descripcion !== undefined) fila.galeria2Descripcion = datos.galeria_2_descripcion;
   if (datos.galeria_3_nombre !== undefined) fila.galeria3Nombre = datos.galeria_3_nombre;
   if (datos.galeria_3_precio !== undefined) fila.galeria3Precio = datos.galeria_3_precio;
+  if (datos.galeria_3_unidad !== undefined) fila.galeria3Unidad = datos.galeria_3_unidad;
+  if (datos.galeria_3_descripcion !== undefined) fila.galeria3Descripcion = datos.galeria_3_descripcion;
   if (datos.menu !== undefined) fila.menu = datos.menu;
   return fila;
 }

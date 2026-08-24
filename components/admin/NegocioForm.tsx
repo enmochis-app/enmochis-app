@@ -62,9 +62,10 @@ export default function NegocioForm({
   );
   const [telefono, setTelefono] = useState(negocio?.telefono ?? "");
   const [whatsapp, setWhatsapp] = useState(negocio?.whatsapp ?? "");
+  const [mensajeWhatsapp, setMensajeWhatsapp] = useState(negocio?.mensajeWhatsapp ?? "");
   const [direccion, setDireccion] = useState(negocio?.direccion ?? "");
-  const [googleMapsUrl, setGoogleMapsUrl] = useState(negocio?.googleMapsUrl ?? "");
-  const [appleMapsUrl, setAppleMapsUrl] = useState(negocio?.appleMapsUrl ?? "");
+  const [lat, setLat] = useState(negocio?.lat !== undefined ? String(negocio.lat) : "");
+  const [lng, setLng] = useState(negocio?.lng !== undefined ? String(negocio.lng) : "");
   const [instagram, setInstagram] = useState(negocio?.instagram ?? "");
   const [facebook, setFacebook] = useState(negocio?.facebook ?? "");
   const [horarios, setHorarios] = useState(negocio?.horarios ?? "");
@@ -74,10 +75,16 @@ export default function NegocioForm({
   const [colorAcento, setColorAcento] = useState(negocio?.colorAcento ?? "#C8FF3D");
   const [galeria1Nombre, setGaleria1Nombre] = useState(negocio?.galeria[0]?.nombre ?? "");
   const [galeria1Precio, setGaleria1Precio] = useState(negocio?.galeria[0]?.precio ?? "");
+  const [galeria1Unidad, setGaleria1Unidad] = useState(negocio?.galeria[0]?.unidad ?? "");
+  const [galeria1Descripcion, setGaleria1Descripcion] = useState(negocio?.galeria[0]?.descripcion ?? "");
   const [galeria2Nombre, setGaleria2Nombre] = useState(negocio?.galeria[1]?.nombre ?? "");
   const [galeria2Precio, setGaleria2Precio] = useState(negocio?.galeria[1]?.precio ?? "");
+  const [galeria2Unidad, setGaleria2Unidad] = useState(negocio?.galeria[1]?.unidad ?? "");
+  const [galeria2Descripcion, setGaleria2Descripcion] = useState(negocio?.galeria[1]?.descripcion ?? "");
   const [galeria3Nombre, setGaleria3Nombre] = useState(negocio?.galeria[2]?.nombre ?? "");
   const [galeria3Precio, setGaleria3Precio] = useState(negocio?.galeria[2]?.precio ?? "");
+  const [galeria3Unidad, setGaleria3Unidad] = useState(negocio?.galeria[2]?.unidad ?? "");
+  const [galeria3Descripcion, setGaleria3Descripcion] = useState(negocio?.galeria[2]?.descripcion ?? "");
 
   const [addonsSeleccionados, setAddonsSeleccionados] = useState<Record<string, boolean>>(() => {
     const inicial: Record<string, boolean> = {};
@@ -140,9 +147,10 @@ export default function NegocioForm({
           fechaProximaRenovacion: fechaProximaRenovacion || undefined,
           telefono,
           whatsapp,
+          mensajeWhatsapp,
           direccion,
-          googleMapsUrl,
-          appleMapsUrl,
+          lat: lat.trim() === "" ? undefined : Number(lat),
+          lng: lng.trim() === "" ? undefined : Number(lng),
           instagram,
           facebook,
           horarios,
@@ -151,10 +159,16 @@ export default function NegocioForm({
           colorAcento,
           galeria_1_nombre: galeria1Nombre,
           galeria_1_precio: galeria1Precio,
+          galeria_1_unidad: galeria1Unidad,
+          galeria_1_descripcion: galeria1Descripcion,
           galeria_2_nombre: galeria2Nombre,
           galeria_2_precio: galeria2Precio,
+          galeria_2_unidad: galeria2Unidad,
+          galeria_2_descripcion: galeria2Descripcion,
           galeria_3_nombre: galeria3Nombre,
           galeria_3_precio: galeria3Precio,
+          galeria_3_unidad: galeria3Unidad,
+          galeria_3_descripcion: galeria3Descripcion,
           addons: Object.keys(addonsSeleccionados).filter((clave) => addonsSeleccionados[clave]),
         }),
       });
@@ -301,18 +315,28 @@ export default function NegocioForm({
           </div>
         </div>
         <div className="admin-field">
+          <label>Mensaje de WhatsApp</label>
+          <input value={mensajeWhatsapp} onChange={(e) => setMensajeWhatsapp(e.target.value)} placeholder="Hola 👋, quiero hacer un pedido." />
+          <div style={{ fontSize: 11, color: "#666", marginTop: 4 }}>
+            Se le agrega solo &quot;Vengo de {negocio.slug}.enmochis.app&quot; al final — nunca hay que escribirlo a mano.
+          </div>
+        </div>
+        <div className="admin-field">
           <label>Dirección</label>
           <input value={direccion} onChange={(e) => setDireccion(e.target.value)} />
         </div>
         <div className="admin-grid-2">
           <div className="admin-field">
-            <label>Link de Google Maps</label>
-            <input value={googleMapsUrl} onChange={(e) => setGoogleMapsUrl(e.target.value)} placeholder="https://maps.google.com/?q=..." />
+            <label>Latitud</label>
+            <input value={lat} onChange={(e) => setLat(e.target.value)} placeholder="25.7920" inputMode="decimal" />
           </div>
           <div className="admin-field">
-            <label>Link de Apple Maps</label>
-            <input value={appleMapsUrl} onChange={(e) => setAppleMapsUrl(e.target.value)} placeholder="https://maps.apple.com/?q=..." />
+            <label>Longitud</label>
+            <input value={lng} onChange={(e) => setLng(e.target.value)} placeholder="-108.9930" inputMode="decimal" />
           </div>
+        </div>
+        <div style={{ fontSize: 11, color: "#666", marginTop: -8, marginBottom: 8 }}>
+          Se sacan una sola vez: compartir ubicación desde Google Maps → copiar coordenadas.
         </div>
         <div className="admin-grid-2">
           <div className="admin-field">
@@ -379,9 +403,9 @@ export default function NegocioForm({
       <div className="admin-section">
         <h2>Galería (3 productos)</h2>
         {[
-          { n: 1, campo: "galeria_1_foto", nombre: galeria1Nombre, setNombre: setGaleria1Nombre, precio: galeria1Precio, setPrecio: setGaleria1Precio, foto: negocio.galeria[0]?.foto },
-          { n: 2, campo: "galeria_2_foto", nombre: galeria2Nombre, setNombre: setGaleria2Nombre, precio: galeria2Precio, setPrecio: setGaleria2Precio, foto: negocio.galeria[1]?.foto },
-          { n: 3, campo: "galeria_3_foto", nombre: galeria3Nombre, setNombre: setGaleria3Nombre, precio: galeria3Precio, setPrecio: setGaleria3Precio, foto: negocio.galeria[2]?.foto },
+          { n: 1, campo: "galeria_1_foto", nombre: galeria1Nombre, setNombre: setGaleria1Nombre, precio: galeria1Precio, setPrecio: setGaleria1Precio, unidad: galeria1Unidad, setUnidad: setGaleria1Unidad, descripcion: galeria1Descripcion, setDescripcion: setGaleria1Descripcion, foto: negocio.galeria[0]?.foto },
+          { n: 2, campo: "galeria_2_foto", nombre: galeria2Nombre, setNombre: setGaleria2Nombre, precio: galeria2Precio, setPrecio: setGaleria2Precio, unidad: galeria2Unidad, setUnidad: setGaleria2Unidad, descripcion: galeria2Descripcion, setDescripcion: setGaleria2Descripcion, foto: negocio.galeria[1]?.foto },
+          { n: 3, campo: "galeria_3_foto", nombre: galeria3Nombre, setNombre: setGaleria3Nombre, precio: galeria3Precio, setPrecio: setGaleria3Precio, unidad: galeria3Unidad, setUnidad: setGaleria3Unidad, descripcion: galeria3Descripcion, setDescripcion: setGaleria3Descripcion, foto: negocio.galeria[2]?.foto },
         ].map((g) => (
           <div key={g.n} style={{ borderTop: g.n > 1 ? "1px solid #eee" : undefined, paddingTop: g.n > 1 ? 14 : 0, marginTop: g.n > 1 ? 14 : 0 }}>
             <ImageUploadField
@@ -399,6 +423,16 @@ export default function NegocioForm({
               <div className="admin-field">
                 <label>Precio</label>
                 <input value={g.precio} onChange={(e) => g.setPrecio(e.target.value)} />
+              </div>
+            </div>
+            <div className="admin-grid-2">
+              <div className="admin-field">
+                <label>Unidad</label>
+                <input value={g.unidad} onChange={(e) => g.setUnidad(e.target.value)} placeholder="x kilo, c/u, orden..." />
+              </div>
+              <div className="admin-field">
+                <label>Descripción corta</label>
+                <input value={g.descripcion} onChange={(e) => g.setDescripcion(e.target.value)} />
               </div>
             </div>
           </div>

@@ -112,32 +112,65 @@ body {
 .cta-row-pair { display: flex; gap: 10px; }
 .cta-row-pair .cta-btn { flex: 1; font-size: 13px; padding: 15px 10px; }
 
-.carousel-wrap { margin-top: 40px; }
-.land-section-title {
-  font-family: 'Anton', sans-serif; font-size: 22px; text-transform: uppercase;
-  padding: 0 20px; margin-bottom: 14px;
+/* ===== Addon: Mapas (Google + Apple, siempre ambos) ===== */
+.mini-mapas { padding: 0 20px; margin-top: 18px; }
+.mini-mapas .mapas-direccion { font-size: 12.5px; color: #999; margin-bottom: 10px; }
+.mapa-principal { position: relative; width: 100%; }
+.mapa-principal .chip-recomendado {
+  position: absolute; top: -9px; right: 12px; background: #0A0A0A; color: var(--accent, #C8FF3D);
+  border: 1px solid var(--accent, #C8FF3D); font-size: 8.5px; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 7px; border-radius: 999px;
 }
+.mapa-secundario {
+  display: block; text-align: center; margin-top: 10px; font-family: 'Space Grotesk';
+  font-size: 12px; font-weight: 600; color: #888; text-decoration: underline;
+}
+
 .menu-main-title {
   font-family: 'Anton', sans-serif; font-size: 22px; text-transform: uppercase;
   text-align: center; margin-bottom: 18px;
 }
-.carousel {
-  display: flex; gap: 12px; overflow-x: auto; padding: 4px 20px 12px;
-  scrollbar-width: none;
+
+/* ===== Addon: Galería / carrusel (estilo BRUTAL FOOD) ===== */
+.mini-galeria { margin-top: 40px; }
+.galeria-eyebrow {
+  font-family: 'Space Grotesk'; font-size: 11px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent, #C8FF3D);
+  padding: 0 20px; margin-bottom: 4px;
 }
-.carousel::-webkit-scrollbar { display: none; }
-.prod-card {
-  flex-shrink: 0; width: 150px; background: #161616; border-radius: 14px;
-  border: 2px solid #262626; overflow: hidden;
+.galeria-titulo {
+  font-family: 'Anton', sans-serif; font-size: 26px; text-transform: uppercase;
+  line-height: 1; padding: 0 20px; margin-bottom: 14px;
 }
-.prod-card:nth-child(even) { transform: rotate(-1.5deg); }
-.prod-card:nth-child(odd) { transform: rotate(1.5deg); }
-.prod-photo {
-  height: 110px; background: #1E1E1E; background-size: cover; background-position: center;
+.carrusel-track {
+  display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory;
+  padding: 4px 20px 12px; scrollbar-width: none; -webkit-overflow-scrolling: touch;
 }
-.prod-body { padding: 10px 12px 12px; }
-.prod-name { font-family: 'Space Grotesk'; font-weight: 700; font-size: 13px; text-transform: uppercase; margin: 2px 0; }
-.prod-price { font-family: 'Anton'; font-size: 16px; color: var(--accent, #C8FF3D); }
+.carrusel-track::-webkit-scrollbar { display: none; }
+.tarjeta {
+  scroll-snap-align: start; flex: 0 0 68%; background: #1C1C1C;
+  border: 1.5px solid #2C2C2C; border-radius: 4px; position: relative;
+}
+.tarjeta .foto-wrap { position: relative; aspect-ratio: 3/4; overflow: hidden; border-radius: 4px 4px 0 0; }
+.tarjeta .foto-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.tarjeta .foto-wrap::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.45) 100%);
+}
+.tag-precio {
+  position: absolute; top: 10px; left: 10px;
+  background: var(--accent, #C8FF3D); color: #0A0A0A;
+  font-family: 'Space Grotesk'; font-weight: 700; font-size: 15px;
+  padding: 5px 10px 4px; border-radius: 3px; line-height: 1.1; z-index: 2;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.35);
+}
+.tag-precio small { display: block; font-size: 8px; font-weight: 700; letter-spacing: 0.03em; opacity: 0.75; text-transform: uppercase; }
+.tarjeta .info { padding: 14px 14px 16px; }
+.tarjeta .nombre { font-family: 'Anton', sans-serif; font-size: 17px; text-transform: uppercase; margin: 0 0 6px; }
+.tarjeta .desc { font-size: 12px; line-height: 1.45; margin: 0; color: #999; }
+.dots { display: flex; justify-content: center; gap: 6px; margin-top: 4px; }
+.dot { width: 5px; height: 5px; border-radius: 50%; background: #333; transition: background .2s, width .2s; }
+.dot.activo { background: var(--accent, #C8FF3D); width: 18px; border-radius: 3px; }
 
 .menu-section { margin-top: 44px; padding: 0 20px; }
 .menu-cat-block { margin-bottom: 28px; }
