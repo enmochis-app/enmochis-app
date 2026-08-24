@@ -12,13 +12,6 @@ function waHref(numero: string, slug: string) {
   return `https://wa.me/${numero.replace(/[^\d]/g, "")}?text=${encodeURIComponent(mensaje)}`;
 }
 
-const SERVICIOS: { addon: keyof Negocio; emoji: string; label: string }[] = [
-  { addon: "addonPedidos", emoji: "🛍️", label: "Pedidos por WhatsApp" },
-  { addon: "addonQrMesa", emoji: "📱", label: "Pide desde tu mesa (QR)" },
-  { addon: "addonLealtad", emoji: "⭐", label: "Programa de lealtad" },
-  { addon: "addonMultiSucursal", emoji: "📍", label: "Varias sucursales" },
-];
-
 export default function NegocioDetalle({ negocio }: { negocio: Negocio }) {
   const [pantalla, setPantalla] = useState<"inicio" | "menu">("inicio");
   const scrimRef = useRef<HTMLDivElement>(null);
@@ -38,10 +31,12 @@ export default function NegocioDetalle({ negocio }: { negocio: Negocio }) {
   }, [pantalla]);
 
   const accent = negocio.colorAcento || "#C8FF3D";
-  const goMapsUrl = negocio.addonMapas ? negocio.googleMapsUrl || negocio.appleMapsUrl : undefined;
+  const tieneAddon = (clave: string) => negocio.addons.some((a) => a.clave === clave);
+  const goMapsUrl = tieneAddon("mapas") ? negocio.googleMapsUrl || negocio.appleMapsUrl : undefined;
+  const addonWhatsapp = tieneAddon("whatsapp");
   const galeriaConFoto = negocio.galeria.filter((g) => g.foto);
   const categorias = parsearMenu(negocio.menu);
-  const servicios = SERVICIOS.filter((s) => negocio[s.addon] === true);
+  const servicios = negocio.addons.filter((a) => a.comportamiento === "chip");
 
   return (
     <div className="mini-wrap" style={{ "--accent": accent } as React.CSSProperties}>
@@ -75,9 +70,9 @@ export default function NegocioDetalle({ negocio }: { negocio: Negocio }) {
 
         {servicios.length > 0 && (
           <div className="mini-servicios">
-            {servicios.map((s) => (
-              <span className="mini-chip" key={s.addon}>
-                {s.emoji} {s.label}
+            {servicios.map((a) => (
+              <span className="mini-chip" key={a.id}>
+                {a.icono} {a.nombre}
               </span>
             ))}
           </div>
@@ -167,9 +162,9 @@ export default function NegocioDetalle({ negocio }: { negocio: Negocio }) {
 
         {servicios.length > 0 && (
           <div className="mini-servicios">
-            {servicios.map((s) => (
-              <span className="mini-chip" key={s.addon}>
-                {s.emoji} {s.label}
+            {servicios.map((a) => (
+              <span className="mini-chip" key={a.id}>
+                {a.icono} {a.nombre}
               </span>
             ))}
           </div>
@@ -187,12 +182,12 @@ export default function NegocioDetalle({ negocio }: { negocio: Negocio }) {
             <span className="icon-ic">📍</span>MAPA
           </a>
         )}
-        {negocio.addonWhatsapp && negocio.whatsapp && (
+        {addonWhatsapp && negocio.whatsapp && (
           <a href={waHref(negocio.whatsapp, negocio.slug)} target="_blank" rel="noopener noreferrer">
             <span className="icon-ic">💬</span>WHATSAPP
           </a>
         )}
-        {!negocio.addonWhatsapp && negocio.telefono && (
+        {!addonWhatsapp && negocio.telefono && (
           <a href={telHref(negocio.telefono)}>
             <span className="icon-ic">☎</span>LLAMAR
           </a>

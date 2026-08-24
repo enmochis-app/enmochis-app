@@ -1,7 +1,7 @@
 import { put } from "@vercel/blob";
 import { and, eq, inArray } from "drizzle-orm";
 import { db } from "./db";
-import { negocios, type NegocioRow } from "./db/schema";
+import { negocios, addons, negocioAddons, type NegocioRow } from "./db/schema";
 import { SAMPLE_NEGOCIOS } from "./sample-data";
 
 export type Categoria = "Restaurantes" | "Cafeterías" | "Snacks" | "Panaderías";
@@ -65,6 +65,20 @@ export function parsearMenu(texto: string): CategoriaMenu[] {
 
 export type ItemGaleria = { foto?: string; nombre?: string; precio?: string };
 
+export type ComportamientoAddon = "chip" | "especial";
+
+export type Addon = {
+  id: string;
+  clave: string;
+  nombre: string;
+  descripcion: string;
+  icono: string;
+  precio: number;
+  comportamiento: ComportamientoAddon;
+  activo: boolean;
+  orden: number;
+};
+
 export type Negocio = {
   id: string;
   nombre: string;
@@ -77,7 +91,7 @@ export type Negocio = {
   fotoPortada?: string;
   colorAcento: string;
   estado: Estado;
-  plan?: "top20" | "estandar";
+  plan?: "top20" | "estandar" | "gratuita";
   fechaProximaRenovacion?: string;
   contactoNombre?: string;
   telefono?: string;
@@ -90,20 +104,14 @@ export type Negocio = {
   horarios?: string;
   galeria: ItemGaleria[];
   menu: string;
-  addonWhatsapp: boolean;
-  addonMapas: boolean;
-  addonGaleria: boolean;
-  addonPedidos: boolean;
-  addonQrMesa: boolean;
-  addonLealtad: boolean;
-  addonMultiSucursal: boolean;
+  addons: Addon[];
 };
 
 function u(v: string | null | undefined): string | undefined {
   return v ?? undefined;
 }
 
-function mapNegocio(row: NegocioRow): Negocio {
+function mapNegocio(row: NegocioRow, addonsDelNegocio: Addon[]): Negocio {
   const galeria: ItemGaleria[] = [
     { foto: u(row.galeria1Foto), nombre: u(row.galeria1Nombre), precio: u(row.galeria1Precio) },
     { foto: u(row.galeria2Foto), nombre: u(row.galeria2Nombre), precio: u(row.galeria2Precio) },
@@ -135,14 +143,63 @@ function mapNegocio(row: NegocioRow): Negocio {
     horarios: u(row.horarios),
     galeria,
     menu: row.menu ?? "",
-    addonWhatsapp: row.addonWhatsapp,
-    addonMapas: row.addonMapas,
-    addonGaleria: row.addonGaleria,
-    addonPedidos: row.addonPedidos,
-    addonQrMesa: row.addonQrMesa,
-    addonLealtad: row.addonLealtad,
-    addonMultiSucursal: row.addonMultiSucursal,
+    addons: addonsDelNegocio,
   };
+}
+
+function mapAddon(row: {
+  id: string;
+  clave: string;
+  nombre: string;
+  descripcion: string;
+  icono: string;
+  precio: number;
+  comportamiento: string;
+  activo: boolean;
+  orden: number;
+}): Addon {
+  return {
+    id: row.id,
+    clave: row.clave,
+    nombre: row.nombre,
+    descripcion: row.descripcion,
+    icono: row.icono,
+    precio: row.precio,
+    comportamiento: row.comportamiento as ComportamientoAddon,
+    activo: row.activo,
+    orden: row.orden,
+  };
+}
+
+/** Junta cada negocio con la lista de addons que tiene activos, en una sola consulta de más. */
+async function mapNegociosConAddons(filas: NegocioRow[]): Promise<Negocio[]> {
+  if (filas.length === 0) return [];
+  const ids = filas.map((f) => f.id);
+  const filasAddons = await db()
+    .select({
+      negocioId: negocioAddons.negocioId,
+      id: addons.id,
+      clave: addons.clave,
+      nombre: addons.nombre,
+      descripcion: addons.descripcion,
+      icono: addons.icono,
+      precio: addons.precio,
+      comportamiento: addons.comportamiento,
+      activo: addons.activo,
+      orden: addons.orden,
+    })
+    .from(negocioAddons)
+    .innerJoin(addons, eq(negocioAddons.addonId, addons.id))
+    .where(inArray(negocioAddons.negocioId, ids))
+    .orderBy(addons.orden);
+
+  const porNegocio = new Map<string, Addon[]>();
+  for (const fa of filasAddons) {
+    const lista = porNegocio.get(fa.negocioId) ?? [];
+    lista.push(mapAddon(fa));
+    porNegocio.set(fa.negocioId, lista);
+  }
+  return filas.map((f) => mapNegocio(f, porNegocio.get(f.id) ?? []));
 }
 
 const ESTADOS_PUBLICOS = ["activo", "destacado", "prueba"] as const;
@@ -150,7 +207,7 @@ const ESTADOS_PUBLICOS = ["activo", "destacado", "prueba"] as const;
 export async function getDestacados(): Promise<Negocio[]> {
   try {
     const filas = await db().select().from(negocios).where(eq(negocios.estado, "destacado")).limit(10);
-    return filas.map(mapNegocio);
+    return await mapNegociosConAddons(filas);
   } catch {
     return SAMPLE_NEGOCIOS.filter((n) => n.estado === "destacado");
   }
@@ -163,7 +220,7 @@ export async function getRecomendados(): Promise<Negocio[]> {
       .from(negocios)
       .where(inArray(negocios.estado, ESTADOS_PUBLICOS))
       .limit(12);
-    return filas.map(mapNegocio);
+    return await mapNegociosConAddons(filas);
   } catch {
     return SAMPLE_NEGOCIOS;
   }
@@ -177,7 +234,7 @@ export async function getNegociosPorCategoria(categoriaSlug: string): Promise<Ne
       .select()
       .from(negocios)
       .where(and(eq(negocios.categoria, cat.nombre), inArray(negocios.estado, ESTADOS_PUBLICOS)));
-    return filas.map(mapNegocio);
+    return await mapNegociosConAddons(filas);
   } catch {
     return SAMPLE_NEGOCIOS.filter((n) => n.categoria === cat.nombre);
   }
@@ -190,7 +247,8 @@ export async function getNegocioPorSlug(slug: string): Promise<Negocio | null> {
       .from(negocios)
       .where(and(eq(negocios.slug, slug), inArray(negocios.estado, ESTADOS_PUBLICOS)))
       .limit(1);
-    return filas[0] ? mapNegocio(filas[0]) : null;
+    const resultado = await mapNegociosConAddons(filas);
+    return resultado[0] ?? null;
   } catch {
     return SAMPLE_NEGOCIOS.find((n) => n.slug === slug) ?? null;
   }
@@ -258,7 +316,7 @@ export type DatosNegocio = {
   logoForma?: LogoForma;
   colorAcento?: string;
   estado: Estado;
-  plan?: "top20" | "estandar";
+  plan?: "top20" | "estandar" | "gratuita";
   fechaProximaRenovacion?: string;
   telefono?: string;
   whatsapp?: string;
@@ -275,13 +333,8 @@ export type DatosNegocio = {
   galeria_3_nombre?: string;
   galeria_3_precio?: string;
   menu?: string;
-  addonWhatsapp: boolean;
-  addonMapas: boolean;
-  addonGaleria: boolean;
-  addonPedidos: boolean;
-  addonQrMesa: boolean;
-  addonLealtad: boolean;
-  addonMultiSucursal: boolean;
+  /** Claves del catálogo de addons (ver getCatalogoAddons) que debe tener activos este negocio. */
+  addons?: string[];
 };
 
 function filaParaGuardar(datos: Partial<DatosNegocio>) {
@@ -310,25 +363,30 @@ function filaParaGuardar(datos: Partial<DatosNegocio>) {
   if (datos.galeria_3_nombre !== undefined) fila.galeria3Nombre = datos.galeria_3_nombre;
   if (datos.galeria_3_precio !== undefined) fila.galeria3Precio = datos.galeria_3_precio;
   if (datos.menu !== undefined) fila.menu = datos.menu;
-  if (datos.addonWhatsapp !== undefined) fila.addonWhatsapp = datos.addonWhatsapp;
-  if (datos.addonMapas !== undefined) fila.addonMapas = datos.addonMapas;
-  if (datos.addonGaleria !== undefined) fila.addonGaleria = datos.addonGaleria;
-  if (datos.addonPedidos !== undefined) fila.addonPedidos = datos.addonPedidos;
-  if (datos.addonQrMesa !== undefined) fila.addonQrMesa = datos.addonQrMesa;
-  if (datos.addonLealtad !== undefined) fila.addonLealtad = datos.addonLealtad;
-  if (datos.addonMultiSucursal !== undefined) fila.addonMultiSucursal = datos.addonMultiSucursal;
   return fila;
+}
+
+/** Reemplaza los addons activos de un negocio por los que corresponden a estas claves del catálogo. */
+async function sincronizarAddonsNegocio(negocioId: string, claves: string[]): Promise<void> {
+  await db().delete(negocioAddons).where(eq(negocioAddons.negocioId, negocioId));
+  if (claves.length === 0) return;
+  const catalogo = await db().select({ id: addons.id, clave: addons.clave }).from(addons).where(inArray(addons.clave, claves));
+  if (catalogo.length === 0) return;
+  await db()
+    .insert(negocioAddons)
+    .values(catalogo.map((a) => ({ negocioId, addonId: a.id })));
 }
 
 export async function getAllNegocios(): Promise<Negocio[]> {
   const filas = await db().select().from(negocios).orderBy(negocios.nombre);
-  return filas.map(mapNegocio);
+  return mapNegociosConAddons(filas);
 }
 
 export async function getNegocioPorId(id: string): Promise<Negocio | null> {
   try {
     const filas = await db().select().from(negocios).where(eq(negocios.id, id)).limit(1);
-    return filas[0] ? mapNegocio(filas[0]) : null;
+    const resultado = await mapNegociosConAddons(filas);
+    return resultado[0] ?? null;
   } catch {
     return null;
   }
@@ -348,16 +406,23 @@ export async function crearNegocioAdmin(
       fechaAfiliacion: new Date().toISOString().slice(0, 10),
     })
     .returning({ id: negocios.id });
+  if (datos.addons !== undefined) {
+    await sincronizarAddonsNegocio(fila.id, datos.addons);
+  }
   return { id: fila.id, slug };
 }
 
 export async function actualizarNegocio(id: string, cambios: Partial<DatosNegocio>): Promise<void> {
   const fila = filaParaGuardar(cambios);
-  if (Object.keys(fila).length === 0) return;
-  await db()
-    .update(negocios)
-    .set({ ...fila, updatedAt: new Date() })
-    .where(eq(negocios.id, id));
+  if (Object.keys(fila).length > 0) {
+    await db()
+      .update(negocios)
+      .set({ ...fila, updatedAt: new Date() })
+      .where(eq(negocios.id, id));
+  }
+  if (cambios.addons !== undefined) {
+    await sincronizarAddonsNegocio(id, cambios.addons);
+  }
 }
 
 export async function archivarNegocio(id: string): Promise<void> {
@@ -395,4 +460,64 @@ export async function subirAdjunto(
     .update(negocios)
     .set({ [columna]: url, updatedAt: new Date() })
     .where(eq(negocios.id, recordId));
+}
+
+// --- Catálogo de addons ---
+
+export type DatosAddon = {
+  nombre: string;
+  descripcion?: string;
+  icono?: string;
+  precio: number;
+};
+
+export type CambiosAddon = Partial<{
+  nombre: string;
+  descripcion: string;
+  icono: string;
+  precio: number;
+  activo: boolean;
+  orden: number;
+}>;
+
+async function existeClaveAddon(clave: string): Promise<boolean> {
+  const filas = await db().select({ id: addons.id }).from(addons).where(eq(addons.clave, clave)).limit(1);
+  return filas.length > 0;
+}
+
+export async function generarClaveUnica(nombre: string): Promise<string> {
+  const base = slugifyBase(nombre) || "addon";
+  let candidata = base;
+  let contador = 2;
+  while (await existeClaveAddon(candidata)) {
+    candidata = `${base}-${contador}`;
+    contador += 1;
+  }
+  return candidata;
+}
+
+export async function getCatalogoAddons(): Promise<Addon[]> {
+  const filas = await db().select().from(addons).orderBy(addons.orden, addons.nombre);
+  return filas.map(mapAddon);
+}
+
+export async function crearAddon(datos: DatosAddon): Promise<{ id: string; clave: string }> {
+  const clave = await generarClaveUnica(datos.nombre);
+  const [fila] = await db()
+    .insert(addons)
+    .values({
+      clave,
+      nombre: datos.nombre,
+      descripcion: datos.descripcion ?? "",
+      icono: datos.icono?.trim() || "✨",
+      precio: datos.precio,
+      comportamiento: "chip",
+    })
+    .returning({ id: addons.id });
+  return { id: fila.id, clave };
+}
+
+export async function actualizarAddon(id: string, cambios: CambiosAddon): Promise<void> {
+  if (Object.keys(cambios).length === 0) return;
+  await db().update(addons).set(cambios).where(eq(addons.id, id));
 }

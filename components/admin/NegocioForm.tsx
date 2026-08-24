@@ -3,18 +3,14 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
-import { CATEGORIAS, type Negocio, type Estado, type Categoria, type LogoForma } from "@/lib/negocios";
+import { CATEGORIAS, type Negocio, type Estado, type Categoria, type LogoForma, type Addon } from "@/lib/negocios";
 import ImageUploadField from "@/components/ImageUploadField";
 
-const ADDONS: { key: keyof Negocio; label: string }[] = [
-  { key: "addonWhatsapp", label: "WhatsApp" },
-  { key: "addonMapas", label: "Mapas" },
-  { key: "addonGaleria", label: "Galería" },
-  { key: "addonPedidos", label: "Pedidos por WhatsApp" },
-  { key: "addonQrMesa", label: "QR en mesa" },
-  { key: "addonLealtad", label: "Lealtad" },
-  { key: "addonMultiSucursal", label: "Multi-sucursal" },
-];
+function hoyMasDias(dias: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + dias);
+  return d.toISOString().slice(0, 10);
+}
 
 const ESTADOS: { value: Estado; label: string }[] = [
   { value: "solicitud", label: "Solicitud" },
@@ -40,9 +36,11 @@ Ensalada — $75`;
 
 export default function NegocioForm({
   negocio,
+  catalogoAddons,
   onRecargar,
 }: {
   negocio: Negocio | null;
+  catalogoAddons: Addon[];
   onRecargar?: () => void;
 }) {
   const router = useRouter();
@@ -58,7 +56,7 @@ export default function NegocioForm({
   // Solo aplican una vez que el negocio ya existe (modo editar)
   const [descripcionLarga, setDescripcionLarga] = useState(negocio?.descripcionLarga ?? "");
   const [estado, setEstado] = useState<Estado>(negocio?.estado ?? "solicitud");
-  const [plan, setPlan] = useState(negocio?.plan ?? "");
+  const [plan, setPlan] = useState<"top20" | "estandar" | "gratuita" | "">(negocio?.plan ?? "");
   const [fechaProximaRenovacion, setFechaProximaRenovacion] = useState(
     negocio?.fechaProximaRenovacion ?? ""
   );
@@ -81,11 +79,27 @@ export default function NegocioForm({
   const [galeria3Nombre, setGaleria3Nombre] = useState(negocio?.galeria[2]?.nombre ?? "");
   const [galeria3Precio, setGaleria3Precio] = useState(negocio?.galeria[2]?.precio ?? "");
 
-  const [addons, setAddons] = useState<Record<string, boolean>>(() => {
+  const [addonsSeleccionados, setAddonsSeleccionados] = useState<Record<string, boolean>>(() => {
     const inicial: Record<string, boolean> = {};
-    for (const a of ADDONS) inicial[a.key as string] = negocio ? Boolean(negocio[a.key]) : false;
+    for (const a of negocio?.addons ?? []) inicial[a.clave] = true;
     return inicial;
   });
+
+  const enPrueba = estado === "prueba";
+  function activarPrueba() {
+    setEstado("prueba");
+    setFechaProximaRenovacion(hoyMasDias(45));
+  }
+  function desactivarPrueba() {
+    setEstado("activo");
+    setFechaProximaRenovacion("");
+  }
+
+  const addonsParaMostrar = catalogoAddons.filter((a) => a.activo || addonsSeleccionados[a.clave]);
+  const totalMensualAddons = catalogoAddons
+    .filter((a) => addonsSeleccionados[a.clave])
+    .reduce((suma, a) => suma + a.precio, 0);
+  const cantidadAddonsActivos = Object.values(addonsSeleccionados).filter(Boolean).length;
 
   async function crear(e: React.FormEvent) {
     e.preventDefault();
@@ -141,13 +155,7 @@ export default function NegocioForm({
           galeria_2_precio: galeria2Precio,
           galeria_3_nombre: galeria3Nombre,
           galeria_3_precio: galeria3Precio,
-          addonWhatsapp: addons.addonWhatsapp,
-          addonMapas: addons.addonMapas,
-          addonGaleria: addons.addonGaleria,
-          addonPedidos: addons.addonPedidos,
-          addonQrMesa: addons.addonQrMesa,
-          addonLealtad: addons.addonLealtad,
-          addonMultiSucursal: addons.addonMultiSucursal,
+          addons: Object.keys(addonsSeleccionados).filter((clave) => addonsSeleccionados[clave]),
         }),
       });
       const body = await res.json();
@@ -214,7 +222,38 @@ export default function NegocioForm({
   return (
     <form onSubmit={guardar}>
       <div className="admin-head-row">
-        <h1 style={{ fontSize: 20 }}>{negocio.nombre}</h1>
+        <div>
+          <h1 style={{ fontSize: 20 }}>{negocio.nombre}</h1>
+          <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, marginTop: 6 }}>
+            <input
+              type="checkbox"
+              checked={enPrueba}
+              onChange={(e) => (e.target.checked ? activarPrueba() : desactivarPrueba())}
+            />
+            Periodo de prueba
+          </label>
+          {enPrueba && (
+            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginTop: 6 }}>
+              {[45, 50, 100].map((dias) => (
+                <button
+                  key={dias}
+                  type="button"
+                  className="admin-btn admin-btn-secondary"
+                  style={{ padding: "3px 10px", fontSize: 12 }}
+                  onClick={() => setFechaProximaRenovacion(hoyMasDias(dias))}
+                >
+                  {dias} días
+                </button>
+              ))}
+              <input
+                type="date"
+                value={fechaProximaRenovacion}
+                onChange={(e) => setFechaProximaRenovacion(e.target.value)}
+                style={{ fontSize: 12, padding: "3px 6px" }}
+              />
+            </div>
+          )}
+        </div>
         <div style={{ display: "flex", gap: 10 }}>
           <Link className="admin-btn admin-btn-secondary" href={`/admin/vista-previa/${negocio.id}`} target="_blank">
             Ver vista previa
@@ -383,43 +422,63 @@ export default function NegocioForm({
 
       <div className="admin-section">
         <h2>Addons</h2>
+        <div className="admin-small" style={{ fontSize: 12, color: "#666", marginBottom: 10 }}>
+          El catálogo (nombres, precios, y crear addons nuevos) se administra en{" "}
+          <Link href="/admin/addons">Addons</Link>.
+        </div>
         <div className="admin-checks">
-          {ADDONS.map((a) => (
-            <label key={a.key as string}>
+          {addonsParaMostrar.map((a) => (
+            <label key={a.id}>
               <input
                 type="checkbox"
-                checked={addons[a.key as string] ?? false}
+                checked={addonsSeleccionados[a.clave] ?? false}
                 onChange={(e) =>
-                  setAddons((prev) => ({ ...prev, [a.key as string]: e.target.checked }))
+                  setAddonsSeleccionados((prev) => ({ ...prev, [a.clave]: e.target.checked }))
                 }
               />
-              {a.label}
+              {a.icono} {a.nombre} — ${a.precio}/mes
             </label>
           ))}
         </div>
       </div>
 
       <div className="admin-section">
+        <h2>Pago</h2>
+        <div className="admin-field">
+          <label>Tipo de suscripción</label>
+          <select value={plan} onChange={(e) => setPlan(e.target.value as typeof plan)}>
+            <option value="">Sin definir</option>
+            <option value="gratuita">Gratuita</option>
+            <option value="top20">Top 20</option>
+            <option value="estandar">Estándar</option>
+          </select>
+        </div>
+        <div className="admin-field">
+          <label>Total mensual por addons</label>
+          <div style={{ fontSize: 18, fontWeight: 700 }}>
+            ${totalMensualAddons}
+            <span style={{ fontSize: 12, fontWeight: 400, color: "#666", marginLeft: 8 }}>
+              ({cantidadAddonsActivos} addon{cantidadAddonsActivos === 1 ? "" : "s"} activo
+              {cantidadAddonsActivos === 1 ? "" : "s"})
+            </span>
+          </div>
+        </div>
+        <div style={{ fontSize: 12, color: "#666" }}>
+          Información de referencia — el cobro y el envío del recibo se hacen por fuera del sistema.
+        </div>
+      </div>
+
+      <div className="admin-section">
         <h2>Estado y renovación</h2>
-        <div className="admin-grid-2">
-          <div className="admin-field">
-            <label>Estado</label>
-            <select value={estado} onChange={(e) => setEstado(e.target.value as Estado)}>
-              {ESTADOS.map((e) => (
-                <option key={e.value} value={e.value}>
-                  {e.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="admin-field">
-            <label>Plan</label>
-            <select value={plan} onChange={(e) => setPlan(e.target.value as "top20" | "estandar" | "")}>
-              <option value="">Sin definir</option>
-              <option value="top20">Top 20</option>
-              <option value="estandar">Estándar</option>
-            </select>
-          </div>
+        <div className="admin-field">
+          <label>Estado</label>
+          <select value={estado} onChange={(e) => setEstado(e.target.value as Estado)}>
+            {ESTADOS.map((e) => (
+              <option key={e.value} value={e.value}>
+                {e.label}
+              </option>
+            ))}
+          </select>
         </div>
         <div className="admin-field">
           <label>Próxima renovación</label>

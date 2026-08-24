@@ -1,4 +1,4 @@
-import { pgTable, text, boolean, date, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, boolean, date, timestamp, integer, primaryKey } from "drizzle-orm/pg-core";
 
 export const negocios = pgTable("negocios", {
   id: text("id")
@@ -43,17 +43,42 @@ export const negocios = pgTable("negocios", {
 
   menu: text("menu").notNull().default(""),
 
-  addonWhatsapp: boolean("addon_whatsapp").notNull().default(false),
-  addonMapas: boolean("addon_mapas").notNull().default(false),
-  addonGaleria: boolean("addon_galeria").notNull().default(false),
-  addonPedidos: boolean("addon_pedidos").notNull().default(false),
-  addonQrMesa: boolean("addon_qr_mesa").notNull().default(false),
-  addonLealtad: boolean("addon_lealtad").notNull().default(false),
-  addonMultiSucursal: boolean("addon_multi_sucursal").notNull().default(false),
-
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export type NegocioRow = typeof negocios.$inferSelect;
 export type NuevoNegocioRow = typeof negocios.$inferInsert;
+
+export const addons = pgTable("addons", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+
+  clave: text("clave").notNull().unique(),
+  nombre: text("nombre").notNull(),
+  descripcion: text("descripcion").notNull().default(""),
+  icono: text("icono").notNull().default("✨"),
+  precio: integer("precio").notNull().default(0),
+  comportamiento: text("comportamiento").notNull().default("chip"),
+  activo: boolean("activo").notNull().default(true),
+  orden: integer("orden").notNull().default(0),
+
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export type AddonRow = typeof addons.$inferSelect;
+export type NuevoAddonRow = typeof addons.$inferInsert;
+
+export const negocioAddons = pgTable(
+  "negocio_addons",
+  {
+    negocioId: text("negocio_id")
+      .notNull()
+      .references(() => negocios.id, { onDelete: "cascade" }),
+    addonId: text("addon_id")
+      .notNull()
+      .references(() => addons.id, { onDelete: "cascade" }),
+  },
+  (t) => [primaryKey({ columns: [t.negocioId, t.addonId] })]
+);

@@ -14,7 +14,10 @@ export default function AdminTopbar() {
 
   return (
     <div className="admin-topbar">
-      <Link href="/admin">Admin EnMochis</Link>
+      <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
+        <Link href="/admin">Admin EnMochis</Link>
+        <Link href="/admin/addons">Addons</Link>
+      </div>
       <button onClick={salir}>Salir</button>
     </div>
   );

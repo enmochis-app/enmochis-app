@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useEffect, useState, useCallback } from "react";
-import type { Negocio } from "@/lib/negocios";
+import type { Addon, Negocio } from "@/lib/negocios";
 import NegocioForm from "@/components/admin/NegocioForm";
 
 export default function EditarNegocioPage({
@@ -11,6 +11,7 @@ export default function EditarNegocioPage({
 }) {
   const { id } = use(params);
   const [negocio, setNegocio] = useState<Negocio | null>(null);
+  const [catalogoAddons, setCatalogoAddons] = useState<Addon[]>([]);
   const [cargando, setCargando] = useState(true);
   const [noEncontrado, setNoEncontrado] = useState(false);
 
@@ -29,10 +30,13 @@ export default function EditarNegocioPage({
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- carga inicial de datos al montar
     cargar();
+    fetch("/api/admin/addons")
+      .then((r) => r.json())
+      .then((body) => setCatalogoAddons(body.addons ?? []));
   }, [cargar]);
 
   if (cargando) return <p>Cargando...</p>;
   if (noEncontrado || !negocio) return <p>No se encontró ese negocio.</p>;
 
-  return <NegocioForm negocio={negocio} onRecargar={cargar} />;
+  return <NegocioForm negocio={negocio} catalogoAddons={catalogoAddons} onRecargar={cargar} />;
 }

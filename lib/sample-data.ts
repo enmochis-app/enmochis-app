@@ -1,4 +1,15 @@
-import type { Negocio } from "./negocios";
+import type { Addon, Negocio } from "./negocios";
+
+/** Espejo del catálogo inicial que se siembra en la base real (scripts/migrar-addons.mts). */
+const CATALOGO_ADDONS_DEMO = {
+  whatsapp: { id: "demo-addon-whatsapp", clave: "whatsapp", nombre: "WhatsApp", descripcion: "Botón directo de WhatsApp en vez de solo llamada.", icono: "💬", precio: 100, comportamiento: "especial", activo: true, orden: 1 },
+  mapas: { id: "demo-addon-mapas", clave: "mapas", nombre: "Mapas", descripcion: "Botón \"Cómo llegar\" con Google/Apple Maps.", icono: "📍", precio: 100, comportamiento: "especial", activo: true, orden: 2 },
+  galeria: { id: "demo-addon-galeria", clave: "galeria", nombre: "Galería", descripcion: "Destaca fotos de productos en el minisitio.", icono: "🖼️", precio: 100, comportamiento: "chip", activo: true, orden: 3 },
+  pedidos: { id: "demo-addon-pedidos", clave: "pedidos", nombre: "Pedidos por WhatsApp", descripcion: "Permite a los clientes ordenar directo por WhatsApp.", icono: "🛍️", precio: 100, comportamiento: "chip", activo: true, orden: 4 },
+  qrMesa: { id: "demo-addon-qr-mesa", clave: "qr_mesa", nombre: "Pide desde tu mesa (QR)", descripcion: "Código QR en mesa para pedir sin esperar mesero.", icono: "📱", precio: 100, comportamiento: "chip", activo: true, orden: 5 },
+  lealtad: { id: "demo-addon-lealtad", clave: "lealtad", nombre: "Programa de lealtad", descripcion: "Programa de puntos o visitas para clientes frecuentes.", icono: "⭐", precio: 100, comportamiento: "chip", activo: true, orden: 6 },
+  multiSucursal: { id: "demo-addon-multi-sucursal", clave: "multi_sucursal", nombre: "Varias sucursales", descripcion: "Indica que el negocio tiene más de una ubicación.", icono: "🏬", precio: 100, comportamiento: "chip", activo: true, orden: 7 },
+} satisfies Record<string, Addon>;
 
 /**
  * Datos de ejemplo, solo para fines ilustrativos mientras la base de datos
@@ -43,13 +54,12 @@ Pescado zarandeado (media orden) — $240
 Coctel de camarón chico — $120
 Chicharrón de camarón — $160
 Michelada El Guamúchil — $75`,
-    addonWhatsapp: true,
-    addonMapas: true,
-    addonGaleria: true,
-    addonPedidos: true,
-    addonQrMesa: false,
-    addonLealtad: false,
-    addonMultiSucursal: false,
+    addons: [
+      CATALOGO_ADDONS_DEMO.whatsapp,
+      CATALOGO_ADDONS_DEMO.mapas,
+      CATALOGO_ADDONS_DEMO.galeria,
+      CATALOGO_ADDONS_DEMO.pedidos,
+    ],
   },
   {
     id: "sample-rincon-del-cafe",
@@ -88,13 +98,13 @@ REPOSTERÍA
 Pan dulce del día — $30
 Concha rellena de nata — $38
 Croissant de jamón y queso — $52`,
-    addonWhatsapp: true,
-    addonMapas: true,
-    addonGaleria: true,
-    addonPedidos: false,
-    addonQrMesa: true,
-    addonLealtad: true,
-    addonMultiSucursal: false,
+    addons: [
+      CATALOGO_ADDONS_DEMO.whatsapp,
+      CATALOGO_ADDONS_DEMO.mapas,
+      CATALOGO_ADDONS_DEMO.galeria,
+      CATALOGO_ADDONS_DEMO.qrMesa,
+      CATALOGO_ADDONS_DEMO.lealtad,
+    ],
   },
   {
     id: "sample-tacos-el-guero",
@@ -133,13 +143,12 @@ ANTOJITOS
 Orden de papas El Güero — $65
 Dorilocos chicos — $45
 Agua fresca de horchata — $25`,
-    addonWhatsapp: true,
-    addonMapas: true,
-    addonGaleria: false,
-    addonPedidos: true,
-    addonQrMesa: false,
-    addonLealtad: false,
-    addonMultiSucursal: true,
+    addons: [
+      CATALOGO_ADDONS_DEMO.whatsapp,
+      CATALOGO_ADDONS_DEMO.mapas,
+      CATALOGO_ADDONS_DEMO.pedidos,
+      CATALOGO_ADDONS_DEMO.multiSucursal,
+    ],
   },
   {
     id: "sample-dulce-pecado",
@@ -178,12 +187,10 @@ Cuernito relleno de crema — $32
 Brownie de chocolate — $38
 Galletas de avena (2 pzas) — $25
 Pastelillo de fresa — $35`,
-    addonWhatsapp: true,
-    addonMapas: true,
-    addonGaleria: true,
-    addonPedidos: false,
-    addonQrMesa: false,
-    addonLealtad: false,
-    addonMultiSucursal: false,
+    addons: [
+      CATALOGO_ADDONS_DEMO.whatsapp,
+      CATALOGO_ADDONS_DEMO.mapas,
+      CATALOGO_ADDONS_DEMO.galeria,
+    ],
   },
 ];
