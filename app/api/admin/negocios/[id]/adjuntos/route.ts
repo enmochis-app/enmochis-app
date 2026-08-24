@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
 import { subirAdjunto } from "@/lib/airtable";
 
-const CAMPOS_VALIDOS = new Set(["logo", "foto_portada", "galeria"]);
+const CAMPOS_VALIDOS = new Set([
+  "logo",
+  "producto_estrella_foto",
+  "galeria_1_foto",
+  "galeria_2_foto",
+  "galeria_3_foto",
+]);
 
 export async function POST(
   request: Request,

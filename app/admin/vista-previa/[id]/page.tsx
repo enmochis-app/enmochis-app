@@ -1,8 +1,7 @@
 import { notFound } from "next/navigation";
 import { getNegocioPorId } from "@/lib/airtable";
 import NegocioDetalle from "@/components/NegocioDetalle";
-import AppShell from "@/components/AppShell";
-import "@/app/globals.css";
+import "@/app/negocio/minisitio.css";
 
 export default async function VistaPreviaPage({
   params,
@@ -13,9 +12,5 @@ export default async function VistaPreviaPage({
   const negocio = await getNegocioPorId(id);
   if (!negocio) notFound();
 
-  return (
-    <AppShell>
-      <NegocioDetalle negocio={negocio} />
-    </AppShell>
-  );
+  return <NegocioDetalle negocio={negocio} />;
 }

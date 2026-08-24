@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getNegocioPorSlug, slugPorCategoria } from "@/lib/airtable";
+import { getNegocioPorSlug } from "@/lib/airtable";
 import NegocioDetalle from "@/components/NegocioDetalle";
 
 export const revalidate = 60;
@@ -13,10 +13,5 @@ export default async function NegocioPage({
   const negocio = await getNegocioPorSlug(slug);
   if (!negocio) notFound();
 
-  return (
-    <NegocioDetalle
-      negocio={negocio}
-      backHref={`/categoria/${slugPorCategoria(negocio.categoria)}`}
-    />
-  );
+  return <NegocioDetalle negocio={negocio} />;
 }

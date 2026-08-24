@@ -18,8 +18,12 @@ export const SAMPLE_NEGOCIOS: Negocio[] = [
       "Desde 2015 servimos mariscos frescos de la costa de Sinaloa: aguachiles, ceviches y pescado zarandeado preparado al carbón todos los días. Ambiente familiar, ideal para comer en grupo.",
     logoUrl:
       "https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?auto=format&fit=crop&w=300&q=80",
-    fotoPortadaUrl:
+    logoForma: "circular",
+    productoEstrellaFoto:
       "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=1000&q=85",
+    productoEstrellaNombre: "Aguachile verde",
+    productoEstrellaPrecio: "$180",
+    colorAcento: "#C8FF3D",
     estado: "destacado",
     telefono: "6681234501",
     whatsapp: "6681234501",
@@ -28,26 +32,23 @@ export const SAMPLE_NEGOCIOS: Negocio[] = [
     facebook: "MariscosElGuamuchilLosMochis",
     horarios: "Lun-Dom 12:00pm - 10:00pm",
     galeria: [
-      "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=600&q=80",
-      "https://images.unsplash.com/photo-1625944230945-1b7dd3b949ab?auto=format&fit=crop&w=600&q=80",
-      "https://images.unsplash.com/photo-1585238342024-78d387f4a707?auto=format&fit=crop&w=600&q=80",
+      { foto: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=600&q=80", nombre: "Ceviche de camarón", precio: "$150" },
+      { foto: "https://images.unsplash.com/photo-1625944230945-1b7dd3b949ab?auto=format&fit=crop&w=600&q=80", nombre: "Camarones a la diabla", precio: "$210" },
+      { foto: "https://images.unsplash.com/photo-1585238342024-78d387f4a707?auto=format&fit=crop&w=600&q=80", nombre: "Pescado zarandeado", precio: "$240" },
     ],
-    menu: [
-      { nombre: "Aguachile verde", descripcion: "Camarón fresco, pepino, cebolla morada, chile serrano", precio: "$180" },
-      { nombre: "Ceviche de camarón", descripcion: "Limón, jitomate, cilantro, aguacate", precio: "$150" },
-      { nombre: "Tostadas de ceviche (3 pzas)", descripcion: "Ceviche de camarón sobre tostada crujiente", precio: "$95" },
-      { nombre: "Camarones a la diabla", descripcion: "Picante, con arroz y ensalada", precio: "$210" },
-      { nombre: "Pescado zarandeado (media orden)", descripcion: "Sazonado y asado al carbón", precio: "$240" },
-      { nombre: "Coctel de camarón chico", descripcion: "Clásico coctel estilo Sinaloa", precio: "$120" },
-      { nombre: "Chicharrón de camarón", descripcion: "Botana crujiente con salsa", precio: "$160" },
-      { nombre: "Michelada El Guamúchil", descripcion: "Cerveza clara preparada", precio: "$75" },
-    ],
+    menu: `MARISCOS
+Aguachile verde — $180
+Ceviche de camarón — $150
+Tostadas de ceviche (3 pzas) — $95
+Camarones a la diabla — $210
+Pescado zarandeado (media orden) — $240
+Coctel de camarón chico — $120
+Chicharrón de camarón — $160
+Michelada El Guamúchil — $75`,
     addonWhatsapp: true,
     addonMapas: true,
     addonGaleria: true,
-    addonFormularioContacto: false,
     addonPedidos: true,
-    addonReservaciones: true,
     addonQrMesa: false,
     addonLealtad: false,
     addonMultiSucursal: false,
@@ -62,8 +63,12 @@ export const SAMPLE_NEGOCIOS: Negocio[] = [
       "Café de especialidad tostado localmente, repostería casera y un rincón tranquilo en pleno Centro de Los Mochis para trabajar, leer o platicar con calma.",
     logoUrl:
       "https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=300&q=80",
-    fotoPortadaUrl:
+    logoForma: "circular",
+    productoEstrellaFoto:
       "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1000&q=85",
+    productoEstrellaNombre: "Café de olla",
+    productoEstrellaPrecio: "$45",
+    colorAcento: "#E8B84B",
     estado: "destacado",
     telefono: "6681234502",
     whatsapp: "6681234502",
@@ -72,26 +77,25 @@ export const SAMPLE_NEGOCIOS: Negocio[] = [
     facebook: "RincondelCafeLosMochis",
     horarios: "Lun-Sáb 7:30am - 9:00pm · Dom 8:00am - 3:00pm",
     galeria: [
-      "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=600&q=80",
-      "https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=600&q=80",
-      "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?auto=format&fit=crop&w=600&q=80",
+      { foto: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=600&q=80", nombre: "Cappuccino", precio: "$55" },
+      { foto: "https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=600&q=80", nombre: "Latte de vainilla", precio: "$58" },
+      { foto: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?auto=format&fit=crop&w=600&q=80", nombre: "Chai latte", precio: "$56" },
     ],
-    menu: [
-      { nombre: "Café de olla", descripcion: "Canela, piloncillo", precio: "$45" },
-      { nombre: "Cappuccino", descripcion: "Doble shot", precio: "$55" },
-      { nombre: "Latte de vainilla", descripcion: "Espresso, leche vaporizada, vainilla", precio: "$58" },
-      { nombre: "Cold brew", descripcion: "12 horas de extracción en frío", precio: "$60" },
-      { nombre: "Pan dulce del día", descripcion: "Recién horneado", precio: "$30" },
-      { nombre: "Concha rellena de nata", descripcion: "Clásico mexicano", precio: "$38" },
-      { nombre: "Croissant de jamón y queso", descripcion: "Horneado al momento", precio: "$52" },
-      { nombre: "Chai latte", descripcion: "Especias, leche vaporizada", precio: "$56" },
-    ],
+    menu: `CAFÉ
+Café de olla — $45
+Cappuccino — $55
+Latte de vainilla — $58
+Cold brew — $60
+Chai latte — $56
+
+REPOSTERÍA
+Pan dulce del día — $30
+Concha rellena de nata — $38
+Croissant de jamón y queso — $52`,
     addonWhatsapp: true,
     addonMapas: true,
     addonGaleria: true,
-    addonFormularioContacto: false,
     addonPedidos: false,
-    addonReservaciones: false,
     addonQrMesa: true,
     addonLealtad: true,
     addonMultiSucursal: false,
@@ -106,8 +110,12 @@ export const SAMPLE_NEGOCIOS: Negocio[] = [
       "Tacos de asada y adobada al estilo Sinaloa desde hace más de 10 años. Ya somos 3 sucursales en Los Mochis por la demanda de nuestros clientes.",
     logoUrl:
       "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=300&q=80",
-    fotoPortadaUrl:
+    logoForma: "rectangular",
+    productoEstrellaFoto:
       "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=1000&q=85",
+    productoEstrellaNombre: "Taco de asada",
+    productoEstrellaPrecio: "$22",
+    colorAcento: "#FF5A3C",
     estado: "destacado",
     telefono: "6681234503",
     whatsapp: "6681234503",
@@ -116,26 +124,25 @@ export const SAMPLE_NEGOCIOS: Negocio[] = [
     facebook: "TacosElGueroLosMochis",
     horarios: "Lun-Dom 6:00pm - 1:00am",
     galeria: [
-      "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=600&q=80",
-      "https://images.unsplash.com/photo-1615870216519-2f9fa575fa5c?auto=format&fit=crop&w=600&q=80",
-      "https://images.unsplash.com/photo-1552332386-f8dd00dc2f85?auto=format&fit=crop&w=600&q=80",
+      { foto: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=600&q=80", nombre: "Taco de adobada", precio: "$20" },
+      { foto: "https://images.unsplash.com/photo-1615870216519-2f9fa575fa5c?auto=format&fit=crop&w=600&q=80", nombre: "Quesotaco", precio: "$25" },
+      { foto: "https://images.unsplash.com/photo-1552332386-f8dd00dc2f85?auto=format&fit=crop&w=600&q=80", nombre: "Vampiro", precio: "$30" },
     ],
-    menu: [
-      { nombre: "Taco de asada", descripcion: "Carne asada, cebolla, cilantro", precio: "$22" },
-      { nombre: "Taco de adobada", descripcion: "Trompo estilo Sinaloa", precio: "$20" },
-      { nombre: "Taco de camarón", descripcion: "Empanizado, con aderezo", precio: "$28" },
-      { nombre: "Quesotaco", descripcion: "Con queso derretido", precio: "$25" },
-      { nombre: "Orden de papas El Güero", descripcion: "Con queso y tocino", precio: "$65" },
-      { nombre: "Vampiro", descripcion: "Tostada con carne y queso gratinado", precio: "$30" },
-      { nombre: "Dorilocos chicos", descripcion: "Con elote, chamoy y dulces", precio: "$45" },
-      { nombre: "Agua fresca de horchata", descripcion: "500 ml", precio: "$25" },
-    ],
+    menu: `TACOS
+Taco de asada — $22
+Taco de adobada — $20
+Taco de camarón — $28
+Quesotaco — $25
+Vampiro — $30
+
+ANTOJITOS
+Orden de papas El Güero — $65
+Dorilocos chicos — $45
+Agua fresca de horchata — $25`,
     addonWhatsapp: true,
     addonMapas: true,
     addonGaleria: false,
-    addonFormularioContacto: false,
     addonPedidos: true,
-    addonReservaciones: false,
     addonQrMesa: false,
     addonLealtad: false,
     addonMultiSucursal: true,
@@ -150,8 +157,12 @@ export const SAMPLE_NEGOCIOS: Negocio[] = [
       "Repostería artesanal: pasteles, cheesecakes y pan dulce horneados diario. También hacemos pasteles personalizados para cumpleaños y eventos — escríbenos con tiempo.",
     logoUrl:
       "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=300&q=80",
-    fotoPortadaUrl:
+    logoForma: "cuadrada",
+    productoEstrellaFoto:
       "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=1000&q=85",
+    productoEstrellaNombre: "Pastel de tres leches",
+    productoEstrellaPrecio: "$55",
+    colorAcento: "#FF7BAC",
     estado: "destacado",
     telefono: "6681234504",
     whatsapp: "6681234504",
@@ -160,26 +171,25 @@ export const SAMPLE_NEGOCIOS: Negocio[] = [
     facebook: "DulcePecadoLosMochis",
     horarios: "Mar-Dom 9:00am - 8:00pm · Lun cerrado",
     galeria: [
-      "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80",
-      "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80",
-      "https://images.unsplash.com/photo-1571115177098-24ec42ed204d?auto=format&fit=crop&w=600&q=80",
+      { foto: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80", nombre: "Cheesecake de zarzamora", precio: "$60" },
+      { foto: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80", nombre: "Concha grande", precio: "$28" },
+      { foto: "https://images.unsplash.com/photo-1571115177098-24ec42ed204d?auto=format&fit=crop&w=600&q=80", nombre: "Pay de limón", precio: "$50" },
     ],
-    menu: [
-      { nombre: "Pastel de tres leches (rebanada)", descripcion: "Clásico, con canela", precio: "$55" },
-      { nombre: "Cheesecake de zarzamora", descripcion: "Cremoso, con mermelada de zarzamora", precio: "$60" },
-      { nombre: "Concha grande", descripcion: "Cobertura de vainilla o chocolate", precio: "$28" },
-      { nombre: "Cuernito relleno de crema", descripcion: "Recién horneado", precio: "$32" },
-      { nombre: "Brownie de chocolate", descripcion: "Con nuez", precio: "$38" },
-      { nombre: "Galletas de avena (2 pzas)", descripcion: "Con chispas de chocolate", precio: "$25" },
-      { nombre: "Pay de limón (rebanada)", descripcion: "Costra crujiente, relleno cremoso", precio: "$50" },
-      { nombre: "Pastelillo de fresa", descripcion: "Individual, con crema batida", precio: "$35" },
-    ],
+    menu: `PASTELES
+Pastel de tres leches (rebanada) — $55
+Cheesecake de zarzamora — $60
+Pay de limón (rebanada) — $50
+
+PAN DULCE
+Concha grande — $28
+Cuernito relleno de crema — $32
+Brownie de chocolate — $38
+Galletas de avena (2 pzas) — $25
+Pastelillo de fresa — $35`,
     addonWhatsapp: true,
     addonMapas: true,
     addonGaleria: true,
-    addonFormularioContacto: true,
     addonPedidos: false,
-    addonReservaciones: false,
     addonQrMesa: false,
     addonLealtad: false,
     addonMultiSucursal: false,

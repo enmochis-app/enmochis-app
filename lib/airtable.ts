@@ -26,6 +26,42 @@ export type Estado =
   | "destacado"
   | "archivado";
 
+export type LogoForma = "circular" | "cuadrada" | "rectangular";
+
+export type ItemMenu = { nombre: string; precio: string };
+export type CategoriaMenu = { categoria: string; items: ItemMenu[] };
+
+/** Convierte el texto libre del menú ("CATEGORÍA" en su línea + "Producto — $Precio") en categorías. */
+export function parsearMenu(texto: string): CategoriaMenu[] {
+  const lineas = (texto ?? "").split("\n").map((l) => l.trim());
+  const precioRe = /^(.+?)\s*[—-]\s*\$?\s*([\d,.]+)\s*$/;
+  const categorias: CategoriaMenu[] = [];
+  let actual: CategoriaMenu | null = null;
+
+  for (let i = 0; i < lineas.length; i++) {
+    const linea = lineas[i];
+    if (!linea) continue;
+    const m = linea.match(precioRe);
+    if (m) {
+      if (!actual) {
+        actual = { categoria: "Menú", items: [] };
+        categorias.push(actual);
+      }
+      actual.items.push({ nombre: m[1].trim(), precio: m[2].trim() });
+    } else {
+      const siguiente = lineas.slice(i + 1).find((l) => l);
+      const siguienteEsItem = siguiente ? precioRe.test(siguiente) : false;
+      if (siguienteEsItem || linea === linea.toUpperCase()) {
+        actual = { categoria: linea, items: [] };
+        categorias.push(actual);
+      }
+    }
+  }
+  return categorias;
+}
+
+export type ItemGaleria = { foto?: string; nombre?: string; precio?: string };
+
 export type Negocio = {
   id: string;
   nombre: string;
@@ -34,7 +70,11 @@ export type Negocio = {
   descripcionCorta: string;
   descripcionLarga: string;
   logoUrl?: string;
-  fotoPortadaUrl?: string;
+  logoForma: LogoForma;
+  productoEstrellaFoto?: string;
+  productoEstrellaNombre?: string;
+  productoEstrellaPrecio?: string;
+  colorAcento: string;
   estado: Estado;
   plan?: "top20" | "estandar";
   fechaProximaRenovacion?: string;
@@ -42,28 +82,23 @@ export type Negocio = {
   telefono?: string;
   whatsapp?: string;
   direccion?: string;
+  googleMapsUrl?: string;
+  appleMapsUrl?: string;
   instagram?: string;
   facebook?: string;
   horarios?: string;
-  galeria: string[];
-  menu: { nombre: string; descripcion?: string; precio?: string }[];
+  galeria: ItemGaleria[];
+  menu: string;
   addonWhatsapp: boolean;
   addonMapas: boolean;
   addonGaleria: boolean;
-  addonFormularioContacto: boolean;
   addonPedidos: boolean;
-  addonReservaciones: boolean;
   addonQrMesa: boolean;
   addonLealtad: boolean;
   addonMultiSucursal: boolean;
 };
 
-export function menuATexto(items: { nombre: string; precio?: string }[]): string {
-  return items
-    .filter((i) => i.nombre.trim())
-    .map((i) => (i.precio ? `${i.nombre.trim()} | ${i.precio.trim()}` : i.nombre.trim()))
-    .join("\n");
-}
+const COLOR_ACENTO_DEFECTO = "#C8FF3D";
 
 function getBase() {
   const apiKey = process.env.AIRTABLE_API_KEY;
@@ -85,17 +120,14 @@ function attachmentUrls(field: unknown): string[] {
 
 function mapNegocio(record: Airtable.Record<Airtable.FieldSet>): Negocio {
   const f = record.fields;
-  const menuRaw = f["menu"];
-  const menu = typeof menuRaw === "string" && menuRaw.trim()
-    ? menuRaw
-        .split("\n")
-        .map((l) => l.trim())
-        .filter(Boolean)
-        .map((line) => {
-          const [nombre, resto] = line.split("|").map((s) => s?.trim());
-          return { nombre: nombre ?? line, precio: resto };
-        })
-    : [];
+
+  const galeria: ItemGaleria[] = [1, 2, 3]
+    .map((n) => ({
+      foto: attachmentUrls(f[`galeria_${n}_foto`])[0],
+      nombre: f[`galeria_${n}_nombre`] ? String(f[`galeria_${n}_nombre`]) : undefined,
+      precio: f[`galeria_${n}_precio`] ? String(f[`galeria_${n}_precio`]) : undefined,
+    }))
+    .filter((g) => g.foto || g.nombre);
 
   return {
     id: record.id,
@@ -105,7 +137,11 @@ function mapNegocio(record: Airtable.Record<Airtable.FieldSet>): Negocio {
     descripcionCorta: String(f["descripcion_corta"] ?? ""),
     descripcionLarga: String(f["descripcion_larga"] ?? ""),
     logoUrl: attachmentUrls(f["logo"])[0],
-    fotoPortadaUrl: attachmentUrls(f["foto_portada"])[0],
+    logoForma: (f["logo_forma"] as LogoForma) ?? "circular",
+    productoEstrellaFoto: attachmentUrls(f["producto_estrella_foto"])[0],
+    productoEstrellaNombre: f["producto_estrella_nombre"] ? String(f["producto_estrella_nombre"]) : undefined,
+    productoEstrellaPrecio: f["producto_estrella_precio"] ? String(f["producto_estrella_precio"]) : undefined,
+    colorAcento: f["color_acento"] ? String(f["color_acento"]) : COLOR_ACENTO_DEFECTO,
     estado: (f["estado"] as Estado) ?? "solicitud",
     plan: f["plan"] ? (f["plan"] as Negocio["plan"]) : undefined,
     fechaProximaRenovacion: f["fecha_proxima_renovacion"]
@@ -115,17 +151,17 @@ function mapNegocio(record: Airtable.Record<Airtable.FieldSet>): Negocio {
     telefono: f["telefono"] ? String(f["telefono"]) : undefined,
     whatsapp: f["whatsapp"] ? String(f["whatsapp"]) : undefined,
     direccion: f["direccion"] ? String(f["direccion"]) : undefined,
+    googleMapsUrl: f["google_maps_url"] ? String(f["google_maps_url"]) : undefined,
+    appleMapsUrl: f["apple_maps_url"] ? String(f["apple_maps_url"]) : undefined,
     instagram: f["instagram"] ? String(f["instagram"]) : undefined,
     facebook: f["facebook"] ? String(f["facebook"]) : undefined,
     horarios: f["horarios"] ? String(f["horarios"]) : undefined,
-    galeria: attachmentUrls(f["galeria"]),
-    menu,
+    galeria,
+    menu: f["menu"] ? String(f["menu"]) : "",
     addonWhatsapp: f["addon_whatsapp"] === true,
     addonMapas: f["addon_mapas"] === true,
     addonGaleria: f["addon_galeria"] === true,
-    addonFormularioContacto: f["addon_formulario_contacto"] === true,
     addonPedidos: f["addon_pedidos"] === true,
-    addonReservaciones: f["addon_reservaciones"] === true,
     addonQrMesa: f["addon_qr_mesa"] === true,
     addonLealtad: f["addon_lealtad"] === true,
     addonMultiSucursal: f["addon_multi_sucursal"] === true,
@@ -260,22 +296,32 @@ export type DatosNegocio = {
   categoria: Categoria;
   descripcionCorta: string;
   descripcionLarga: string;
+  logoForma?: LogoForma;
+  productoEstrellaNombre?: string;
+  productoEstrellaPrecio?: string;
+  colorAcento?: string;
   estado: Estado;
   plan?: "top20" | "estandar";
   fechaProximaRenovacion?: string;
   telefono?: string;
   whatsapp?: string;
   direccion?: string;
+  googleMapsUrl?: string;
+  appleMapsUrl?: string;
   instagram?: string;
   facebook?: string;
   horarios?: string;
-  menu: { nombre: string; precio?: string }[];
+  galeria_1_nombre?: string;
+  galeria_1_precio?: string;
+  galeria_2_nombre?: string;
+  galeria_2_precio?: string;
+  galeria_3_nombre?: string;
+  galeria_3_precio?: string;
+  menu?: string;
   addonWhatsapp: boolean;
   addonMapas: boolean;
   addonGaleria: boolean;
-  addonFormularioContacto: boolean;
   addonPedidos: boolean;
-  addonReservaciones: boolean;
   addonQrMesa: boolean;
   addonLealtad: boolean;
   addonMultiSucursal: boolean;
@@ -287,22 +333,32 @@ function camposParaAirtable(datos: Partial<DatosNegocio>): Airtable.FieldSet {
   if (datos.categoria !== undefined) campos["categoria"] = datos.categoria;
   if (datos.descripcionCorta !== undefined) campos["descripcion_corta"] = datos.descripcionCorta;
   if (datos.descripcionLarga !== undefined) campos["descripcion_larga"] = datos.descripcionLarga;
+  if (datos.logoForma !== undefined) campos["logo_forma"] = datos.logoForma;
+  if (datos.productoEstrellaNombre !== undefined) campos["producto_estrella_nombre"] = datos.productoEstrellaNombre;
+  if (datos.productoEstrellaPrecio !== undefined) campos["producto_estrella_precio"] = datos.productoEstrellaPrecio;
+  if (datos.colorAcento !== undefined) campos["color_acento"] = datos.colorAcento;
   if (datos.estado !== undefined) campos["estado"] = datos.estado;
   if (datos.plan !== undefined) campos["plan"] = datos.plan;
   if (datos.fechaProximaRenovacion !== undefined) campos["fecha_proxima_renovacion"] = datos.fechaProximaRenovacion;
   if (datos.telefono !== undefined) campos["telefono"] = datos.telefono;
   if (datos.whatsapp !== undefined) campos["whatsapp"] = datos.whatsapp;
   if (datos.direccion !== undefined) campos["direccion"] = datos.direccion;
+  if (datos.googleMapsUrl !== undefined) campos["google_maps_url"] = datos.googleMapsUrl;
+  if (datos.appleMapsUrl !== undefined) campos["apple_maps_url"] = datos.appleMapsUrl;
   if (datos.instagram !== undefined) campos["instagram"] = datos.instagram;
   if (datos.facebook !== undefined) campos["facebook"] = datos.facebook;
   if (datos.horarios !== undefined) campos["horarios"] = datos.horarios;
-  if (datos.menu !== undefined) campos["menu"] = menuATexto(datos.menu);
+  if (datos.galeria_1_nombre !== undefined) campos["galeria_1_nombre"] = datos.galeria_1_nombre;
+  if (datos.galeria_1_precio !== undefined) campos["galeria_1_precio"] = datos.galeria_1_precio;
+  if (datos.galeria_2_nombre !== undefined) campos["galeria_2_nombre"] = datos.galeria_2_nombre;
+  if (datos.galeria_2_precio !== undefined) campos["galeria_2_precio"] = datos.galeria_2_precio;
+  if (datos.galeria_3_nombre !== undefined) campos["galeria_3_nombre"] = datos.galeria_3_nombre;
+  if (datos.galeria_3_precio !== undefined) campos["galeria_3_precio"] = datos.galeria_3_precio;
+  if (datos.menu !== undefined) campos["menu"] = datos.menu;
   if (datos.addonWhatsapp !== undefined) campos["addon_whatsapp"] = datos.addonWhatsapp;
   if (datos.addonMapas !== undefined) campos["addon_mapas"] = datos.addonMapas;
   if (datos.addonGaleria !== undefined) campos["addon_galeria"] = datos.addonGaleria;
-  if (datos.addonFormularioContacto !== undefined) campos["addon_formulario_contacto"] = datos.addonFormularioContacto;
   if (datos.addonPedidos !== undefined) campos["addon_pedidos"] = datos.addonPedidos;
-  if (datos.addonReservaciones !== undefined) campos["addon_reservaciones"] = datos.addonReservaciones;
   if (datos.addonQrMesa !== undefined) campos["addon_qr_mesa"] = datos.addonQrMesa;
   if (datos.addonLealtad !== undefined) campos["addon_lealtad"] = datos.addonLealtad;
   if (datos.addonMultiSucursal !== undefined) campos["addon_multi_sucursal"] = datos.addonMultiSucursal;
@@ -363,21 +419,18 @@ export async function subirAdjunto(
     throw new Error("Faltan AIRTABLE_API_KEY y/o AIRTABLE_BASE_ID. Revisa tu .env.local.");
   }
   const url = `https://content.airtable.com/v0/${baseId}/${recordId}/${encodeURIComponent(campo)}/uploadAttachment`;
-  const res = await fetch(
-    url,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        contentType: archivo.contentType,
-        filename: archivo.filename,
-        file: archivo.base64,
-      }),
-    }
-  );
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      contentType: archivo.contentType,
+      filename: archivo.filename,
+      file: archivo.base64,
+    }),
+  });
   if (!res.ok) {
     const texto = await res.text().catch(() => "");
     throw new Error(`No se pudo subir el archivo a Airtable (${res.status}): ${texto}`);

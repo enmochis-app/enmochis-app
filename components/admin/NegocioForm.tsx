@@ -3,16 +3,14 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
-import { CATEGORIAS, type Negocio, type Estado, type Categoria } from "@/lib/airtable";
+import { CATEGORIAS, type Negocio, type Estado, type Categoria, type LogoForma } from "@/lib/airtable";
 import ImageUploadField from "@/components/ImageUploadField";
 
 const ADDONS: { key: keyof Negocio; label: string }[] = [
   { key: "addonWhatsapp", label: "WhatsApp" },
   { key: "addonMapas", label: "Mapas" },
   { key: "addonGaleria", label: "Galería" },
-  { key: "addonFormularioContacto", label: "Formulario de contacto" },
-  { key: "addonPedidos", label: "Pedidos" },
-  { key: "addonReservaciones", label: "Reservaciones" },
+  { key: "addonPedidos", label: "Pedidos por WhatsApp" },
   { key: "addonQrMesa", label: "QR en mesa" },
   { key: "addonLealtad", label: "Lealtad" },
   { key: "addonMultiSucursal", label: "Multi-sucursal" },
@@ -27,7 +25,18 @@ const ESTADOS: { value: Estado; label: string }[] = [
   { value: "archivado", label: "Archivado" },
 ];
 
-type MenuItem = { nombre: string; precio: string };
+const FORMAS_LOGO: { value: LogoForma; label: string }[] = [
+  { value: "circular", label: "Circular" },
+  { value: "cuadrada", label: "Cuadrada" },
+  { value: "rectangular", label: "Rectangular" },
+];
+
+const MENU_PLACEHOLDER = `PIEZAS
+Ala — $100
+Filete — $170
+
+COMPLEMENTOS
+Ensalada — $75`;
 
 export default function NegocioForm({
   negocio,
@@ -56,29 +65,29 @@ export default function NegocioForm({
   const [telefono, setTelefono] = useState(negocio?.telefono ?? "");
   const [whatsapp, setWhatsapp] = useState(negocio?.whatsapp ?? "");
   const [direccion, setDireccion] = useState(negocio?.direccion ?? "");
+  const [googleMapsUrl, setGoogleMapsUrl] = useState(negocio?.googleMapsUrl ?? "");
+  const [appleMapsUrl, setAppleMapsUrl] = useState(negocio?.appleMapsUrl ?? "");
   const [instagram, setInstagram] = useState(negocio?.instagram ?? "");
   const [facebook, setFacebook] = useState(negocio?.facebook ?? "");
   const [horarios, setHorarios] = useState(negocio?.horarios ?? "");
-  const [menu, setMenu] = useState<MenuItem[]>(
-    negocio && negocio.menu.length > 0
-      ? negocio.menu.map((m) => ({ nombre: m.nombre, precio: m.precio ?? "" }))
-      : [{ nombre: "", precio: "" }]
-  );
+  const [menu, setMenu] = useState(negocio?.menu ?? "");
+
+  const [logoForma, setLogoForma] = useState<LogoForma>(negocio?.logoForma ?? "circular");
+  const [colorAcento, setColorAcento] = useState(negocio?.colorAcento ?? "#C8FF3D");
+  const [productoEstrellaNombre, setProductoEstrellaNombre] = useState(negocio?.productoEstrellaNombre ?? "");
+  const [productoEstrellaPrecio, setProductoEstrellaPrecio] = useState(negocio?.productoEstrellaPrecio ?? "");
+  const [galeria1Nombre, setGaleria1Nombre] = useState(negocio?.galeria[0]?.nombre ?? "");
+  const [galeria1Precio, setGaleria1Precio] = useState(negocio?.galeria[0]?.precio ?? "");
+  const [galeria2Nombre, setGaleria2Nombre] = useState(negocio?.galeria[1]?.nombre ?? "");
+  const [galeria2Precio, setGaleria2Precio] = useState(negocio?.galeria[1]?.precio ?? "");
+  const [galeria3Nombre, setGaleria3Nombre] = useState(negocio?.galeria[2]?.nombre ?? "");
+  const [galeria3Precio, setGaleria3Precio] = useState(negocio?.galeria[2]?.precio ?? "");
+
   const [addons, setAddons] = useState<Record<string, boolean>>(() => {
     const inicial: Record<string, boolean> = {};
     for (const a of ADDONS) inicial[a.key as string] = negocio ? Boolean(negocio[a.key]) : false;
     return inicial;
   });
-
-  function actualizarMenuFila(i: number, campo: "nombre" | "precio", valor: string) {
-    setMenu((prev) => prev.map((fila, idx) => (idx === i ? { ...fila, [campo]: valor } : fila)));
-  }
-  function agregarFilaMenu() {
-    setMenu((prev) => [...prev, { nombre: "", precio: "" }]);
-  }
-  function quitarFilaMenu(i: number) {
-    setMenu((prev) => prev.filter((_, idx) => idx !== i));
-  }
 
   async function crear(e: React.FormEvent) {
     e.preventDefault();
@@ -120,16 +129,26 @@ export default function NegocioForm({
           telefono,
           whatsapp,
           direccion,
+          googleMapsUrl,
+          appleMapsUrl,
           instagram,
           facebook,
           horarios,
-          menu: menu.filter((m) => m.nombre.trim()),
+          menu,
+          logoForma,
+          colorAcento,
+          productoEstrellaNombre,
+          productoEstrellaPrecio,
+          galeria_1_nombre: galeria1Nombre,
+          galeria_1_precio: galeria1Precio,
+          galeria_2_nombre: galeria2Nombre,
+          galeria_2_precio: galeria2Precio,
+          galeria_3_nombre: galeria3Nombre,
+          galeria_3_precio: galeria3Precio,
           addonWhatsapp: addons.addonWhatsapp,
           addonMapas: addons.addonMapas,
           addonGaleria: addons.addonGaleria,
-          addonFormularioContacto: addons.addonFormularioContacto,
           addonPedidos: addons.addonPedidos,
-          addonReservaciones: addons.addonReservaciones,
           addonQrMesa: addons.addonQrMesa,
           addonLealtad: addons.addonLealtad,
           addonMultiSucursal: addons.addonMultiSucursal,
@@ -252,6 +271,16 @@ export default function NegocioForm({
         </div>
         <div className="admin-grid-2">
           <div className="admin-field">
+            <label>Link de Google Maps</label>
+            <input value={googleMapsUrl} onChange={(e) => setGoogleMapsUrl(e.target.value)} placeholder="https://maps.google.com/?q=..." />
+          </div>
+          <div className="admin-field">
+            <label>Link de Apple Maps</label>
+            <input value={appleMapsUrl} onChange={(e) => setAppleMapsUrl(e.target.value)} placeholder="https://maps.apple.com/?q=..." />
+          </div>
+        </div>
+        <div className="admin-grid-2">
+          <div className="admin-field">
             <label>Instagram</label>
             <input value={instagram} onChange={(e) => setInstagram(e.target.value)} />
           </div>
@@ -267,7 +296,28 @@ export default function NegocioForm({
       </div>
 
       <div className="admin-section">
-        <h2>Fotos</h2>
+        <h2>Marca del minisitio</h2>
+        <div className="admin-grid-2">
+          <div className="admin-field">
+            <label>Forma del logo</label>
+            <select value={logoForma} onChange={(e) => setLogoForma(e.target.value as LogoForma)}>
+              {FORMAS_LOGO.map((f) => (
+                <option key={f.value} value={f.value}>
+                  {f.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="admin-field">
+            <label>Color de acento</label>
+            <input
+              type="color"
+              value={colorAcento}
+              onChange={(e) => setColorAcento(e.target.value)}
+              style={{ height: 42, padding: 4 }}
+            />
+          </div>
+        </div>
         <ImageUploadField
           label="Logo"
           campo="logo"
@@ -275,46 +325,74 @@ export default function NegocioForm({
           existentes={negocio.logoUrl ? [negocio.logoUrl] : []}
           onUploaded={() => onRecargar?.()}
         />
+      </div>
+
+      <div className="admin-section">
+        <h2>Producto estrella</h2>
+        <div className="admin-small" style={{ fontSize: 12, color: "#666", marginBottom: 10 }}>
+          Su foto es el fondo principal del minisitio.
+        </div>
         <ImageUploadField
-          label="Foto de portada"
-          campo="foto_portada"
+          label="Foto del producto estrella"
+          campo="producto_estrella_foto"
           uploadUrl={uploadUrl}
-          existentes={negocio.fotoPortadaUrl ? [negocio.fotoPortadaUrl] : []}
+          existentes={negocio.productoEstrellaFoto ? [negocio.productoEstrellaFoto] : []}
           onUploaded={() => onRecargar?.()}
         />
-        <ImageUploadField
-          label="Galería"
-          campo="galeria"
-          uploadUrl={uploadUrl}
-          existentes={negocio.galeria}
-          multiple
-          onUploaded={() => onRecargar?.()}
-        />
+        <div className="admin-grid-2">
+          <div className="admin-field">
+            <label>Nombre del producto</label>
+            <input value={productoEstrellaNombre} onChange={(e) => setProductoEstrellaNombre(e.target.value)} />
+          </div>
+          <div className="admin-field">
+            <label>Precio</label>
+            <input value={productoEstrellaPrecio} onChange={(e) => setProductoEstrellaPrecio(e.target.value)} />
+          </div>
+        </div>
+      </div>
+
+      <div className="admin-section">
+        <h2>Galería (3 productos)</h2>
+        {[
+          { n: 1, campo: "galeria_1_foto", nombre: galeria1Nombre, setNombre: setGaleria1Nombre, precio: galeria1Precio, setPrecio: setGaleria1Precio, foto: negocio.galeria[0]?.foto },
+          { n: 2, campo: "galeria_2_foto", nombre: galeria2Nombre, setNombre: setGaleria2Nombre, precio: galeria2Precio, setPrecio: setGaleria2Precio, foto: negocio.galeria[1]?.foto },
+          { n: 3, campo: "galeria_3_foto", nombre: galeria3Nombre, setNombre: setGaleria3Nombre, precio: galeria3Precio, setPrecio: setGaleria3Precio, foto: negocio.galeria[2]?.foto },
+        ].map((g) => (
+          <div key={g.n} style={{ borderTop: g.n > 1 ? "1px solid #eee" : undefined, paddingTop: g.n > 1 ? 14 : 0, marginTop: g.n > 1 ? 14 : 0 }}>
+            <ImageUploadField
+              label={`Foto ${g.n}`}
+              campo={g.campo}
+              uploadUrl={uploadUrl}
+              existentes={g.foto ? [g.foto] : []}
+              onUploaded={() => onRecargar?.()}
+            />
+            <div className="admin-grid-2">
+              <div className="admin-field">
+                <label>Nombre</label>
+                <input value={g.nombre} onChange={(e) => g.setNombre(e.target.value)} />
+              </div>
+              <div className="admin-field">
+                <label>Precio</label>
+                <input value={g.precio} onChange={(e) => g.setPrecio(e.target.value)} />
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
       <div className="admin-section">
         <h2>Menú</h2>
-        {menu.map((fila, i) => (
-          <div className="admin-menu-row" key={i}>
-            <input
-              placeholder="Nombre del platillo"
-              value={fila.nombre}
-              onChange={(e) => actualizarMenuFila(i, "nombre", e.target.value)}
-            />
-            <input
-              placeholder="Precio (ej. $45)"
-              value={fila.precio}
-              onChange={(e) => actualizarMenuFila(i, "precio", e.target.value)}
-              style={{ maxWidth: 120 }}
-            />
-            <button type="button" className="admin-link" onClick={() => quitarFilaMenu(i)}>
-              Quitar
-            </button>
+        <div className="admin-field">
+          <textarea
+            value={menu}
+            onChange={(e) => setMenu(e.target.value)}
+            placeholder={MENU_PLACEHOLDER}
+            style={{ minHeight: 220, fontFamily: "monospace" }}
+          />
+          <div style={{ fontSize: 11, color: "#666", marginTop: 6 }}>
+            Formato: CATEGORÍA en su propia línea, luego &quot;Producto — $Precio&quot; por línea.
           </div>
-        ))}
-        <button type="button" className="admin-link" onClick={agregarFilaMenu}>
-          + Agregar platillo
-        </button>
+        </div>
       </div>
 
       <div className="admin-section">

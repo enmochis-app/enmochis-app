@@ -1,10 +1,15 @@
 "use client";
 
 import { use, useCallback, useEffect, useState } from "react";
-import type { Negocio } from "@/lib/airtable";
+import type { Negocio, LogoForma } from "@/lib/airtable";
 import ImageUploadField from "@/components/ImageUploadField";
 
-type MenuItem = { nombre: string; precio: string };
+const MENU_PLACEHOLDER = `PIEZAS
+Ala — $100
+Filete — $170
+
+COMPLEMENTOS
+Ensalada — $75`;
 
 export default function CompletarPage({
   params,
@@ -24,10 +29,23 @@ export default function CompletarPage({
   const [telefono, setTelefono] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [direccion, setDireccion] = useState("");
+  const [googleMapsUrl, setGoogleMapsUrl] = useState("");
+  const [appleMapsUrl, setAppleMapsUrl] = useState("");
   const [instagram, setInstagram] = useState("");
   const [facebook, setFacebook] = useState("");
   const [horarios, setHorarios] = useState("");
-  const [menu, setMenu] = useState<MenuItem[]>([{ nombre: "", precio: "" }]);
+  const [menu, setMenu] = useState("");
+
+  const [logoForma, setLogoForma] = useState<LogoForma>("circular");
+  const [colorAcento, setColorAcento] = useState("#C8FF3D");
+  const [productoEstrellaNombre, setProductoEstrellaNombre] = useState("");
+  const [productoEstrellaPrecio, setProductoEstrellaPrecio] = useState("");
+  const [galeria1Nombre, setGaleria1Nombre] = useState("");
+  const [galeria1Precio, setGaleria1Precio] = useState("");
+  const [galeria2Nombre, setGaleria2Nombre] = useState("");
+  const [galeria2Precio, setGaleria2Precio] = useState("");
+  const [galeria3Nombre, setGaleria3Nombre] = useState("");
+  const [galeria3Precio, setGaleria3Precio] = useState("");
 
   const cargar = useCallback(async () => {
     const res = await fetch(`/api/negocios/${id}/completar`);
@@ -44,14 +62,22 @@ export default function CompletarPage({
     setTelefono(n.telefono ?? "");
     setWhatsapp(n.whatsapp ?? "");
     setDireccion(n.direccion ?? "");
+    setGoogleMapsUrl(n.googleMapsUrl ?? "");
+    setAppleMapsUrl(n.appleMapsUrl ?? "");
     setInstagram(n.instagram ?? "");
     setFacebook(n.facebook ?? "");
     setHorarios(n.horarios ?? "");
-    setMenu(
-      n.menu.length > 0
-        ? n.menu.map((m) => ({ nombre: m.nombre, precio: m.precio ?? "" }))
-        : [{ nombre: "", precio: "" }]
-    );
+    setMenu(n.menu ?? "");
+    setLogoForma(n.logoForma ?? "circular");
+    setColorAcento(n.colorAcento ?? "#C8FF3D");
+    setProductoEstrellaNombre(n.productoEstrellaNombre ?? "");
+    setProductoEstrellaPrecio(n.productoEstrellaPrecio ?? "");
+    setGaleria1Nombre(n.galeria[0]?.nombre ?? "");
+    setGaleria1Precio(n.galeria[0]?.precio ?? "");
+    setGaleria2Nombre(n.galeria[1]?.nombre ?? "");
+    setGaleria2Precio(n.galeria[1]?.precio ?? "");
+    setGaleria3Nombre(n.galeria[2]?.nombre ?? "");
+    setGaleria3Precio(n.galeria[2]?.precio ?? "");
     setCargando(false);
   }, [id]);
 
@@ -59,16 +85,6 @@ export default function CompletarPage({
     // eslint-disable-next-line react-hooks/set-state-in-effect -- carga inicial de datos al montar
     cargar();
   }, [cargar]);
-
-  function actualizarMenuFila(i: number, campo: "nombre" | "precio", valor: string) {
-    setMenu((prev) => prev.map((fila, idx) => (idx === i ? { ...fila, [campo]: valor } : fila)));
-  }
-  function agregarFilaMenu() {
-    setMenu((prev) => [...prev, { nombre: "", precio: "" }]);
-  }
-  function quitarFilaMenu(i: number) {
-    setMenu((prev) => prev.filter((_, idx) => idx !== i));
-  }
 
   async function enviar(e: React.FormEvent) {
     e.preventDefault();
@@ -84,10 +100,22 @@ export default function CompletarPage({
           telefono,
           whatsapp,
           direccion,
+          googleMapsUrl,
+          appleMapsUrl,
           instagram,
           facebook,
           horarios,
-          menu: menu.filter((m) => m.nombre.trim()),
+          menu,
+          logoForma,
+          colorAcento,
+          productoEstrellaNombre,
+          productoEstrellaPrecio,
+          galeria_1_nombre: galeria1Nombre,
+          galeria_1_precio: galeria1Precio,
+          galeria_2_nombre: galeria2Nombre,
+          galeria_2_precio: galeria2Precio,
+          galeria_3_nombre: galeria3Nombre,
+          galeria_3_precio: galeria3Precio,
         }),
       });
       const body = await res.json();
@@ -170,6 +198,14 @@ export default function CompletarPage({
           <input value={direccion} onChange={(e) => setDireccion(e.target.value)} />
         </div>
         <div className="field">
+          <label>Link de Google Maps</label>
+          <input value={googleMapsUrl} onChange={(e) => setGoogleMapsUrl(e.target.value)} placeholder="https://maps.google.com/?q=..." />
+        </div>
+        <div className="field">
+          <label>Link de Apple Maps (opcional)</label>
+          <input value={appleMapsUrl} onChange={(e) => setAppleMapsUrl(e.target.value)} placeholder="https://maps.apple.com/?q=..." />
+        </div>
+        <div className="field">
           <label>Instagram</label>
           <input value={instagram} onChange={(e) => setInstagram(e.target.value)} />
         </div>
@@ -184,7 +220,23 @@ export default function CompletarPage({
 
         <section className="section" style={{ padding: "12px 0" }}>
           <div className="head">
-            <h2>Fotos</h2>
+            <h2>Marca de tu minisitio</h2>
+          </div>
+          <div className="field">
+            <label>Forma del logo</label>
+            <select
+              value={logoForma}
+              onChange={(e) => setLogoForma(e.target.value as LogoForma)}
+              style={{ width: "100%", padding: 14, border: "1px solid #0002", borderRadius: 12 }}
+            >
+              <option value="circular">Circular</option>
+              <option value="cuadrada">Cuadrada</option>
+              <option value="rectangular">Rectangular</option>
+            </select>
+          </div>
+          <div className="field">
+            <label>Color de acento</label>
+            <input type="color" value={colorAcento} onChange={(e) => setColorAcento(e.target.value)} style={{ height: 46 }} />
           </div>
           <ImageUploadField
             label="Logo"
@@ -193,48 +245,75 @@ export default function CompletarPage({
             existentes={negocio.logoUrl ? [negocio.logoUrl] : []}
             onUploaded={cargar}
           />
+        </section>
+
+        <section className="section" style={{ padding: "12px 0" }}>
+          <div className="head">
+            <h2>Producto estrella</h2>
+          </div>
+          <p className="small">Su foto será el fondo principal de tu minisitio.</p>
           <ImageUploadField
-            label="Foto de portada"
-            campo="foto_portada"
+            label="Foto"
+            campo="producto_estrella_foto"
             uploadUrl={uploadUrl}
-            existentes={negocio.fotoPortadaUrl ? [negocio.fotoPortadaUrl] : []}
+            existentes={negocio.productoEstrellaFoto ? [negocio.productoEstrellaFoto] : []}
             onUploaded={cargar}
           />
-          <ImageUploadField
-            label="Galería (varias fotos)"
-            campo="galeria"
-            uploadUrl={uploadUrl}
-            existentes={negocio.galeria}
-            multiple
-            onUploaded={cargar}
-          />
+          <div className="field">
+            <label>Nombre del producto</label>
+            <input value={productoEstrellaNombre} onChange={(e) => setProductoEstrellaNombre(e.target.value)} />
+          </div>
+          <div className="field">
+            <label>Precio</label>
+            <input value={productoEstrellaPrecio} onChange={(e) => setProductoEstrellaPrecio(e.target.value)} />
+          </div>
+        </section>
+
+        <section className="section" style={{ padding: "12px 0" }}>
+          <div className="head">
+            <h2>Galería (3 productos)</h2>
+          </div>
+          {[
+            { n: 1, campo: "galeria_1_foto", nombre: galeria1Nombre, setNombre: setGaleria1Nombre, precio: galeria1Precio, setPrecio: setGaleria1Precio, foto: negocio.galeria[0]?.foto },
+            { n: 2, campo: "galeria_2_foto", nombre: galeria2Nombre, setNombre: setGaleria2Nombre, precio: galeria2Precio, setPrecio: setGaleria2Precio, foto: negocio.galeria[1]?.foto },
+            { n: 3, campo: "galeria_3_foto", nombre: galeria3Nombre, setNombre: setGaleria3Nombre, precio: galeria3Precio, setPrecio: setGaleria3Precio, foto: negocio.galeria[2]?.foto },
+          ].map((g) => (
+            <div key={g.n} style={{ marginBottom: 16 }}>
+              <ImageUploadField
+                label={`Foto ${g.n}`}
+                campo={g.campo}
+                uploadUrl={uploadUrl}
+                existentes={g.foto ? [g.foto] : []}
+                onUploaded={cargar}
+              />
+              <div className="field">
+                <label>Nombre</label>
+                <input value={g.nombre} onChange={(e) => g.setNombre(e.target.value)} />
+              </div>
+              <div className="field">
+                <label>Precio</label>
+                <input value={g.precio} onChange={(e) => g.setPrecio(e.target.value)} />
+              </div>
+            </div>
+          ))}
         </section>
 
         <section className="section" style={{ padding: "12px 0" }}>
           <div className="head">
             <h2>Menú</h2>
           </div>
-          {menu.map((fila, i) => (
-            <div className="admin-menu-row" key={i}>
-              <input
-                placeholder="Platillo"
-                value={fila.nombre}
-                onChange={(e) => actualizarMenuFila(i, "nombre", e.target.value)}
-              />
-              <input
-                placeholder="Precio"
-                value={fila.precio}
-                onChange={(e) => actualizarMenuFila(i, "precio", e.target.value)}
-                style={{ maxWidth: 100 }}
-              />
-              <button type="button" className="backlink" onClick={() => quitarFilaMenu(i)}>
-                Quitar
-              </button>
+          <div className="field">
+            <textarea
+              className="textarea"
+              value={menu}
+              onChange={(e) => setMenu(e.target.value)}
+              placeholder={MENU_PLACEHOLDER}
+              style={{ minHeight: 200 }}
+            />
+            <div className="small" style={{ marginTop: 6 }}>
+              Escribe la CATEGORÍA en su propia línea, luego cada platillo como &quot;Producto — $Precio&quot;.
             </div>
-          ))}
-          <button type="button" className="backlink" onClick={agregarFilaMenu}>
-            + Agregar platillo
-          </button>
+          </div>
         </section>
 
         <button className="btn" type="submit" disabled={enviando}>
