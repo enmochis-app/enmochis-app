@@ -38,8 +38,6 @@ export default function CompletarPage({
 
   const [logoForma, setLogoForma] = useState<LogoForma>("circular");
   const [colorAcento, setColorAcento] = useState("#C8FF3D");
-  const [productoEstrellaNombre, setProductoEstrellaNombre] = useState("");
-  const [productoEstrellaPrecio, setProductoEstrellaPrecio] = useState("");
   const [galeria1Nombre, setGaleria1Nombre] = useState("");
   const [galeria1Precio, setGaleria1Precio] = useState("");
   const [galeria2Nombre, setGaleria2Nombre] = useState("");
@@ -70,8 +68,6 @@ export default function CompletarPage({
     setMenu(n.menu ?? "");
     setLogoForma(n.logoForma ?? "circular");
     setColorAcento(n.colorAcento ?? "#C8FF3D");
-    setProductoEstrellaNombre(n.productoEstrellaNombre ?? "");
-    setProductoEstrellaPrecio(n.productoEstrellaPrecio ?? "");
     setGaleria1Nombre(n.galeria[0]?.nombre ?? "");
     setGaleria1Precio(n.galeria[0]?.precio ?? "");
     setGaleria2Nombre(n.galeria[1]?.nombre ?? "");
@@ -108,8 +104,6 @@ export default function CompletarPage({
           menu,
           logoForma,
           colorAcento,
-          productoEstrellaNombre,
-          productoEstrellaPrecio,
           galeria_1_nombre: galeria1Nombre,
           galeria_1_precio: galeria1Precio,
           galeria_2_nombre: galeria2Nombre,
@@ -249,24 +243,16 @@ export default function CompletarPage({
 
         <section className="section" style={{ padding: "12px 0" }}>
           <div className="head">
-            <h2>Producto estrella</h2>
+            <h2>Foto de portada</h2>
           </div>
-          <p className="small">Su foto será el fondo principal de tu minisitio.</p>
+          <p className="small">Es el fondo principal de tu minisitio — puede ser una foto de un producto o del lugar.</p>
           <ImageUploadField
-            label="Foto"
-            campo="producto_estrella_foto"
+            label="Foto de portada"
+            campo="foto_portada"
             uploadUrl={uploadUrl}
-            existentes={negocio.productoEstrellaFoto ? [negocio.productoEstrellaFoto] : []}
+            existentes={negocio.fotoPortada ? [negocio.fotoPortada] : []}
             onUploaded={cargar}
           />
-          <div className="field">
-            <label>Nombre del producto</label>
-            <input value={productoEstrellaNombre} onChange={(e) => setProductoEstrellaNombre(e.target.value)} />
-          </div>
-          <div className="field">
-            <label>Precio</label>
-            <input value={productoEstrellaPrecio} onChange={(e) => setProductoEstrellaPrecio(e.target.value)} />
-          </div>
         </section>
 
         <section className="section" style={{ padding: "12px 0" }}>

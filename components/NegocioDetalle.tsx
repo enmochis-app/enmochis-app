@@ -53,9 +53,9 @@ export default function NegocioDetalle({ negocio }: { negocio: Negocio }) {
       <div className={`screen${pantalla === "inicio" ? " activo" : ""}`}>
         <div
           className="hero-bg"
-          style={negocio.productoEstrellaFoto ? { backgroundImage: `url(${negocio.productoEstrellaFoto})` } : undefined}
+          style={negocio.fotoPortada ? { backgroundImage: `url(${negocio.fotoPortada})` } : undefined}
         />
-        {!negocio.productoEstrellaFoto && <div className="ph-icon-wrap">🍽️</div>}
+        {!negocio.fotoPortada && <div className="ph-icon-wrap">🍽️</div>}
         <div className="hero-scrim-top" ref={scrimRef} />
         <div className="hero-scrim-bottom" />
 

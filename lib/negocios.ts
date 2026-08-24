@@ -74,9 +74,7 @@ export type Negocio = {
   descripcionLarga: string;
   logoUrl?: string;
   logoForma: LogoForma;
-  productoEstrellaFoto?: string;
-  productoEstrellaNombre?: string;
-  productoEstrellaPrecio?: string;
+  fotoPortada?: string;
   colorAcento: string;
   estado: Estado;
   plan?: "top20" | "estandar";
@@ -121,9 +119,7 @@ function mapNegocio(row: NegocioRow): Negocio {
     descripcionLarga: row.descripcionLarga ?? "",
     logoUrl: u(row.logoUrl),
     logoForma: row.logoForma as LogoForma,
-    productoEstrellaFoto: u(row.productoEstrellaFoto),
-    productoEstrellaNombre: u(row.productoEstrellaNombre),
-    productoEstrellaPrecio: u(row.productoEstrellaPrecio),
+    fotoPortada: u(row.fotoPortada),
     colorAcento: row.colorAcento,
     estado: row.estado as Estado,
     plan: (row.plan as Negocio["plan"]) ?? undefined,
@@ -260,8 +256,6 @@ export type DatosNegocio = {
   descripcionCorta: string;
   descripcionLarga: string;
   logoForma?: LogoForma;
-  productoEstrellaNombre?: string;
-  productoEstrellaPrecio?: string;
   colorAcento?: string;
   estado: Estado;
   plan?: "top20" | "estandar";
@@ -297,8 +291,6 @@ function filaParaGuardar(datos: Partial<DatosNegocio>) {
   if (datos.descripcionCorta !== undefined) fila.descripcionCorta = datos.descripcionCorta;
   if (datos.descripcionLarga !== undefined) fila.descripcionLarga = datos.descripcionLarga;
   if (datos.logoForma !== undefined) fila.logoForma = datos.logoForma;
-  if (datos.productoEstrellaNombre !== undefined) fila.productoEstrellaNombre = datos.productoEstrellaNombre;
-  if (datos.productoEstrellaPrecio !== undefined) fila.productoEstrellaPrecio = datos.productoEstrellaPrecio;
   if (datos.colorAcento !== undefined) fila.colorAcento = datos.colorAcento;
   if (datos.estado !== undefined) fila.estado = datos.estado;
   if (datos.plan !== undefined) fila.plan = datos.plan;
@@ -372,9 +364,9 @@ export async function archivarNegocio(id: string): Promise<void> {
   await actualizarNegocio(id, { estado: "archivado" });
 }
 
-const CAMPO_A_COLUMNA: Record<string, "logoUrl" | "productoEstrellaFoto" | "galeria1Foto" | "galeria2Foto" | "galeria3Foto"> = {
+const CAMPO_A_COLUMNA: Record<string, "logoUrl" | "fotoPortada" | "galeria1Foto" | "galeria2Foto" | "galeria3Foto"> = {
   logo: "logoUrl",
-  producto_estrella_foto: "productoEstrellaFoto",
+  foto_portada: "fotoPortada",
   galeria_1_foto: "galeria1Foto",
   galeria_2_foto: "galeria2Foto",
   galeria_3_foto: "galeria3Foto",

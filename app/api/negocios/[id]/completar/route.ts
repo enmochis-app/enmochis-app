@@ -44,8 +44,6 @@ export async function PATCH(
       menu: datos.menu,
       logoForma: datos.logoForma,
       colorAcento: datos.colorAcento,
-      productoEstrellaNombre: datos.productoEstrellaNombre,
-      productoEstrellaPrecio: datos.productoEstrellaPrecio,
       galeria_1_nombre: datos.galeria_1_nombre,
       galeria_1_precio: datos.galeria_1_precio,
       galeria_2_nombre: datos.galeria_2_nombre,

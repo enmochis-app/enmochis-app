@@ -19,10 +19,8 @@ export const SAMPLE_NEGOCIOS: Negocio[] = [
     logoUrl:
       "https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?auto=format&fit=crop&w=300&q=80",
     logoForma: "circular",
-    productoEstrellaFoto:
+    fotoPortada:
       "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=1000&q=85",
-    productoEstrellaNombre: "Aguachile verde",
-    productoEstrellaPrecio: "$180",
     colorAcento: "#C8FF3D",
     estado: "destacado",
     telefono: "6681234501",
@@ -64,10 +62,8 @@ Michelada El Guamúchil — $75`,
     logoUrl:
       "https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=300&q=80",
     logoForma: "circular",
-    productoEstrellaFoto:
+    fotoPortada:
       "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1000&q=85",
-    productoEstrellaNombre: "Café de olla",
-    productoEstrellaPrecio: "$45",
     colorAcento: "#E8B84B",
     estado: "destacado",
     telefono: "6681234502",
@@ -111,10 +107,8 @@ Croissant de jamón y queso — $52`,
     logoUrl:
       "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=300&q=80",
     logoForma: "rectangular",
-    productoEstrellaFoto:
+    fotoPortada:
       "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=1000&q=85",
-    productoEstrellaNombre: "Taco de asada",
-    productoEstrellaPrecio: "$22",
     colorAcento: "#FF5A3C",
     estado: "destacado",
     telefono: "6681234503",
@@ -158,10 +152,8 @@ Agua fresca de horchata — $25`,
     logoUrl:
       "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=300&q=80",
     logoForma: "cuadrada",
-    productoEstrellaFoto:
+    fotoPortada:
       "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=1000&q=85",
-    productoEstrellaNombre: "Pastel de tres leches",
-    productoEstrellaPrecio: "$55",
     colorAcento: "#FF7BAC",
     estado: "destacado",
     telefono: "6681234504",

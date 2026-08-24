@@ -74,8 +74,6 @@ export default function NegocioForm({
 
   const [logoForma, setLogoForma] = useState<LogoForma>(negocio?.logoForma ?? "circular");
   const [colorAcento, setColorAcento] = useState(negocio?.colorAcento ?? "#C8FF3D");
-  const [productoEstrellaNombre, setProductoEstrellaNombre] = useState(negocio?.productoEstrellaNombre ?? "");
-  const [productoEstrellaPrecio, setProductoEstrellaPrecio] = useState(negocio?.productoEstrellaPrecio ?? "");
   const [galeria1Nombre, setGaleria1Nombre] = useState(negocio?.galeria[0]?.nombre ?? "");
   const [galeria1Precio, setGaleria1Precio] = useState(negocio?.galeria[0]?.precio ?? "");
   const [galeria2Nombre, setGaleria2Nombre] = useState(negocio?.galeria[1]?.nombre ?? "");
@@ -137,8 +135,6 @@ export default function NegocioForm({
           menu,
           logoForma,
           colorAcento,
-          productoEstrellaNombre,
-          productoEstrellaPrecio,
           galeria_1_nombre: galeria1Nombre,
           galeria_1_precio: galeria1Precio,
           galeria_2_nombre: galeria2Nombre,
@@ -328,27 +324,17 @@ export default function NegocioForm({
       </div>
 
       <div className="admin-section">
-        <h2>Producto estrella</h2>
+        <h2>Foto de portada</h2>
         <div className="admin-small" style={{ fontSize: 12, color: "#666", marginBottom: 10 }}>
-          Su foto es el fondo principal del minisitio.
+          Es el fondo principal del minisitio — puede ser una foto de un producto o del lugar.
         </div>
         <ImageUploadField
-          label="Foto del producto estrella"
-          campo="producto_estrella_foto"
+          label="Foto de portada"
+          campo="foto_portada"
           uploadUrl={uploadUrl}
-          existentes={negocio.productoEstrellaFoto ? [negocio.productoEstrellaFoto] : []}
+          existentes={negocio.fotoPortada ? [negocio.fotoPortada] : []}
           onUploaded={() => onRecargar?.()}
         />
-        <div className="admin-grid-2">
-          <div className="admin-field">
-            <label>Nombre del producto</label>
-            <input value={productoEstrellaNombre} onChange={(e) => setProductoEstrellaNombre(e.target.value)} />
-          </div>
-          <div className="admin-field">
-            <label>Precio</label>
-            <input value={productoEstrellaPrecio} onChange={(e) => setProductoEstrellaPrecio(e.target.value)} />
-          </div>
-        </div>
       </div>
 
       <div className="admin-section">

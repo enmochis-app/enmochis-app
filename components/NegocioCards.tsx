@@ -7,7 +7,7 @@ const PLACEHOLDER =
 export function FeatureCard({ negocio }: { negocio: Negocio }) {
   return (
     <article className="feature">
-      <img src={negocio.productoEstrellaFoto || negocio.logoUrl || PLACEHOLDER} alt={negocio.nombre} />
+      <img src={negocio.fotoPortada || negocio.logoUrl || PLACEHOLDER} alt={negocio.nombre} />
       <div className="feature-body">
         <h3>{negocio.nombre.toUpperCase()}</h3>
         <div className="meta">{negocio.descripcionCorta}</div>
@@ -20,7 +20,7 @@ export function FeatureCard({ negocio }: { negocio: Negocio }) {
 export function NegocioCard({ negocio }: { negocio: Negocio }) {
   return (
     <Link href={`/negocio/${negocio.slug}`} className="card" style={{ textDecoration: "none", color: "inherit" }}>
-      <img src={negocio.productoEstrellaFoto || negocio.logoUrl || PLACEHOLDER} alt={negocio.nombre} />
+      <img src={negocio.fotoPortada || negocio.logoUrl || PLACEHOLDER} alt={negocio.nombre} />
       <div className="cardbody">
         <h3>{negocio.nombre}</h3>
         <div className="small">{negocio.categoria}</div>
@@ -32,7 +32,7 @@ export function NegocioCard({ negocio }: { negocio: Negocio }) {
 export function NegocioListItem({ negocio }: { negocio: Negocio }) {
   return (
     <Link href={`/negocio/${negocio.slug}`} className="listitem">
-      <img src={negocio.productoEstrellaFoto || negocio.logoUrl || PLACEHOLDER} alt={negocio.nombre} />
+      <img src={negocio.fotoPortada || negocio.logoUrl || PLACEHOLDER} alt={negocio.nombre} />
       <div>
         <h3>{negocio.nombre}</h3>
         <div className="small">{negocio.descripcionCorta}</div>

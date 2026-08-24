@@ -3,7 +3,7 @@ import { subirAdjunto } from "@/lib/negocios";
 
 const CAMPOS_VALIDOS = new Set([
   "logo",
-  "producto_estrella_foto",
+  "foto_portada",
   "galeria_1_foto",
   "galeria_2_foto",
   "galeria_3_foto",
