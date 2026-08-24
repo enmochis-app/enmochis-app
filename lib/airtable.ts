@@ -362,8 +362,9 @@ export async function subirAdjunto(
   if (!apiKey || !baseId) {
     throw new Error("Faltan AIRTABLE_API_KEY y/o AIRTABLE_BASE_ID. Revisa tu .env.local.");
   }
+  const url = `https://content.airtable.com/v0/${baseId}/${recordId}/${encodeURIComponent(campo)}/uploadAttachment`;
   const res = await fetch(
-    `https://api.airtable.com/v0/${baseId}/Negocios/${recordId}/${encodeURIComponent(campo)}/uploadAttachment`,
+    url,
     {
       method: "POST",
       headers: {
