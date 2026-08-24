@@ -1,0 +1,196 @@
+.admin-body {
+  min-height: 100vh;
+  background: #f4f5f7;
+  color: #1a1a1a;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.admin-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  background: #111;
+  color: #fff;
+}
+.admin-topbar a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+}
+.admin-topbar button {
+  background: transparent;
+  color: #fff;
+  border: 1px solid #fff5;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.admin-main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px;
+}
+.admin-login-wrap {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+}
+.admin-card {
+  background: #fff;
+  border: 1px solid #e2e2e6;
+  border-radius: 10px;
+  padding: 28px;
+  max-width: 360px;
+  width: 100%;
+  box-shadow: 0 8px 30px #0000000d;
+}
+.admin-card h1 {
+  font-size: 20px;
+  margin: 0 0 18px;
+}
+.admin-field {
+  margin-bottom: 14px;
+}
+.admin-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 5px;
+  color: #444;
+}
+.admin-field input,
+.admin-field select,
+.admin-field textarea {
+  width: 100%;
+  padding: 9px 11px;
+  border: 1px solid #d3d3da;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+}
+.admin-field textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+.admin-btn {
+  display: inline-block;
+  background: #111;
+  color: #fff;
+  border: 0;
+  border-radius: 6px;
+  padding: 10px 16px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none;
+}
+.admin-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.admin-btn-secondary {
+  background: #fff;
+  color: #111;
+  border: 1px solid #d3d3da;
+}
+.admin-btn-danger {
+  background: #fff;
+  color: #b3261e;
+  border: 1px solid #e6b3af;
+}
+.admin-error {
+  color: #b3261e;
+  font-size: 13px;
+  margin-top: 8px;
+}
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border: 1px solid #e2e2e6;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.admin-table th,
+.admin-table td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
+.admin-table th {
+  background: #fafafa;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #666;
+}
+.admin-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.admin-badge-solicitud { background: #fde68a; color: #7a5900; }
+.admin-badge-revision { background: #bfdbfe; color: #1e3a8a; }
+.admin-badge-prueba { background: #e5e7eb; color: #374151; }
+.admin-badge-activo { background: #bbf7d0; color: #14532d; }
+.admin-badge-destacado { background: #fbcfe8; color: #831843; }
+.admin-badge-archivado { background: #e5e7eb; color: #6b7280; }
+.admin-warn-rojo { color: #b3261e; font-weight: 700; }
+.admin-warn-amarillo { color: #92600a; font-weight: 700; }
+.admin-warn-verde { color: #14532d; }
+.admin-section {
+  background: #fff;
+  border: 1px solid #e2e2e6;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 18px;
+}
+.admin-section h2 {
+  font-size: 15px;
+  margin: 0 0 14px;
+}
+.admin-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.admin-checks {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+.admin-checks label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+.admin-menu-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.admin-menu-row input {
+  flex: 1;
+}
+.admin-head-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.admin-link { color: #2f6fed; text-decoration: underline; cursor: pointer; background: none; border: 0; font-size: 13px; padding: 0; }
+.admin-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; }
+.admin-dropzone {
+  border: 2px dashed #d3d3da;
+  border-radius: 8px;
+  padding: 14px;
+  text-align: center;
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+}
+.admin-dropzone.drag { border-color: #2f6fed; background: #2f6fed10; }

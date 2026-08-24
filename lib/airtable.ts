@@ -18,6 +18,14 @@ export function slugPorCategoria(nombre: Categoria) {
   return CATEGORIAS.find((c) => c.nombre === nombre)?.slug ?? "";
 }
 
+export type Estado =
+  | "solicitud"
+  | "revision"
+  | "prueba"
+  | "activo"
+  | "destacado"
+  | "archivado";
+
 export type Negocio = {
   id: string;
   nombre: string;
@@ -27,7 +35,10 @@ export type Negocio = {
   descripcionLarga: string;
   logoUrl?: string;
   fotoPortadaUrl?: string;
-  estado: "solicitud" | "prueba" | "activo" | "destacado";
+  estado: Estado;
+  plan?: "top20" | "estandar";
+  fechaProximaRenovacion?: string;
+  contactoNombre?: string;
   telefono?: string;
   whatsapp?: string;
   direccion?: string;
@@ -46,6 +57,13 @@ export type Negocio = {
   addonLealtad: boolean;
   addonMultiSucursal: boolean;
 };
+
+export function menuATexto(items: { nombre: string; precio?: string }[]): string {
+  return items
+    .filter((i) => i.nombre.trim())
+    .map((i) => (i.precio ? `${i.nombre.trim()} | ${i.precio.trim()}` : i.nombre.trim()))
+    .join("\n");
+}
 
 function getBase() {
   const apiKey = process.env.AIRTABLE_API_KEY;
@@ -88,7 +106,12 @@ function mapNegocio(record: Airtable.Record<Airtable.FieldSet>): Negocio {
     descripcionLarga: String(f["descripcion_larga"] ?? ""),
     logoUrl: attachmentUrls(f["logo"])[0],
     fotoPortadaUrl: attachmentUrls(f["foto_portada"])[0],
-    estado: (f["estado"] as Negocio["estado"]) ?? "solicitud",
+    estado: (f["estado"] as Estado) ?? "solicitud",
+    plan: f["plan"] ? (f["plan"] as Negocio["plan"]) : undefined,
+    fechaProximaRenovacion: f["fecha_proxima_renovacion"]
+      ? String(f["fecha_proxima_renovacion"])
+      : undefined,
+    contactoNombre: f["contacto_nombre"] ? String(f["contacto_nombre"]) : undefined,
     telefono: f["telefono"] ? String(f["telefono"]) : undefined,
     whatsapp: f["whatsapp"] ? String(f["whatsapp"]) : undefined,
     direccion: f["direccion"] ? String(f["direccion"]) : undefined,
@@ -228,4 +251,134 @@ export async function crearSolicitud(datos: NuevaSolicitud): Promise<{ id: strin
     },
   ]);
   return { id: record.id, slug };
+}
+
+// --- A partir de aquí: funciones para el panel de administración ---
+
+export type DatosNegocio = {
+  nombre: string;
+  categoria: Categoria;
+  descripcionCorta: string;
+  descripcionLarga: string;
+  estado: Estado;
+  plan?: "top20" | "estandar";
+  fechaProximaRenovacion?: string;
+  telefono?: string;
+  whatsapp?: string;
+  direccion?: string;
+  instagram?: string;
+  facebook?: string;
+  horarios?: string;
+  menu: { nombre: string; precio?: string }[];
+  addonWhatsapp: boolean;
+  addonMapas: boolean;
+  addonGaleria: boolean;
+  addonFormularioContacto: boolean;
+  addonPedidos: boolean;
+  addonReservaciones: boolean;
+  addonQrMesa: boolean;
+  addonLealtad: boolean;
+  addonMultiSucursal: boolean;
+};
+
+function camposParaAirtable(datos: Partial<DatosNegocio>): Airtable.FieldSet {
+  const campos: Airtable.FieldSet = {};
+  if (datos.nombre !== undefined) campos["nombre"] = datos.nombre;
+  if (datos.categoria !== undefined) campos["categoria"] = datos.categoria;
+  if (datos.descripcionCorta !== undefined) campos["descripcion_corta"] = datos.descripcionCorta;
+  if (datos.descripcionLarga !== undefined) campos["descripcion_larga"] = datos.descripcionLarga;
+  if (datos.estado !== undefined) campos["estado"] = datos.estado;
+  if (datos.plan !== undefined) campos["plan"] = datos.plan;
+  if (datos.fechaProximaRenovacion !== undefined) campos["fecha_proxima_renovacion"] = datos.fechaProximaRenovacion;
+  if (datos.telefono !== undefined) campos["telefono"] = datos.telefono;
+  if (datos.whatsapp !== undefined) campos["whatsapp"] = datos.whatsapp;
+  if (datos.direccion !== undefined) campos["direccion"] = datos.direccion;
+  if (datos.instagram !== undefined) campos["instagram"] = datos.instagram;
+  if (datos.facebook !== undefined) campos["facebook"] = datos.facebook;
+  if (datos.horarios !== undefined) campos["horarios"] = datos.horarios;
+  if (datos.menu !== undefined) campos["menu"] = menuATexto(datos.menu);
+  if (datos.addonWhatsapp !== undefined) campos["addon_whatsapp"] = datos.addonWhatsapp;
+  if (datos.addonMapas !== undefined) campos["addon_mapas"] = datos.addonMapas;
+  if (datos.addonGaleria !== undefined) campos["addon_galeria"] = datos.addonGaleria;
+  if (datos.addonFormularioContacto !== undefined) campos["addon_formulario_contacto"] = datos.addonFormularioContacto;
+  if (datos.addonPedidos !== undefined) campos["addon_pedidos"] = datos.addonPedidos;
+  if (datos.addonReservaciones !== undefined) campos["addon_reservaciones"] = datos.addonReservaciones;
+  if (datos.addonQrMesa !== undefined) campos["addon_qr_mesa"] = datos.addonQrMesa;
+  if (datos.addonLealtad !== undefined) campos["addon_lealtad"] = datos.addonLealtad;
+  if (datos.addonMultiSucursal !== undefined) campos["addon_multi_sucursal"] = datos.addonMultiSucursal;
+  return campos;
+}
+
+export async function getAllNegocios(): Promise<Negocio[]> {
+  const base = getBase();
+  const records = await base("Negocios").select({ sort: [{ field: "nombre" }] }).all();
+  return records.map(mapNegocio);
+}
+
+export async function getNegocioPorId(id: string): Promise<Negocio | null> {
+  try {
+    const base = getBase();
+    const record = await base("Negocios").find(id);
+    return mapNegocio(record);
+  } catch {
+    return null;
+  }
+}
+
+export async function crearNegocioAdmin(
+  datos: Partial<DatosNegocio> & { nombre: string }
+): Promise<{ id: string; slug: string }> {
+  const slug = await generarSlugUnico(datos.nombre);
+  const base = getBase();
+  const [record] = await base("Negocios").create([
+    {
+      fields: {
+        ...camposParaAirtable(datos),
+        slug,
+        estado: datos.estado ?? "solicitud",
+        fecha_afiliacion: new Date().toISOString().slice(0, 10),
+      },
+    },
+  ]);
+  return { id: record.id, slug };
+}
+
+export async function actualizarNegocio(id: string, cambios: Partial<DatosNegocio>): Promise<void> {
+  const base = getBase();
+  await base("Negocios").update([{ id, fields: camposParaAirtable(cambios) }]);
+}
+
+export async function archivarNegocio(id: string): Promise<void> {
+  await actualizarNegocio(id, { estado: "archivado" });
+}
+
+export async function subirAdjunto(
+  recordId: string,
+  campo: string,
+  archivo: { filename: string; contentType: string; base64: string }
+): Promise<void> {
+  const apiKey = process.env.AIRTABLE_API_KEY;
+  const baseId = process.env.AIRTABLE_BASE_ID;
+  if (!apiKey || !baseId) {
+    throw new Error("Faltan AIRTABLE_API_KEY y/o AIRTABLE_BASE_ID. Revisa tu .env.local.");
+  }
+  const res = await fetch(
+    `https://api.airtable.com/v0/${baseId}/Negocios/${recordId}/${encodeURIComponent(campo)}/uploadAttachment`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        contentType: archivo.contentType,
+        filename: archivo.filename,
+        file: archivo.base64,
+      }),
+    }
+  );
+  if (!res.ok) {
+    const texto = await res.text().catch(() => "");
+    throw new Error(`No se pudo subir el archivo a Airtable (${res.status}): ${texto}`);
+  }
 }

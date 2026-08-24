@@ -1,8 +1,5 @@
-import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getNegocioPorSlug, slugPorCategoria, type Negocio } from "@/lib/airtable";
-
-export const revalidate = 60;
+import type { Negocio } from "@/lib/airtable";
 
 function whatsappHref(numero: string) {
   const limpio = numero.replace(/[^0-9]/g, "");
@@ -22,22 +19,24 @@ const SERVICIOS: { addon: keyof Negocio; emoji: string; label: string }[] = [
   { addon: "addonMultiSucursal", emoji: "📍", label: "Varias sucursales" },
 ];
 
-export default async function NegocioPage({
-  params,
+export default function NegocioDetalle({
+  negocio,
+  backHref,
+  backLabel = "← Volver al directorio",
 }: {
-  params: Promise<{ slug: string }>;
+  negocio: Negocio;
+  backHref?: string;
+  backLabel?: string;
 }) {
-  const { slug } = await params;
-  const negocio = await getNegocioPorSlug(slug);
-  if (!negocio) notFound();
-
   const servicios = SERVICIOS.filter((s) => negocio[s.addon] === true);
 
   return (
     <>
-      <Link href={`/categoria/${slugPorCategoria(negocio.categoria)}`} className="backlink">
-        ← Volver al directorio
-      </Link>
+      {backHref && (
+        <Link href={backHref} className="backlink">
+          {backLabel}
+        </Link>
+      )}
 
       <article className="feature" style={{ margin: "16px 18px" }}>
         {negocio.fotoPortadaUrl && <img src={negocio.fotoPortadaUrl} alt={negocio.nombre} />}

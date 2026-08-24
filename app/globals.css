@@ -103,3 +103,11 @@
 .whatsapp-btn{display:flex;align-items:center;justify-content:center;gap:8px;border:0;width:100%;margin-top:12px;padding:14px;border-radius:999px;background:#25D366;color:#fff;font-weight:800;cursor:pointer;text-decoration:none}
 .app.orange .whatsapp-btn{border-radius:2px;border:2px solid #111}
 @media(min-width:700px){body{padding:80px 0}.app{border-radius:28px;box-shadow:0 30px 80px #0005}}
+.admin-field{margin-bottom:14px}
+.admin-field label{display:block;font-size:11px;font-weight:800;text-transform:uppercase;margin-bottom:6px}
+.admin-thumb{width:60px;height:60px;object-fit:cover;border-radius:8px}
+.admin-error{color:#b3261e;font-size:12px;margin-top:6px}
+.admin-dropzone{border:2px dashed #0003;border-radius:8px;padding:14px;text-align:center;font-size:13px;color:#666;cursor:pointer;background:#fff}
+.admin-dropzone.drag{border-color:var(--blue);background:#2f6fed10}
+.admin-menu-row{display:flex;gap:8px;margin-bottom:8px}
+.admin-menu-row input{flex:1}
