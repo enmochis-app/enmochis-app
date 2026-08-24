@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAllNegocios, crearNegocioAdmin, type DatosNegocio } from "@/lib/airtable";
+import { getAllNegocios, crearNegocioAdmin, type DatosNegocio } from "@/lib/negocios";
 
 export async function GET() {
   const negocios = await getAllNegocios();

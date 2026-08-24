@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CATEGORIAS } from "@/lib/airtable";
+import { CATEGORIAS } from "@/lib/negocios";
 
 export default function UnetePage() {
   const [estado, setEstado] = useState<"idle" | "enviando" | "ok" | "error">("idle");

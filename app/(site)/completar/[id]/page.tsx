@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useCallback, useEffect, useState } from "react";
-import type { Negocio, LogoForma } from "@/lib/airtable";
+import type { Negocio, LogoForma } from "@/lib/negocios";
 import ImageUploadField from "@/components/ImageUploadField";
 
 const MENU_PLACEHOLDER = `PIEZAS

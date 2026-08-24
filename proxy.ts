@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { CATEGORIAS } from "@/lib/airtable";
+import { CATEGORIAS } from "@/lib/negocios";
 import { COOKIE_SESION_ADMIN, tokenSesionValido } from "@/lib/adminAuth";
 
 const CATEGORIA_SLUGS = new Set(CATEGORIAS.map((c) => c.slug));

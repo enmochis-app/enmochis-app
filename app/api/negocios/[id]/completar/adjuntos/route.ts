@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getNegocioPorId, subirAdjunto } from "@/lib/airtable";
+import { getNegocioPorId, subirAdjunto } from "@/lib/negocios";
 
 const CAMPOS_VALIDOS = new Set([
   "logo",

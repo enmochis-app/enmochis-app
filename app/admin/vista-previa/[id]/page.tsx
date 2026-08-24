@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getNegocioPorId } from "@/lib/airtable";
+import { getNegocioPorId } from "@/lib/negocios";
 import NegocioDetalle from "@/components/NegocioDetalle";
 import "@/app/negocio/minisitio.css";
 

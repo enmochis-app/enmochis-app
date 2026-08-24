@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { categoriaPorSlug, getNegociosPorCategoria } from "@/lib/airtable";
+import { categoriaPorSlug, getNegociosPorCategoria } from "@/lib/negocios";
 import { NegocioCard, NegocioListItem } from "@/components/NegocioCards";
 
 export const revalidate = 60;

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getNegocioPorId, actualizarNegocio, archivarNegocio, type DatosNegocio } from "@/lib/airtable";
+import { getNegocioPorId, actualizarNegocio, archivarNegocio, type DatosNegocio } from "@/lib/negocios";
 
 export async function GET(
   _request: Request,

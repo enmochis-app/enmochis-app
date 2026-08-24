@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useEffect, useState, useCallback } from "react";
-import type { Negocio } from "@/lib/airtable";
+import type { Negocio } from "@/lib/negocios";
 import NegocioForm from "@/components/admin/NegocioForm";
 
 export default function EditarNegocioPage({

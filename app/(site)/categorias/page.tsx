@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CATEGORIAS } from "@/lib/airtable";
+import { CATEGORIAS } from "@/lib/negocios";
 
 export default function CategoriasPage() {
   return (

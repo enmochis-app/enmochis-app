@@ -1,11 +1,11 @@
-import type { Negocio } from "./airtable";
+import type { Negocio } from "./negocios";
 
 /**
- * Datos de ejemplo, solo para fines ilustrativos mientras Airtable no está
- * conectado (o mientras la base todavía no tiene negocios reales). En cuanto
- * AIRTABLE_API_KEY / AIRTABLE_BASE_ID estén configurados y la consulta a
- * Airtable funcione, estos datos dejan de usarse automáticamente — ver el
- * try/catch en cada función de lib/airtable.ts.
+ * Datos de ejemplo, solo para fines ilustrativos mientras la base de datos
+ * no está conectada (o mientras todavía no tiene negocios reales). En cuanto
+ * POSTGRES_URL esté configurado y la consulta funcione, estos datos dejan
+ * de usarse automáticamente — ver el try/catch en cada función de
+ * lib/negocios.ts.
  */
 export const SAMPLE_NEGOCIOS: Negocio[] = [
   {

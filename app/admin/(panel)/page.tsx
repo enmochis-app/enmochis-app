@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import type { Negocio } from "@/lib/airtable";
+import type { Negocio } from "@/lib/negocios";
 
 const ETIQUETAS_ESTADO: Record<string, string> = {
   solicitud: "Solicitud",

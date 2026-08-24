@@ -1,4 +1,4 @@
-import { getDestacados, getRecomendados } from "@/lib/airtable";
+import { getDestacados, getRecomendados } from "@/lib/negocios";
 import HomeHero from "@/components/HomeHero";
 import { FeatureCard, NegocioCard } from "@/components/NegocioCards";
 import Link from "next/link";

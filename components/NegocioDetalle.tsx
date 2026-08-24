@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { Negocio } from "@/lib/airtable";
-import { parsearMenu } from "@/lib/airtable";
+import type { Negocio } from "@/lib/negocios";
+import { parsearMenu } from "@/lib/negocios";
 
 function telHref(numero: string) {
   return `tel:${numero.replace(/[^\d+]/g, "")}`;

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Negocio } from "@/lib/airtable";
+import type { Negocio } from "@/lib/negocios";
 
 const PLACEHOLDER =
   "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=700&q=85";

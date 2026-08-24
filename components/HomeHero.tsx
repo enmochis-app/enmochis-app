@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useTheme } from "./theme-context";
-import { CATEGORIAS } from "@/lib/airtable";
+import { CATEGORIAS } from "@/lib/negocios";
 
 export default function HomeHero() {
   const theme = useTheme();

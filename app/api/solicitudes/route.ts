@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { crearSolicitud, CATEGORIAS, type Categoria } from "@/lib/airtable";
+import { crearSolicitud, CATEGORIAS, type Categoria } from "@/lib/negocios";
 
 const CATEGORIAS_VALIDAS = new Set<string>(CATEGORIAS.map((c) => c.nombre));
 
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     });
     return NextResponse.json({ ok: true, slug }, { status: 201 });
   } catch (err) {
-    console.error("Error creando solicitud en Airtable:", err);
+    console.error("Error creando solicitud:", err);
     return NextResponse.json(
       { error: "No se pudo guardar la solicitud. Intenta de nuevo más tarde." },
       { status: 502 }

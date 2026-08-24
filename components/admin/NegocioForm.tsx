@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
-import { CATEGORIAS, type Negocio, type Estado, type Categoria, type LogoForma } from "@/lib/airtable";
+import { CATEGORIAS, type Negocio, type Estado, type Categoria, type LogoForma } from "@/lib/negocios";
 import ImageUploadField from "@/components/ImageUploadField";
 
 const ADDONS: { key: keyof Negocio; label: string }[] = [

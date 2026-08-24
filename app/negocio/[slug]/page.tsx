@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getNegocioPorSlug } from "@/lib/airtable";
+import { getNegocioPorSlug } from "@/lib/negocios";
 import NegocioDetalle from "@/components/NegocioDetalle";
 
 export const revalidate = 60;
