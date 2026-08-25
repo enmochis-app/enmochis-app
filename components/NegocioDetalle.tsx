@@ -19,6 +19,15 @@ function urlAppleMaps(lat: number, lng: number, nombre: string) {
   return `https://maps.apple.com/?ll=${lat},${lng}&q=${encodeURIComponent(nombre)}`;
 }
 
+function registrarEvento(negocioId: string, tipo: string) {
+  const body = JSON.stringify({ negocioId, tipo });
+  if (navigator.sendBeacon) {
+    navigator.sendBeacon("/api/eventos", new Blob([body], { type: "application/json" }));
+  } else {
+    fetch("/api/eventos", { method: "POST", headers: { "Content-Type": "application/json" }, body, keepalive: true }).catch(() => {});
+  }
+}
+
 function CarruselGaleria({ galeria }: { galeria: Negocio["galeria"] }) {
   const [activo, setActivo] = useState(0);
   const items = galeria.filter((g) => g.foto);
@@ -89,6 +98,10 @@ export default function NegocioDetalle({ negocio }: { negocio: Negocio }) {
     setAppleRecomendado(ios);
   }, []);
 
+  useEffect(() => {
+    registrarEvento(negocio.id, "visita");
+  }, [negocio.id]);
+
   const accent = negocio.colorAcento || "#C8FF3D";
   const tieneAddon = (clave: string) => negocio.addons.some((a) => a.clave === clave);
 
@@ -152,12 +165,19 @@ export default function NegocioDetalle({ negocio }: { negocio: Negocio }) {
               href={urlMapaRecomendado}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => registrarEvento(negocio.id, "mapa")}
               style={{ background: accent, color: "#0A0A0A" }}
             >
               📍 Cómo llegar
               <span className="chip-recomendado">Recomendado</span>
             </a>
-            <a className="mapa-secundario" href={urlMapaSecundario} target="_blank" rel="noopener noreferrer">
+            <a
+              className="mapa-secundario"
+              href={urlMapaSecundario}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => registrarEvento(negocio.id, "mapa")}
+            >
               Prefiero {nombreMapaSecundario}
             </a>
           </div>
@@ -176,14 +196,22 @@ export default function NegocioDetalle({ negocio }: { negocio: Negocio }) {
             </div>
           )}
           {negocio.telefono && (
-            <a className="cta-btn" href={telHref(negocio.telefono)} style={{ background: accent, color: "#0A0A0A" }}>
+            <a
+              className="cta-btn"
+              href={telHref(negocio.telefono)}
+              onClick={() => registrarEvento(negocio.id, "llamar")}
+              style={{ background: accent, color: "#0A0A0A" }}
+            >
               ☎ LLAMAR AHORA
             </a>
           )}
           <button
             type="button"
             className="cta-btn"
-            onClick={() => setPantalla("menu")}
+            onClick={() => {
+              registrarEvento(negocio.id, "ver_menu");
+              setPantalla("menu");
+            }}
             style={{ background: "rgba(10,10,10,0.75)", color: "#fff", border: "1.5px solid rgba(255,255,255,0.3)" }}
           >
             ☰ VER MENÚ
@@ -235,21 +263,32 @@ export default function NegocioDetalle({ negocio }: { negocio: Negocio }) {
           <span className="icon-ic">🏠</span>INICIO
         </button>
         {tieneMapa && (
-          <a href={urlMapaRecomendado} target="_blank" rel="noopener noreferrer">
+          <a href={urlMapaRecomendado} target="_blank" rel="noopener noreferrer" onClick={() => registrarEvento(negocio.id, "mapa")}>
             <span className="icon-ic">📍</span>MAPA
           </a>
         )}
         {addonWhatsapp && negocio.whatsapp && (
-          <a href={waHref(negocio.whatsapp, negocio.slug, negocio.mensajeWhatsapp)} target="_blank" rel="noopener noreferrer">
+          <a
+            href={waHref(negocio.whatsapp, negocio.slug, negocio.mensajeWhatsapp)}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => registrarEvento(negocio.id, "whatsapp")}
+          >
             <span className="icon-ic">💬</span>WHATSAPP
           </a>
         )}
         {!addonWhatsapp && negocio.telefono && (
-          <a href={telHref(negocio.telefono)}>
+          <a href={telHref(negocio.telefono)} onClick={() => registrarEvento(negocio.id, "llamar")}>
             <span className="icon-ic">☎</span>LLAMAR
           </a>
         )}
-        <button type="button" onClick={() => setPantalla("menu")}>
+        <button
+          type="button"
+          onClick={() => {
+            registrarEvento(negocio.id, "ver_menu");
+            setPantalla("menu");
+          }}
+        >
           <span className="icon-ic">☰</span>MENÚ
         </button>
       </div>

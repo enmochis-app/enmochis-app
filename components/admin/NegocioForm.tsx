@@ -1,9 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { CATEGORIAS, type Negocio, type Estado, type Categoria, type LogoForma, type Addon } from "@/lib/negocios";
+import { CATEGORIAS, TIPOS_EVENTO, type Negocio, type Estado, type Categoria, type LogoForma, type Addon } from "@/lib/negocios";
 import ImageUploadField from "@/components/ImageUploadField";
 
 function hoyMasDias(dias: number): string {
@@ -107,6 +107,18 @@ export default function NegocioForm({
     .filter((a) => addonsSeleccionados[a.clave])
     .reduce((suma, a) => suma + a.precio, 0);
   const cantidadAddonsActivos = Object.values(addonsSeleccionados).filter(Boolean).length;
+
+  const [metricas, setMetricas] = useState<Record<string, number> | null>(null);
+  const cargarMetricas = useCallback(async () => {
+    if (!negocio) return;
+    const res = await fetch(`/api/admin/negocios/${negocio.id}/metricas`);
+    const body = await res.json();
+    setMetricas(body.metricas ?? {});
+  }, [negocio]);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- carga inicial de datos al montar
+    cargarMetricas();
+  }, [cargarMetricas]);
 
   async function crear(e: React.FormEvent) {
     e.preventDefault();
@@ -500,6 +512,24 @@ export default function NegocioForm({
         <div style={{ fontSize: 12, color: "#666" }}>
           Información de referencia — el cobro y el envío del recibo se hacen por fuera del sistema.
         </div>
+      </div>
+
+      <div className="admin-section">
+        <h2>Métricas — este mes</h2>
+        {metricas === null ? (
+          <p className="admin-small" style={{ fontSize: 12, color: "#666" }}>
+            Cargando...
+          </p>
+        ) : (
+          <div className="admin-grid-2">
+            {TIPOS_EVENTO.map((t) => (
+              <div className="admin-field" key={t.tipo}>
+                <label>{t.label}</label>
+                <div style={{ fontSize: 18, fontWeight: 700 }}>{metricas[t.tipo] ?? 0}</div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="admin-section">

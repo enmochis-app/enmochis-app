@@ -1,7 +1,7 @@
 import { put } from "@vercel/blob";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, gte, inArray, sql } from "drizzle-orm";
 import { db } from "./db";
-import { negocios, addons, negocioAddons, type NegocioRow } from "./db/schema";
+import { negocios, addons, negocioAddons, eventos, type NegocioRow } from "./db/schema";
 import { SAMPLE_NEGOCIOS } from "./sample-data";
 
 export type Categoria = "Restaurantes" | "Cafeterías" | "Snacks" | "Panaderías";
@@ -536,4 +536,56 @@ export async function crearAddon(datos: DatosAddon): Promise<{ id: string; clave
 export async function actualizarAddon(id: string, cambios: CambiosAddon): Promise<void> {
   if (Object.keys(cambios).length === 0) return;
   await db().update(addons).set(cambios).where(eq(addons.id, id));
+}
+
+// --- Métricas ---
+
+export const TIPOS_EVENTO = [
+  { tipo: "visita", label: "Visitas al minisitio" },
+  { tipo: "ver_menu", label: "Ver menú" },
+  { tipo: "llamar", label: "Llamar ahora" },
+  { tipo: "whatsapp", label: "WhatsApp" },
+  { tipo: "mapa", label: "Cómo llegar / Mapa" },
+] as const;
+
+export type TipoEvento = (typeof TIPOS_EVENTO)[number]["tipo"];
+
+export function esTipoEventoValido(tipo: string): tipo is TipoEvento {
+  return TIPOS_EVENTO.some((t) => t.tipo === tipo);
+}
+
+export async function registrarEventoServidor(negocioId: string, tipo: TipoEvento): Promise<void> {
+  await db().insert(eventos).values({ negocioId, tipo });
+}
+
+/** Inicio del mes calendario actual (hora del servidor). */
+export function inicioDeMes(): Date {
+  const ahora = new Date();
+  return new Date(ahora.getFullYear(), ahora.getMonth(), 1);
+}
+
+export async function getMetricasNegocio(negocioId: string, desde: Date): Promise<Record<string, number>> {
+  const filas = await db()
+    .select({ tipo: eventos.tipo, total: sql<number>`count(*)::int` })
+    .from(eventos)
+    .where(and(eq(eventos.negocioId, negocioId), gte(eventos.createdAt, desde)))
+    .groupBy(eventos.tipo);
+  const resultado: Record<string, number> = {};
+  for (const f of filas) resultado[f.tipo] = f.total;
+  return resultado;
+}
+
+export async function getMetricasTodos(desde: Date): Promise<Map<string, Record<string, number>>> {
+  const filas = await db()
+    .select({ negocioId: eventos.negocioId, tipo: eventos.tipo, total: sql<number>`count(*)::int` })
+    .from(eventos)
+    .where(gte(eventos.createdAt, desde))
+    .groupBy(eventos.negocioId, eventos.tipo);
+  const mapa = new Map<string, Record<string, number>>();
+  for (const f of filas) {
+    const actual = mapa.get(f.negocioId) ?? {};
+    actual[f.tipo] = f.total;
+    mapa.set(f.negocioId, actual);
+  }
+  return mapa;
 }

@@ -1,4 +1,4 @@
-import { pgTable, text, boolean, date, timestamp, integer, primaryKey, doublePrecision } from "drizzle-orm/pg-core";
+import { pgTable, text, boolean, date, timestamp, integer, primaryKey, doublePrecision, index } from "drizzle-orm/pg-core";
 
 export const negocios = pgTable("negocios", {
   id: text("id")
@@ -89,3 +89,21 @@ export const negocioAddons = pgTable(
   },
   (t) => [primaryKey({ columns: [t.negocioId, t.addonId] })]
 );
+
+export const eventos = pgTable(
+  "eventos",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    negocioId: text("negocio_id")
+      .notNull()
+      .references(() => negocios.id, { onDelete: "cascade" }),
+    tipo: text("tipo").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => [index("eventos_negocio_fecha_idx").on(t.negocioId, t.createdAt)]
+);
+
+export type EventoRow = typeof eventos.$inferSelect;
+export type NuevoEventoRow = typeof eventos.$inferInsert;
