@@ -40,7 +40,6 @@ export async function PATCH(
       instagram: datos.instagram,
       facebook: datos.facebook,
       horarios: datos.horarios,
-      menu: datos.menu,
       logoForma: datos.logoForma,
       colorAcento: datos.colorAcento,
       galeria_1_nombre: datos.galeria_1_nombre,

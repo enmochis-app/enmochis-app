@@ -1,11 +1,12 @@
 import type { Addon, Negocio } from "./negocios";
+import type { MenuItem } from "./menuItems";
 
 /** Espejo del catálogo inicial que se siembra en la base real (scripts/migrar-addons.mts). */
 const CATALOGO_ADDONS_DEMO = {
   whatsapp: { id: "demo-addon-whatsapp", clave: "whatsapp", nombre: "WhatsApp", descripcion: "Botón directo de WhatsApp en vez de solo llamada.", icono: "💬", precio: 100, comportamiento: "especial", activo: true, orden: 1 },
   mapas: { id: "demo-addon-mapas", clave: "mapas", nombre: "Mapas", descripcion: "Botón \"Cómo llegar\" con Google/Apple Maps.", icono: "📍", precio: 100, comportamiento: "especial", activo: true, orden: 2 },
   galeria: { id: "demo-addon-galeria", clave: "galeria", nombre: "Galería", descripcion: "Carrusel de fotos de producto en el minisitio.", icono: "🖼️", precio: 100, comportamiento: "especial", activo: true, orden: 3 },
-  pedidos: { id: "demo-addon-pedidos", clave: "pedidos", nombre: "Pedidos por WhatsApp", descripcion: "Permite a los clientes ordenar directo por WhatsApp.", icono: "🛍️", precio: 100, comportamiento: "chip", activo: true, orden: 4 },
+  pedidos: { id: "demo-addon-pedidos", clave: "pedidos", nombre: "Pedidos por WhatsApp", descripcion: "Permite a los clientes ordenar directo por WhatsApp.", icono: "🛍️", precio: 100, comportamiento: "especial", activo: true, orden: 4 },
   qrMesa: { id: "demo-addon-qr-mesa", clave: "qr_mesa", nombre: "Pide desde tu mesa (QR)", descripcion: "Código QR en mesa para pedir sin esperar mesero.", icono: "📱", precio: 100, comportamiento: "chip", activo: true, orden: 5 },
   lealtad: { id: "demo-addon-lealtad", clave: "lealtad", nombre: "Programa de lealtad", descripcion: "Programa de puntos o visitas para clientes frecuentes.", icono: "⭐", precio: 100, comportamiento: "chip", activo: true, orden: 6 },
   multiSucursal: { id: "demo-addon-multi-sucursal", clave: "multi_sucursal", nombre: "Varias sucursales", descripcion: "Indica que el negocio tiene más de una ubicación.", icono: "🏬", precio: 100, comportamiento: "chip", activo: true, orden: 7 },
@@ -48,21 +49,16 @@ export const SAMPLE_NEGOCIOS: Negocio[] = [
       { foto: "https://images.unsplash.com/photo-1625944230945-1b7dd3b949ab?auto=format&fit=crop&w=600&q=80", nombre: "Camarones a la diabla", precio: "$210", unidad: "orden" },
       { foto: "https://images.unsplash.com/photo-1585238342024-78d387f4a707?auto=format&fit=crop&w=600&q=80", nombre: "Pescado zarandeado", precio: "$240", unidad: "media orden" },
     ],
-    menu: `MARISCOS
-Aguachile verde — $180
-Ceviche de camarón — $150
-Tostadas de ceviche (3 pzas) — $95
-Camarones a la diabla — $210
-Pescado zarandeado (media orden) — $240
-Coctel de camarón chico — $120
-Chicharrón de camarón — $160
-Michelada El Guamúchil — $75`,
     addons: [
       CATALOGO_ADDONS_DEMO.whatsapp,
       CATALOGO_ADDONS_DEMO.mapas,
       CATALOGO_ADDONS_DEMO.galeria,
       CATALOGO_ADDONS_DEMO.pedidos,
     ],
+    lealtadModo: "visitas",
+    lealtadPorcentaje: 0,
+    lealtadMeta: 10,
+    tienePortal: false,
   },
   {
     id: "sample-rincon-del-cafe",
@@ -93,17 +89,6 @@ Michelada El Guamúchil — $75`,
       { foto: "https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=600&q=80", nombre: "Latte de vainilla", precio: "$58", unidad: "c/u" },
       { foto: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?auto=format&fit=crop&w=600&q=80", nombre: "Chai latte", precio: "$56", unidad: "c/u" },
     ],
-    menu: `CAFÉ
-Café de olla — $45
-Cappuccino — $55
-Latte de vainilla — $58
-Cold brew — $60
-Chai latte — $56
-
-REPOSTERÍA
-Pan dulce del día — $30
-Concha rellena de nata — $38
-Croissant de jamón y queso — $52`,
     addons: [
       CATALOGO_ADDONS_DEMO.whatsapp,
       CATALOGO_ADDONS_DEMO.mapas,
@@ -111,6 +96,10 @@ Croissant de jamón y queso — $52`,
       CATALOGO_ADDONS_DEMO.qrMesa,
       CATALOGO_ADDONS_DEMO.lealtad,
     ],
+    lealtadModo: "visitas",
+    lealtadPorcentaje: 0,
+    lealtadMeta: 8,
+    tienePortal: false,
   },
   {
     id: "sample-tacos-el-guero",
@@ -141,23 +130,16 @@ Croissant de jamón y queso — $52`,
       { foto: "https://images.unsplash.com/photo-1615870216519-2f9fa575fa5c?auto=format&fit=crop&w=600&q=80", nombre: "Quesotaco", precio: "$25", unidad: "c/u" },
       { foto: "https://images.unsplash.com/photo-1552332386-f8dd00dc2f85?auto=format&fit=crop&w=600&q=80", nombre: "Vampiro", precio: "$30", unidad: "c/u" },
     ],
-    menu: `TACOS
-Taco de asada — $22
-Taco de adobada — $20
-Taco de camarón — $28
-Quesotaco — $25
-Vampiro — $30
-
-ANTOJITOS
-Orden de papas El Güero — $65
-Dorilocos chicos — $45
-Agua fresca de horchata — $25`,
     addons: [
       CATALOGO_ADDONS_DEMO.whatsapp,
       CATALOGO_ADDONS_DEMO.mapas,
       CATALOGO_ADDONS_DEMO.pedidos,
       CATALOGO_ADDONS_DEMO.multiSucursal,
     ],
+    lealtadModo: "visitas",
+    lealtadPorcentaje: 0,
+    lealtadMeta: 10,
+    tienePortal: false,
   },
   {
     id: "sample-dulce-pecado",
@@ -188,21 +170,69 @@ Agua fresca de horchata — $25`,
       { foto: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80", nombre: "Concha grande", precio: "$28", unidad: "c/u" },
       { foto: "https://images.unsplash.com/photo-1571115177098-24ec42ed204d?auto=format&fit=crop&w=600&q=80", nombre: "Pay de limón", precio: "$50", unidad: "rebanada" },
     ],
-    menu: `PASTELES
-Pastel de tres leches (rebanada) — $55
-Cheesecake de zarzamora — $60
-Pay de limón (rebanada) — $50
-
-PAN DULCE
-Concha grande — $28
-Cuernito relleno de crema — $32
-Brownie de chocolate — $38
-Galletas de avena (2 pzas) — $25
-Pastelillo de fresa — $35`,
     addons: [
       CATALOGO_ADDONS_DEMO.whatsapp,
       CATALOGO_ADDONS_DEMO.mapas,
       CATALOGO_ADDONS_DEMO.galeria,
     ],
+    lealtadModo: "visitas",
+    lealtadPorcentaje: 0,
+    lealtadMeta: 10,
+    tienePortal: false,
   },
 ];
+
+function itemsDemo(items: { categoria: string; nombre: string; precio: string; ordenable?: boolean }[]): MenuItem[] {
+  return items.map((it, i) => ({
+    id: `demo-item-${i}`,
+    categoria: it.categoria,
+    nombre: it.nombre,
+    precio: it.precio,
+    ordenable: it.ordenable ?? false,
+    orden: i,
+  }));
+}
+
+/** Menú de respaldo por negocio de ejemplo, usado si la base de datos no responde. */
+export const SAMPLE_MENU_ITEMS: Record<string, MenuItem[]> = {
+  "sample-mariscos-el-guamuchil": itemsDemo([
+    { categoria: "MARISCOS", nombre: "Aguachile verde", precio: "180", ordenable: true },
+    { categoria: "MARISCOS", nombre: "Ceviche de camarón", precio: "150", ordenable: true },
+    { categoria: "MARISCOS", nombre: "Tostadas de ceviche (3 pzas)", precio: "95" },
+    { categoria: "MARISCOS", nombre: "Camarones a la diabla", precio: "210", ordenable: true },
+    { categoria: "MARISCOS", nombre: "Pescado zarandeado (media orden)", precio: "240" },
+    { categoria: "MARISCOS", nombre: "Coctel de camarón chico", precio: "120" },
+    { categoria: "MARISCOS", nombre: "Chicharrón de camarón", precio: "160" },
+    { categoria: "MARISCOS", nombre: "Michelada El Guamúchil", precio: "75" },
+  ]),
+  "sample-rincon-del-cafe": itemsDemo([
+    { categoria: "CAFÉ", nombre: "Café de olla", precio: "45", ordenable: true },
+    { categoria: "CAFÉ", nombre: "Cappuccino", precio: "55", ordenable: true },
+    { categoria: "CAFÉ", nombre: "Latte de vainilla", precio: "58", ordenable: true },
+    { categoria: "CAFÉ", nombre: "Cold brew", precio: "60" },
+    { categoria: "CAFÉ", nombre: "Chai latte", precio: "56" },
+    { categoria: "REPOSTERÍA", nombre: "Pan dulce del día", precio: "30" },
+    { categoria: "REPOSTERÍA", nombre: "Concha rellena de nata", precio: "38" },
+    { categoria: "REPOSTERÍA", nombre: "Croissant de jamón y queso", precio: "52" },
+  ]),
+  "sample-tacos-el-guero": itemsDemo([
+    { categoria: "TACOS", nombre: "Taco de asada", precio: "22", ordenable: true },
+    { categoria: "TACOS", nombre: "Taco de adobada", precio: "20", ordenable: true },
+    { categoria: "TACOS", nombre: "Taco de camarón", precio: "28" },
+    { categoria: "TACOS", nombre: "Quesotaco", precio: "25", ordenable: true },
+    { categoria: "TACOS", nombre: "Vampiro", precio: "30" },
+    { categoria: "ANTOJITOS", nombre: "Orden de papas El Güero", precio: "65" },
+    { categoria: "ANTOJITOS", nombre: "Dorilocos chicos", precio: "45" },
+    { categoria: "ANTOJITOS", nombre: "Agua fresca de horchata", precio: "25" },
+  ]),
+  "sample-dulce-pecado": itemsDemo([
+    { categoria: "PASTELES", nombre: "Pastel de tres leches (rebanada)", precio: "55" },
+    { categoria: "PASTELES", nombre: "Cheesecake de zarzamora", precio: "60", ordenable: true },
+    { categoria: "PASTELES", nombre: "Pay de limón (rebanada)", precio: "50" },
+    { categoria: "PAN DULCE", nombre: "Concha grande", precio: "28", ordenable: true },
+    { categoria: "PAN DULCE", nombre: "Cuernito relleno de crema", precio: "32" },
+    { categoria: "PAN DULCE", nombre: "Brownie de chocolate", precio: "38", ordenable: true },
+    { categoria: "PAN DULCE", nombre: "Galletas de avena (2 pzas)", precio: "25" },
+    { categoria: "PAN DULCE", nombre: "Pastelillo de fresa", precio: "35" },
+  ]),
+};

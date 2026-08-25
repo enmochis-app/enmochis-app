@@ -48,7 +48,12 @@ export const negocios = pgTable("negocios", {
   galeria3Unidad: text("galeria_3_unidad"),
   galeria3Descripcion: text("galeria_3_descripcion"),
 
-  menu: text("menu").notNull().default(""),
+  portalPasswordHash: text("portal_password_hash"),
+  portalPasswordSalt: text("portal_password_salt"),
+
+  lealtadModo: text("lealtad_modo"),
+  lealtadPorcentaje: integer("lealtad_porcentaje"),
+  lealtadMeta: integer("lealtad_meta"),
 
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
@@ -107,3 +112,45 @@ export const eventos = pgTable(
 
 export type EventoRow = typeof eventos.$inferSelect;
 export type NuevoEventoRow = typeof eventos.$inferInsert;
+
+export const menuItems = pgTable(
+  "menu_items",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    negocioId: text("negocio_id")
+      .notNull()
+      .references(() => negocios.id, { onDelete: "cascade" }),
+    categoria: text("categoria").notNull().default("Menú"),
+    nombre: text("nombre").notNull(),
+    precio: text("precio").notNull(),
+    ordenable: boolean("ordenable").notNull().default(false),
+    orden: integer("orden").notNull().default(0),
+  },
+  (t) => [index("menu_items_negocio_idx").on(t.negocioId)]
+);
+
+export type MenuItemRow = typeof menuItems.$inferSelect;
+export type NuevoMenuItemRow = typeof menuItems.$inferInsert;
+
+export const lealtadRegistros = pgTable(
+  "lealtad_registros",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    negocioId: text("negocio_id")
+      .notNull()
+      .references(() => negocios.id, { onDelete: "cascade" }),
+    codigo: text("codigo").notNull(),
+    tipo: text("tipo").notNull(),
+    unidades: integer("unidades").notNull(),
+    monto: integer("monto"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => [index("lealtad_negocio_codigo_idx").on(t.negocioId, t.codigo)]
+);
+
+export type LealtadRegistroRow = typeof lealtadRegistros.$inferSelect;
+export type NuevoLealtadRegistroRow = typeof lealtadRegistros.$inferInsert;

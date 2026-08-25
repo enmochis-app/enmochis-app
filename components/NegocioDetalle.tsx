@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import type { Negocio } from "@/lib/negocios";
-import { parsearMenu } from "@/lib/negocios";
+import { agruparPorCategoria, type MenuItem } from "@/lib/menuItems";
 
 function telHref(numero: string) {
   return `tel:${numero.replace(/[^\d+]/g, "")}`;
@@ -71,9 +72,13 @@ function CarruselGaleria({ galeria }: { galeria: Negocio["galeria"] }) {
   );
 }
 
-export default function NegocioDetalle({ negocio }: { negocio: Negocio }) {
+export default function NegocioDetalle({ negocio, menuItems }: { negocio: Negocio; menuItems: MenuItem[] }) {
   const [pantalla, setPantalla] = useState<"inicio" | "menu">("inicio");
   const [appleRecomendado, setAppleRecomendado] = useState(false);
+  const [modoPedido, setModoPedido] = useState(false);
+  const [carrito, setCarrito] = useState<Record<string, number>>({});
+  const [carritoAbierto, setCarritoAbierto] = useState(false);
+  const [notaPedido, setNotaPedido] = useState("");
   const scrimRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -114,8 +119,46 @@ export default function NegocioDetalle({ negocio }: { negocio: Negocio }) {
 
   const addonWhatsapp = tieneAddon("whatsapp");
   const mostrarGaleria = tieneAddon("galeria") && negocio.galeria.some((g) => g.foto);
-  const categorias = parsearMenu(negocio.menu);
+  const categorias = agruparPorCategoria(menuItems);
   const servicios = negocio.addons.filter((a) => a.comportamiento === "chip");
+  const tienePedidos = tieneAddon("pedidos") && menuItems.some((it) => it.ordenable);
+  const tieneLealtad = tieneAddon("lealtad");
+
+  function agregarAlCarrito(item: MenuItem) {
+    setCarrito((prev) => ({ ...prev, [item.id]: (prev[item.id] ?? 0) + 1 }));
+  }
+  function quitarDelCarrito(item: MenuItem) {
+    setCarrito((prev) => {
+      const restante = (prev[item.id] ?? 0) - 1;
+      const nuevo = { ...prev };
+      if (restante <= 0) delete nuevo[item.id];
+      else nuevo[item.id] = restante;
+      return nuevo;
+    });
+  }
+
+  const lineasCarrito = Object.entries(carrito)
+    .map(([itemId, cantidad]) => {
+      const item = menuItems.find((m) => m.id === itemId);
+      if (!item) return null;
+      const precioUnitario = parseFloat(item.precio) || 0;
+      return { item, cantidad, subtotal: precioUnitario * cantidad };
+    })
+    .filter((l): l is { item: MenuItem; cantidad: number; subtotal: number } => l !== null);
+
+  const totalCarrito = lineasCarrito.reduce((s, l) => s + l.subtotal, 0);
+  const cantidadCarrito = lineasCarrito.reduce((s, l) => s + l.cantidad, 0);
+
+  function enviarPedido() {
+    if (!negocio.whatsapp || lineasCarrito.length === 0) return;
+    registrarEvento(negocio.id, "pedido");
+    const lineas = lineasCarrito.map((l) => `• ${l.cantidad}x ${l.item.nombre} — $${l.subtotal}`).join("\n");
+    const base = negocio.mensajeWhatsapp?.trim() || "Hola 👋, quiero hacer este pedido:";
+    let mensaje = `${base}\n\n${lineas}\n\nTotal: $${totalCarrito}`;
+    if (notaPedido.trim()) mensaje += `\n\nNota: ${notaPedido.trim()}`;
+    mensaje += `\n\nVengo de ${negocio.slug}.enmochis.app 🙌`;
+    window.open(`https://wa.me/${negocio.whatsapp.replace(/[^\d]/g, "")}?text=${encodeURIComponent(mensaje)}`, "_blank");
+  }
 
   return (
     <div className="mini-wrap" style={{ "--accent": accent } as React.CSSProperties}>
@@ -155,6 +198,12 @@ export default function NegocioDetalle({ negocio }: { negocio: Negocio }) {
               </span>
             ))}
           </div>
+        )}
+
+        {tieneLealtad && (
+          <Link href={`/negocio/${negocio.slug}/tarjeta`} className="mini-lealtad-banner">
+            ⭐ Obtén tu tarjeta de puntos
+          </Link>
         )}
 
         {tieneMapa && (
@@ -230,15 +279,48 @@ export default function NegocioDetalle({ negocio }: { negocio: Negocio }) {
 
         {mostrarGaleria && <CarruselGaleria galeria={negocio.galeria} />}
 
+        {tienePedidos && (
+          <div className="pedido-toggle-wrap">
+            <button
+              type="button"
+              className={`btn-pedido-toggle${modoPedido ? " activo" : ""}`}
+              onClick={() => setModoPedido((v) => !v)}
+            >
+              🛒 {modoPedido ? "Modo pedido activado" : "Ordenar en línea"}
+            </button>
+          </div>
+        )}
+
         <div className="menu-section">
           <div className="menu-main-title">THE MENU</div>
           {categorias.map((cat, i) => (
             <div className="menu-cat-block" key={cat.categoria + i}>
               <div className="menu-cat-name">{cat.categoria}</div>
-              {cat.items.map((item, j) => (
-                <div className="menu-line" key={item.nombre + j}>
+              {cat.items.map((item) => (
+                <div className="menu-line" key={item.id}>
                   <span className="mname">{item.nombre}</span>
-                  <span className="mprice">${item.precio}</span>
+                  <div className="mprice-group">
+                    <span className="mprice">${item.precio}</span>
+                    {modoPedido && item.ordenable && (
+                      <div className="item-stepper">
+                        {carrito[item.id] ? (
+                          <>
+                            <button type="button" onClick={() => quitarDelCarrito(item)}>
+                              −
+                            </button>
+                            <span>{carrito[item.id]}</span>
+                            <button type="button" onClick={() => agregarAlCarrito(item)}>
+                              +
+                            </button>
+                          </>
+                        ) : (
+                          <button type="button" className="btn-agregar" onClick={() => agregarAlCarrito(item)}>
+                            +
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -256,6 +338,63 @@ export default function NegocioDetalle({ negocio }: { negocio: Negocio }) {
         )}
         <div style={{ height: 40 }} />
       </div>
+
+      {modoPedido && cantidadCarrito > 0 && (
+        <button
+          type="button"
+          className="btn-carrito-flotante"
+          onClick={() => setCarritoAbierto(true)}
+          style={{ background: accent, color: "#0A0A0A" }}
+        >
+          <span>
+            🛒 {cantidadCarrito} producto{cantidadCarrito === 1 ? "" : "s"}
+          </span>
+          <span>${totalCarrito}</span>
+        </button>
+      )}
+
+      {carritoAbierto && (
+        <div className="overlay-carrito" onClick={() => setCarritoAbierto(false)}>
+          <div className="hoja-carrito" onClick={(e) => e.stopPropagation()}>
+            <div className="hoja-carrito-header">
+              <h3>Tu pedido</h3>
+              <button type="button" onClick={() => setCarritoAbierto(false)}>
+                ✕
+              </button>
+            </div>
+            <div className="hoja-carrito-lineas">
+              {lineasCarrito.map((l) => (
+                <div className="linea-carrito" key={l.item.id}>
+                  <div className="linea-nombre">
+                    {l.cantidad}x {l.item.nombre}
+                  </div>
+                  <div className="linea-derecha">
+                    <span>${l.subtotal}</span>
+                    <button type="button" onClick={() => quitarDelCarrito(l.item)}>
+                      Quitar
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <textarea
+              className="nota-pedido"
+              placeholder="Nota para tu pedido (opcional)"
+              value={notaPedido}
+              onChange={(e) => setNotaPedido(e.target.value)}
+            />
+            <div className="hoja-carrito-total">Total: ${totalCarrito}</div>
+            <button
+              type="button"
+              className="btn-enviar-pedido"
+              onClick={enviarPedido}
+              style={{ background: accent, color: "#0A0A0A" }}
+            >
+              Enviar pedido por WhatsApp
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ===== BARRA INFERIOR ===== */}
       <div className="sticky-bar">

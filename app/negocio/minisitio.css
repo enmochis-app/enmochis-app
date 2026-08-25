@@ -215,3 +215,110 @@ body {
 
 .screen { display: none; }
 .screen.activo { display: block; }
+
+/* ===== Addon: Lealtad (banner en el landing) ===== */
+.mini-lealtad-banner {
+  display: block; margin: 18px 20px 0; padding: 14px 16px; text-align: center;
+  background: rgba(255,255,255,0.06); border: 1.5px solid var(--accent, #C8FF3D);
+  border-radius: 12px; color: var(--accent, #C8FF3D); text-decoration: none;
+  font-family: 'Space Grotesk'; font-weight: 700; font-size: 13px;
+}
+
+/* ===== Addon: Pedidos por WhatsApp (carrito) ===== */
+.pedido-toggle-wrap { padding: 0 20px 18px; }
+.btn-pedido-toggle {
+  width: 100%; background: #161616; border: 1.5px solid #2a2a2a; color: #ddd;
+  font-family: 'Space Grotesk'; font-weight: 700; font-size: 13px;
+  padding: 13px; border-radius: 100px; cursor: pointer;
+}
+.btn-pedido-toggle.activo { background: var(--accent, #C8FF3D); color: #0A0A0A; border-color: var(--accent, #C8FF3D); }
+
+.mprice-group { display: flex; align-items: center; gap: 10px; }
+.item-stepper { display: flex; align-items: center; gap: 8px; }
+.item-stepper button {
+  width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--accent, #C8FF3D);
+  background: transparent; color: var(--accent, #C8FF3D); font-size: 14px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1;
+}
+.item-stepper span { font-family: 'Space Grotesk'; font-weight: 700; font-size: 12px; min-width: 14px; text-align: center; }
+.btn-agregar { width: 24px; height: 24px; border-radius: 50%; }
+
+.btn-carrito-flotante {
+  position: fixed; left: 20px; right: 20px; bottom: 90px; max-width: 440px; margin: 0 auto;
+  z-index: 22; display: flex; align-items: center; justify-content: space-between;
+  border: none; border-radius: 12px; padding: 15px 18px; cursor: pointer;
+  font-family: 'Space Grotesk'; font-weight: 700; font-size: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.overlay-carrito {
+  position: fixed; inset: 0; z-index: 30; background: rgba(0,0,0,0.6);
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.hoja-carrito {
+  width: 100%; max-width: 480px; max-height: 80vh; overflow-y: auto;
+  background: #111; border-radius: 20px 20px 0 0; padding: 20px;
+}
+.hoja-carrito-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.hoja-carrito-header h3 { font-family: 'Anton'; font-size: 20px; text-transform: uppercase; }
+.hoja-carrito-header button { background: none; border: none; color: #999; font-size: 18px; cursor: pointer; }
+.linea-carrito {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0; border-bottom: 1px dotted #262626; font-size: 13px;
+}
+.linea-nombre { color: #EEE; }
+.linea-derecha { display: flex; align-items: center; gap: 12px; }
+.linea-derecha button { background: none; border: none; color: #888; font-size: 11px; text-decoration: underline; cursor: pointer; }
+.nota-pedido {
+  width: 100%; margin-top: 14px; background: #1C1C1C; border: 1.5px solid #2C2C2C; border-radius: 10px;
+  color: #fff; font-family: 'Manrope'; font-size: 13px; padding: 12px; resize: none; min-height: 60px;
+}
+.hoja-carrito-total { font-family: 'Space Grotesk'; font-weight: 700; font-size: 16px; margin-top: 14px; text-align: right; }
+.btn-enviar-pedido {
+  width: 100%; margin-top: 14px; border: none; border-radius: 100px; padding: 16px;
+  font-family: 'Space Grotesk'; font-weight: 700; font-size: 14px; cursor: pointer;
+}
+
+/* ===== Tarjeta de lealtad (cliente) ===== */
+.tl-header { text-align: center; margin-bottom: 20px; }
+.tl-eyebrow {
+  font-family: 'Space Grotesk'; font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--accent, #C8FF3D); margin-bottom: 4px;
+}
+.tl-titulo { font-family: 'Anton'; font-size: 24px; text-transform: uppercase; }
+.tarjeta-lealtad {
+  background: #111; border: 1.5px solid #262626; border-radius: 16px; overflow: hidden;
+  max-width: 340px; margin: 0 auto;
+}
+.tl-foto {
+  height: 140px; background: #1c1c1c; background-size: cover; background-position: center;
+  display: flex; align-items: flex-end; padding: 14px; position: relative;
+}
+.tl-foto::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.75) 100%); }
+.tl-marca { position: relative; z-index: 1; display: flex; align-items: center; gap: 10px; }
+.tl-logo {
+  width: 34px; height: 34px; border-radius: 50%; background: var(--accent, #C8FF3D); color: #0A0A0A;
+  display: flex; align-items: center; justify-content: center; font-family: 'Space Grotesk'; font-weight: 700; font-size: 13px;
+}
+.tl-marca span { font-family: 'Space Grotesk'; font-weight: 700; font-size: 13px; }
+.tl-cuerpo { padding: 20px; text-align: center; }
+.tl-qr { width: 140px; height: 140px; border-radius: 8px; }
+.tl-codigo { font-family: 'Space Grotesk'; font-weight: 700; font-size: 20px; letter-spacing: 0.1em; margin-top: 10px; color: var(--accent, #C8FF3D); }
+.tl-progreso { font-family: 'Space Grotesk'; font-size: 12px; color: #ccc; margin-top: 8px; }
+.tl-leyenda { font-size: 11px; color: #888; line-height: 1.5; margin-top: 14px; }
+.tl-nota { font-size: 11.5px; color: #777; text-align: center; margin: 16px auto 0; max-width: 320px; }
+.tl-descargar { display: block; width: 100%; max-width: 340px; margin: 16px auto 0; border: none; }
+.tl-confirmacion { text-align: center; font-size: 12px; color: #14b866; margin-top: 8px; }
+.tl-link {
+  display: block; margin: 18px auto 0; background: none; border: none; color: #888;
+  font-family: 'Space Grotesk'; font-size: 12px; text-decoration: underline; cursor: pointer;
+}
+.tl-recuperar { display: flex; gap: 8px; max-width: 320px; margin: 14px auto 0; }
+.tl-recuperar input {
+  flex: 1; background: #1C1C1C; border: 1.5px solid #2C2C2C; border-radius: 8px; color: #fff;
+  font-family: 'Space Grotesk'; padding: 10px; text-transform: uppercase;
+}
+.tl-recuperar button {
+  background: var(--accent, #C8FF3D); color: #0A0A0A; border: none; border-radius: 8px;
+  padding: 10px 16px; font-family: 'Space Grotesk'; font-weight: 700; cursor: pointer;
+}

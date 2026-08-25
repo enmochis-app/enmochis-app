@@ -4,7 +4,9 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { CATEGORIAS, TIPOS_EVENTO, type Negocio, type Estado, type Categoria, type LogoForma, type Addon } from "@/lib/negocios";
+import type { MenuItemInput } from "@/lib/menuItems";
 import ImageUploadField from "@/components/ImageUploadField";
+import MenuEditor from "@/components/MenuEditor";
 
 function hoyMasDias(dias: number): string {
   const d = new Date();
@@ -26,13 +28,6 @@ const FORMAS_LOGO: { value: LogoForma; label: string }[] = [
   { value: "cuadrada", label: "Cuadrada" },
   { value: "rectangular", label: "Rectangular" },
 ];
-
-const MENU_PLACEHOLDER = `PIEZAS
-Ala — $100
-Filete — $170
-
-COMPLEMENTOS
-Ensalada — $75`;
 
 export default function NegocioForm({
   negocio,
@@ -69,7 +64,13 @@ export default function NegocioForm({
   const [instagram, setInstagram] = useState(negocio?.instagram ?? "");
   const [facebook, setFacebook] = useState(negocio?.facebook ?? "");
   const [horarios, setHorarios] = useState(negocio?.horarios ?? "");
-  const [menu, setMenu] = useState(negocio?.menu ?? "");
+
+  const [lealtadModo, setLealtadModo] = useState<"visitas" | "puntos">(negocio?.lealtadModo ?? "visitas");
+  const [lealtadPorcentaje, setLealtadPorcentaje] = useState(negocio ? String(negocio.lealtadPorcentaje) : "0");
+  const [lealtadMeta, setLealtadMeta] = useState(negocio ? String(negocio.lealtadMeta) : "10");
+  const [portalPassword, setPortalPassword] = useState("");
+  const [portalGuardando, setPortalGuardando] = useState(false);
+  const [portalOk, setPortalOk] = useState(false);
 
   const [logoForma, setLogoForma] = useState<LogoForma>(negocio?.logoForma ?? "circular");
   const [colorAcento, setColorAcento] = useState(negocio?.colorAcento ?? "#C8FF3D");
@@ -120,6 +121,18 @@ export default function NegocioForm({
     cargarMetricas();
   }, [cargarMetricas]);
 
+  const [menuItems, setMenuItems] = useState<MenuItemInput[]>([]);
+  const cargarMenu = useCallback(async () => {
+    if (!negocio) return;
+    const res = await fetch(`/api/admin/negocios/${negocio.id}/menu`);
+    const body = await res.json();
+    setMenuItems(body.items ?? []);
+  }, [negocio]);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- carga inicial de datos al montar
+    cargarMenu();
+  }, [cargarMenu]);
+
   async function crear(e: React.FormEvent) {
     e.preventDefault();
     setGuardando(true);
@@ -166,7 +179,9 @@ export default function NegocioForm({
           instagram,
           facebook,
           horarios,
-          menu,
+          lealtadModo,
+          lealtadPorcentaje: Number(lealtadPorcentaje) || 0,
+          lealtadMeta: Number(lealtadMeta) || 10,
           logoForma,
           colorAcento,
           galeria_1_nombre: galeria1Nombre,
@@ -186,12 +201,39 @@ export default function NegocioForm({
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error || "No se pudo guardar.");
+
+      const resMenu = await fetch(`/api/admin/negocios/${negocio.id}/menu`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: menuItems }),
+      });
+      if (!resMenu.ok) throw new Error("No se pudo guardar el menú.");
+
       setOk(true);
       onRecargar?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo guardar.");
     } finally {
       setGuardando(false);
+    }
+  }
+
+  async function guardarPasswordPortal() {
+    if (!negocio || !portalPassword.trim()) return;
+    setPortalGuardando(true);
+    setPortalOk(false);
+    try {
+      const res = await fetch(`/api/admin/negocios/${negocio.id}/portal-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: portalPassword }),
+      });
+      if (!res.ok) throw new Error("No se pudo guardar la contraseña.");
+      setPortalPassword("");
+      setPortalOk(true);
+      onRecargar?.();
+    } finally {
+      setPortalGuardando(false);
     }
   }
 
@@ -453,17 +495,11 @@ export default function NegocioForm({
 
       <div className="admin-section">
         <h2>Menú</h2>
-        <div className="admin-field">
-          <textarea
-            value={menu}
-            onChange={(e) => setMenu(e.target.value)}
-            placeholder={MENU_PLACEHOLDER}
-            style={{ minHeight: 220, fontFamily: "monospace" }}
-          />
-          <div style={{ fontSize: 11, color: "#666", marginTop: 6 }}>
-            Formato: CATEGORÍA en su propia línea, luego &quot;Producto — $Precio&quot; por línea.
-          </div>
+        <div className="admin-small" style={{ fontSize: 12, color: "#666", marginBottom: 10 }}>
+          Marca &quot;Se puede pedir por WhatsApp&quot; en los productos que quieras que aparezcan
+          en el carrito de pedidos del minisitio (addon &quot;Pedidos&quot;).
         </div>
+        <MenuEditor items={menuItems} onChange={setMenuItems} />
       </div>
 
       <div className="admin-section">
@@ -529,6 +565,63 @@ export default function NegocioForm({
               </div>
             ))}
           </div>
+        )}
+      </div>
+
+      <div className="admin-section">
+        <h2>Lealtad</h2>
+        <div className="admin-small" style={{ fontSize: 12, color: "#666", marginBottom: 10 }}>
+          Solo aplica si el addon &quot;Programa de lealtad&quot; está activo. No se guarda ningún
+          dato personal del cliente — solo un código anónimo y su contador de visitas/puntos.
+        </div>
+        <div className="admin-grid-2">
+          <div className="admin-field">
+            <label>Modo</label>
+            <select value={lealtadModo} onChange={(e) => setLealtadModo(e.target.value as "visitas" | "puntos")}>
+              <option value="visitas">Por visitas</option>
+              <option value="puntos">Por puntos (% de la compra)</option>
+            </select>
+          </div>
+          <div className="admin-field">
+            <label>Meta para canjear</label>
+            <input value={lealtadMeta} onChange={(e) => setLealtadMeta(e.target.value)} inputMode="numeric" />
+          </div>
+        </div>
+        {lealtadModo === "puntos" && (
+          <div className="admin-field">
+            <label>Porcentaje de la compra en puntos</label>
+            <input value={lealtadPorcentaje} onChange={(e) => setLealtadPorcentaje(e.target.value)} inputMode="numeric" placeholder="Ej. 6" />
+          </div>
+        )}
+      </div>
+
+      <div className="admin-section">
+        <h2>Acceso al portal</h2>
+        <div className="admin-small" style={{ fontSize: 12, color: "#666", marginBottom: 10 }}>
+          El negocio entra en <code>enmochis.app/portal/login</code> con su usuario (
+          <strong>{negocio.slug}</strong>) y la contraseña que le asignes aquí. Desde ahí puede
+          editar su menú y manejar su programa de lealtad.
+        </div>
+        <div className="admin-field">
+          <label>{negocio.tienePortal ? "Nueva contraseña (opcional)" : "Asignar contraseña"}</label>
+          <input
+            type="text"
+            value={portalPassword}
+            onChange={(e) => setPortalPassword(e.target.value)}
+            placeholder={negocio.tienePortal ? "Dejar en blanco para no cambiarla" : "Contraseña para el portal"}
+          />
+        </div>
+        <button
+          type="button"
+          className="admin-btn admin-btn-secondary"
+          onClick={guardarPasswordPortal}
+          disabled={portalGuardando || !portalPassword.trim()}
+        >
+          {portalGuardando ? "Guardando..." : "Guardar contraseña"}
+        </button>
+        {portalOk && <span style={{ marginLeft: 10, color: "#14532d" }}>Guardada ✓</span>}
+        {negocio.tienePortal && (
+          <div style={{ fontSize: 12, color: "#14532d", marginTop: 8 }}>Este negocio ya tiene acceso al portal.</div>
         )}
       </div>
 

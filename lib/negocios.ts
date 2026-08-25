@@ -3,6 +3,7 @@ import { and, eq, gte, inArray, sql } from "drizzle-orm";
 import { db } from "./db";
 import { negocios, addons, negocioAddons, eventos, type NegocioRow } from "./db/schema";
 import { SAMPLE_NEGOCIOS } from "./sample-data";
+import { hashearPassword, passwordValido } from "./portalAuth";
 
 export type Categoria = "Restaurantes" | "Cafeterías" | "Snacks" | "Panaderías";
 
@@ -30,38 +31,6 @@ export type Estado =
   | "archivado";
 
 export type LogoForma = "circular" | "cuadrada" | "rectangular";
-
-export type ItemMenu = { nombre: string; precio: string };
-export type CategoriaMenu = { categoria: string; items: ItemMenu[] };
-
-/** Convierte el texto libre del menú ("CATEGORÍA" en su línea + "Producto — $Precio") en categorías. */
-export function parsearMenu(texto: string): CategoriaMenu[] {
-  const lineas = (texto ?? "").split("\n").map((l) => l.trim());
-  const precioRe = /^(.+?)\s*[—-]\s*\$?\s*([\d,.]+)\s*$/;
-  const categorias: CategoriaMenu[] = [];
-  let actual: CategoriaMenu | null = null;
-
-  for (let i = 0; i < lineas.length; i++) {
-    const linea = lineas[i];
-    if (!linea) continue;
-    const m = linea.match(precioRe);
-    if (m) {
-      if (!actual) {
-        actual = { categoria: "Menú", items: [] };
-        categorias.push(actual);
-      }
-      actual.items.push({ nombre: m[1].trim(), precio: m[2].trim() });
-    } else {
-      const siguiente = lineas.slice(i + 1).find((l) => l);
-      const siguienteEsItem = siguiente ? precioRe.test(siguiente) : false;
-      if (siguienteEsItem || linea === linea.toUpperCase()) {
-        actual = { categoria: linea, items: [] };
-        categorias.push(actual);
-      }
-    }
-  }
-  return categorias;
-}
 
 export type ItemGaleria = { foto?: string; nombre?: string; precio?: string; unidad?: string; descripcion?: string };
 
@@ -104,8 +73,11 @@ export type Negocio = {
   facebook?: string;
   horarios?: string;
   galeria: ItemGaleria[];
-  menu: string;
   addons: Addon[];
+  lealtadModo: "visitas" | "puntos";
+  lealtadPorcentaje: number;
+  lealtadMeta: number;
+  tienePortal: boolean;
 };
 
 function u(v: string | null | undefined): string | undefined {
@@ -144,8 +116,11 @@ function mapNegocio(row: NegocioRow, addonsDelNegocio: Addon[]): Negocio {
     facebook: u(row.facebook),
     horarios: u(row.horarios),
     galeria,
-    menu: row.menu ?? "",
     addons: addonsDelNegocio,
+    lealtadModo: (row.lealtadModo as "visitas" | "puntos" | null) ?? "visitas",
+    lealtadPorcentaje: row.lealtadPorcentaje ?? 0,
+    lealtadMeta: row.lealtadMeta ?? 10,
+    tienePortal: !!row.portalPasswordHash,
   };
 }
 
@@ -341,7 +316,9 @@ export type DatosNegocio = {
   galeria_3_precio?: string;
   galeria_3_unidad?: string;
   galeria_3_descripcion?: string;
-  menu?: string;
+  lealtadModo?: "visitas" | "puntos";
+  lealtadPorcentaje?: number;
+  lealtadMeta?: number;
   /** Claves del catálogo de addons (ver getCatalogoAddons) que debe tener activos este negocio. */
   addons?: string[];
 };
@@ -378,7 +355,9 @@ function filaParaGuardar(datos: Partial<DatosNegocio>) {
   if (datos.galeria_3_precio !== undefined) fila.galeria3Precio = datos.galeria_3_precio;
   if (datos.galeria_3_unidad !== undefined) fila.galeria3Unidad = datos.galeria_3_unidad;
   if (datos.galeria_3_descripcion !== undefined) fila.galeria3Descripcion = datos.galeria_3_descripcion;
-  if (datos.menu !== undefined) fila.menu = datos.menu;
+  if (datos.lealtadModo !== undefined) fila.lealtadModo = datos.lealtadModo;
+  if (datos.lealtadPorcentaje !== undefined) fila.lealtadPorcentaje = datos.lealtadPorcentaje;
+  if (datos.lealtadMeta !== undefined) fila.lealtadMeta = datos.lealtadMeta;
   return fila;
 }
 
@@ -546,6 +525,7 @@ export const TIPOS_EVENTO = [
   { tipo: "llamar", label: "Llamar ahora" },
   { tipo: "whatsapp", label: "WhatsApp" },
   { tipo: "mapa", label: "Cómo llegar / Mapa" },
+  { tipo: "pedido", label: "Pedidos enviados" },
 ] as const;
 
 export type TipoEvento = (typeof TIPOS_EVENTO)[number]["tipo"];
@@ -588,4 +568,29 @@ export async function getMetricasTodos(desde: Date): Promise<Map<string, Record<
     mapa.set(f.negocioId, actual);
   }
   return mapa;
+}
+
+// --- Portal del negocio ---
+
+export async function asignarPasswordPortal(negocioId: string, password: string): Promise<void> {
+  const { hash, sal } = await hashearPassword(password);
+  await db()
+    .update(negocios)
+    .set({ portalPasswordHash: hash, portalPasswordSalt: sal, updatedAt: new Date() })
+    .where(eq(negocios.id, negocioId));
+}
+
+/** Busca un negocio por slug sin filtrar por estado — lo usa el login del portal. */
+export async function buscarNegocioPorSlug(slug: string): Promise<Negocio | null> {
+  const filas = await db().select().from(negocios).where(eq(negocios.slug, slug)).limit(1);
+  const resultado = await mapNegociosConAddons(filas);
+  return resultado[0] ?? null;
+}
+
+export async function verificarLoginPortal(slug: string, password: string): Promise<string | null> {
+  const filas = await db().select().from(negocios).where(eq(negocios.slug, slug)).limit(1);
+  const fila = filas[0];
+  if (!fila || !fila.portalPasswordHash || !fila.portalPasswordSalt) return null;
+  const ok = await passwordValido(password, fila.portalPasswordHash, fila.portalPasswordSalt);
+  return ok ? fila.id : null;
 }

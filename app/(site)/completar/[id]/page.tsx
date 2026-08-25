@@ -2,14 +2,9 @@
 
 import { use, useCallback, useEffect, useState } from "react";
 import type { Negocio, LogoForma } from "@/lib/negocios";
+import type { MenuItemInput } from "@/lib/menuItems";
 import ImageUploadField from "@/components/ImageUploadField";
-
-const MENU_PLACEHOLDER = `PIEZAS
-Ala — $100
-Filete — $170
-
-COMPLEMENTOS
-Ensalada — $75`;
+import MenuEditor from "@/components/MenuEditor";
 
 export default function CompletarPage({
   params,
@@ -33,7 +28,7 @@ export default function CompletarPage({
   const [instagram, setInstagram] = useState("");
   const [facebook, setFacebook] = useState("");
   const [horarios, setHorarios] = useState("");
-  const [menu, setMenu] = useState("");
+  const [menuItems, setMenuItems] = useState<MenuItemInput[]>([]);
 
   const [logoForma, setLogoForma] = useState<LogoForma>("circular");
   const [colorAcento, setColorAcento] = useState("#C8FF3D");
@@ -69,7 +64,6 @@ export default function CompletarPage({
     setInstagram(n.instagram ?? "");
     setFacebook(n.facebook ?? "");
     setHorarios(n.horarios ?? "");
-    setMenu(n.menu ?? "");
     setLogoForma(n.logoForma ?? "circular");
     setColorAcento(n.colorAcento ?? "#C8FF3D");
     setGaleria1Nombre(n.galeria[0]?.nombre ?? "");
@@ -84,6 +78,11 @@ export default function CompletarPage({
     setGaleria3Precio(n.galeria[2]?.precio ?? "");
     setGaleria3Unidad(n.galeria[2]?.unidad ?? "");
     setGaleria3Descripcion(n.galeria[2]?.descripcion ?? "");
+    const resMenu = await fetch(`/api/negocios/${id}/completar/menu`);
+    if (resMenu.ok) {
+      const bodyMenu = await resMenu.json();
+      setMenuItems(bodyMenu.items ?? []);
+    }
     setCargando(false);
   }, [id]);
 
@@ -110,7 +109,6 @@ export default function CompletarPage({
           instagram,
           facebook,
           horarios,
-          menu,
           logoForma,
           colorAcento,
           galeria_1_nombre: galeria1Nombre,
@@ -129,6 +127,14 @@ export default function CompletarPage({
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error || "No se pudo enviar la información.");
+
+      const resMenu = await fetch(`/api/negocios/${id}/completar/menu`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: menuItems }),
+      });
+      if (!resMenu.ok) throw new Error("No se pudo guardar el menú.");
+
       setEnviado(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo enviar la información.");
@@ -311,18 +317,7 @@ export default function CompletarPage({
           <div className="head">
             <h2>Menú</h2>
           </div>
-          <div className="field">
-            <textarea
-              className="textarea"
-              value={menu}
-              onChange={(e) => setMenu(e.target.value)}
-              placeholder={MENU_PLACEHOLDER}
-              style={{ minHeight: 200 }}
-            />
-            <div className="small" style={{ marginTop: 6 }}>
-              Escribe la CATEGORÍA en su propia línea, luego cada platillo como &quot;Producto — $Precio&quot;.
-            </div>
-          </div>
+          <MenuEditor items={menuItems} onChange={setMenuItems} />
         </section>
 
         <button className="btn" type="submit" disabled={enviando}>
