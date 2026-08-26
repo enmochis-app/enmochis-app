@@ -393,7 +393,7 @@ export default function NegocioDetalle({
           </div>
         )}
 
-        <div style={{ height: 240 }} />
+        <div className="hero-cta-spacer" style={{ height: 240 }} />
 
         <div className="cta-float">
           {mostrarGaleria && (
