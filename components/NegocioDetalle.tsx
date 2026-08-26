@@ -336,6 +336,13 @@ export default function NegocioDetalle({ negocio, menuItems }: { negocio: Negoci
             ))}
           </div>
         )}
+
+        <a className="mini-footer" href="https://enmochis.app" target="_blank" rel="noopener noreferrer">
+          {negocio.logoUrl && <img className="mini-footer-logo" src={negocio.logoUrl} alt="" />}
+          <span>
+            Este sitio fue creado en <strong>EnMochis.app</strong> — únete ahora
+          </span>
+        </a>
         <div style={{ height: 40 }} />
       </div>
 
