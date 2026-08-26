@@ -81,6 +81,8 @@ export type Negocio = {
   lealtadPorcentaje: number;
   lealtadMeta: number;
   tienePortal: boolean;
+  calificacionModo?: "google" | "interno";
+  googleResenasUrl?: string;
 };
 
 function u(v: string | null | undefined): string | undefined {
@@ -127,6 +129,8 @@ function mapNegocio(row: NegocioRow, addonsDelNegocio: Addon[]): Negocio {
     lealtadPorcentaje: row.lealtadPorcentaje ?? 0,
     lealtadMeta: row.lealtadMeta ?? 10,
     tienePortal: !!row.portalPasswordHash,
+    calificacionModo: (row.calificacionModo as Negocio["calificacionModo"]) ?? undefined,
+    googleResenasUrl: u(row.googleResenasUrl),
   };
 }
 
@@ -327,6 +331,8 @@ export type DatosNegocio = {
   lealtadModo?: "visitas" | "puntos";
   lealtadPorcentaje?: number;
   lealtadMeta?: number;
+  calificacionModo?: "google" | "interno" | "";
+  googleResenasUrl?: string;
   /** Claves del catálogo de addons (ver getCatalogoAddons) que debe tener activos este negocio. */
   addons?: string[];
 };
@@ -368,6 +374,8 @@ function filaParaGuardar(datos: Partial<DatosNegocio>) {
   if (datos.lealtadModo !== undefined) fila.lealtadModo = datos.lealtadModo;
   if (datos.lealtadPorcentaje !== undefined) fila.lealtadPorcentaje = datos.lealtadPorcentaje;
   if (datos.lealtadMeta !== undefined) fila.lealtadMeta = datos.lealtadMeta;
+  if (datos.calificacionModo !== undefined) fila.calificacionModo = datos.calificacionModo || null;
+  if (datos.googleResenasUrl !== undefined) fila.googleResenasUrl = datos.googleResenasUrl;
   return fila;
 }
 

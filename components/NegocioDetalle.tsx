@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { Negocio } from "@/lib/negocios";
 import { agruparPorCategoria, type MenuItem } from "@/lib/menuItems";
+import type { Calificacion, ResumenCalificaciones } from "@/lib/calificaciones";
 
 function telHref(numero: string) {
   return `tel:${numero.replace(/[^\d+]/g, "")}`;
@@ -91,7 +92,116 @@ function CarruselGaleria({ galeria }: { galeria: Negocio["galeria"] }) {
   );
 }
 
-export default function NegocioDetalle({ negocio, menuItems }: { negocio: Negocio; menuItems: MenuItem[] }) {
+function BloqueCalificaciones({
+  negocioId,
+  modo,
+  googleUrl,
+  resumen,
+  comentariosIniciales,
+}: {
+  negocioId: string;
+  modo?: "google" | "interno";
+  googleUrl?: string;
+  resumen: ResumenCalificaciones;
+  comentariosIniciales: Calificacion[];
+}) {
+  const [mostrarForm, setMostrarForm] = useState(false);
+  const [estrellas, setEstrellas] = useState(0);
+  const [comentario, setComentario] = useState("");
+  const [enviando, setEnviando] = useState(false);
+  const [enviado, setEnviado] = useState(false);
+  const [error, setError] = useState("");
+
+  if (modo === "google") {
+    if (!googleUrl) return null;
+    return (
+      <a className="mini-calificaciones-google" href={googleUrl} target="_blank" rel="noopener noreferrer">
+        ⭐ Ver reseñas en Google
+      </a>
+    );
+  }
+
+  if (modo !== "interno") return null;
+
+  async function enviar() {
+    if (estrellas < 1 || enviando) return;
+    setEnviando(true);
+    setError("");
+    try {
+      const res = await fetch("/api/calificaciones", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ negocioId, estrellas, comentario }),
+      });
+      if (!res.ok) throw new Error();
+      setEnviado(true);
+      setMostrarForm(false);
+    } catch {
+      setError("No se pudo enviar tu reseña. Intenta de nuevo.");
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  return (
+    <div className="mini-calificaciones">
+      <div className="calif-resumen">
+        <span className="calif-estrellas">{resumen.total > 0 ? "★".repeat(Math.round(resumen.promedio)) : "☆"}</span>
+        <span className="calif-numero">{resumen.total > 0 ? resumen.promedio.toFixed(1) : "Sin reseñas todavía"}</span>
+        {resumen.total > 0 && <span className="calif-total">({resumen.total})</span>}
+      </div>
+      {comentariosIniciales.slice(0, 3).map((c) => (
+        <div className="calif-item" key={c.id}>
+          <span className="calif-item-estrellas">{"★".repeat(c.estrellas)}</span>
+          {c.comentario && <p>{c.comentario}</p>}
+        </div>
+      ))}
+      {enviado ? (
+        <div className="calif-gracias">¡Gracias por tu reseña!</div>
+      ) : mostrarForm ? (
+        <div className="calif-form">
+          <div className="calif-picker">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <button
+                key={n}
+                type="button"
+                className={n <= estrellas ? "activo" : ""}
+                onClick={() => setEstrellas(n)}
+              >
+                ★
+              </button>
+            ))}
+          </div>
+          <textarea
+            placeholder="Comentario (opcional)"
+            value={comentario}
+            onChange={(e) => setComentario(e.target.value)}
+          />
+          {error && <div className="calif-error">{error}</div>}
+          <button type="button" onClick={enviar} disabled={enviando || estrellas < 1}>
+            {enviando ? "Enviando..." : "Enviar reseña"}
+          </button>
+        </div>
+      ) : (
+        <button type="button" className="calif-abrir" onClick={() => setMostrarForm(true)}>
+          Dejar una reseña
+        </button>
+      )}
+    </div>
+  );
+}
+
+export default function NegocioDetalle({
+  negocio,
+  menuItems,
+  resumenCalificaciones,
+  comentarios,
+}: {
+  negocio: Negocio;
+  menuItems: MenuItem[];
+  resumenCalificaciones?: ResumenCalificaciones;
+  comentarios?: Calificacion[];
+}) {
   const [pantalla, setPantalla] = useState<"inicio" | "menu">("inicio");
   const [appleRecomendado, setAppleRecomendado] = useState(false);
   const [modoPedido, setModoPedido] = useState(false);
@@ -146,6 +256,7 @@ export default function NegocioDetalle({ negocio, menuItems }: { negocio: Negoci
   const tienePedidos = tieneAddon("pedidos") && menuItems.some((it) => it.ordenable);
   const tieneLealtad = tieneAddon("lealtad");
   const tieneCitas = tieneAddon("citas") && !!negocio.whatsapp;
+  const tieneCalificaciones = tieneAddon("calificaciones") && !!negocio.calificacionModo;
 
   function agendarCita() {
     if (!negocio.whatsapp) return;
@@ -244,6 +355,16 @@ export default function NegocioDetalle({ negocio, menuItems }: { negocio: Negoci
           <Link href={`/negocio/${negocio.slug}/tarjeta`} className="mini-lealtad-banner">
             ⭐ Obtén tu tarjeta de puntos
           </Link>
+        )}
+
+        {tieneCalificaciones && (
+          <BloqueCalificaciones
+            negocioId={negocio.id}
+            modo={negocio.calificacionModo}
+            googleUrl={negocio.googleResenasUrl}
+            resumen={resumenCalificaciones ?? { promedio: 0, total: 0 }}
+            comentariosIniciales={comentarios ?? []}
+          />
         )}
 
         {tieneMapa && (

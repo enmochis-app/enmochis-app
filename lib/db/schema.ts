@@ -58,6 +58,9 @@ export const negocios = pgTable("negocios", {
   lealtadPorcentaje: integer("lealtad_porcentaje"),
   lealtadMeta: integer("lealtad_meta"),
 
+  calificacionModo: text("calificacion_modo"),
+  googleResenasUrl: text("google_resenas_url"),
+
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -157,3 +160,23 @@ export const lealtadRegistros = pgTable(
 
 export type LealtadRegistroRow = typeof lealtadRegistros.$inferSelect;
 export type NuevoLealtadRegistroRow = typeof lealtadRegistros.$inferInsert;
+
+export const calificaciones = pgTable(
+  "calificaciones",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    negocioId: text("negocio_id")
+      .notNull()
+      .references(() => negocios.id, { onDelete: "cascade" }),
+    estrellas: integer("estrellas").notNull(),
+    comentario: text("comentario"),
+    visible: boolean("visible").notNull().default(true),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => [index("calificaciones_negocio_idx").on(t.negocioId)]
+);
+
+export type CalificacionRow = typeof calificaciones.$inferSelect;
+export type NuevaCalificacionRow = typeof calificaciones.$inferInsert;
