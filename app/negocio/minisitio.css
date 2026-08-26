@@ -19,13 +19,16 @@ body {
 }
 .mini-tag a { color: #777; text-decoration: none; }
 
-/* HERO: fondo fijo a pantalla completa. El degradado superior se difumina al hacer scroll */
+/* HERO: fondo fijo, alineado a la misma columna que el contenido (.mini-wrap)
+   en vez de estirarse a todo el ancho de la ventana — así se ve bien en
+   tablet/escritorio y no solo en celular. El degradado superior se difumina
+   al hacer scroll. */
 .hero-bg {
-  position: fixed; inset: 0; z-index: 0;
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; max-width: 480px; margin: 0 auto; z-index: 0;
   background: #151515; background-size: cover; background-position: center 30%;
 }
 .hero-scrim-top {
-  position: fixed; top: 0; left: 0; right: 0; height: 55vh; z-index: 1;
+  position: fixed; top: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto; height: 55vh; z-index: 1;
   background: linear-gradient(180deg,
     rgba(10,10,10,0.95) 0%,
     rgba(10,10,10,0.65) 30%,
@@ -34,7 +37,7 @@ body {
   transition: opacity 0.15s linear;
 }
 .hero-scrim-bottom {
-  position: fixed; bottom: 0; left: 0; right: 0; height: 40vh; z-index: 1;
+  position: fixed; bottom: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto; height: 40vh; z-index: 1;
   background: linear-gradient(0deg,
     rgba(10,10,10,0.97) 0%,
     rgba(10,10,10,0.85) 35%,
@@ -47,7 +50,8 @@ body {
   display: flex; flex-direction: column;
 }
 .ph-icon-wrap {
-  position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 0;
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; max-width: 480px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: center; z-index: 0;
   opacity: 0.12; font-size: 90px;
 }
 
