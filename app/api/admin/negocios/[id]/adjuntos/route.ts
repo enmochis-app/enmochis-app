@@ -14,7 +14,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const { campo, filename, contentType, base64 } = await request.json();
+  const { campo, filename, contentType, base64, colorDominante } = await request.json();
 
   if (!CAMPOS_VALIDOS.has(campo)) {
     return NextResponse.json({ error: "Campo de foto inválido." }, { status: 400 });
@@ -24,7 +24,7 @@ export async function POST(
   }
 
   try {
-    await subirAdjunto(id, campo, { filename, contentType, base64 });
+    await subirAdjunto(id, campo, { filename, contentType, base64 }, colorDominante);
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("Error subiendo adjunto:", err);

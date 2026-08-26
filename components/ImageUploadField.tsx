@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { colorDominanteDeBase64 } from "@/lib/colorDominante";
 
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -37,10 +38,12 @@ export default function ImageUploadField({
     try {
       for (const file of Array.from(files)) {
         const base64 = await fileToBase64(file);
+        const colorDominante =
+          campo === "logo" ? await colorDominanteDeBase64(base64, file.type) : undefined;
         const res = await fetch(uploadUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ campo, filename: file.name, contentType: file.type, base64 }),
+          body: JSON.stringify({ campo, filename: file.name, contentType: file.type, base64, colorDominante }),
         });
         if (!res.ok) {
           const body = await res.json().catch(() => ({}));

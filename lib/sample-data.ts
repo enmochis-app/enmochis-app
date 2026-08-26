@@ -7,6 +7,7 @@ const CATALOGO_ADDONS_DEMO = {
   mapas: { id: "demo-addon-mapas", clave: "mapas", nombre: "Mapas", descripcion: "Botón \"Cómo llegar\" con Google/Apple Maps.", icono: "📍", precio: 100, comportamiento: "especial", activo: true, orden: 2 },
   galeria: { id: "demo-addon-galeria", clave: "galeria", nombre: "Galería", descripcion: "Carrusel de fotos de producto en el minisitio.", icono: "🖼️", precio: 100, comportamiento: "especial", activo: true, orden: 3 },
   pedidos: { id: "demo-addon-pedidos", clave: "pedidos", nombre: "Pedidos por WhatsApp", descripcion: "Permite a los clientes ordenar directo por WhatsApp.", icono: "🛍️", precio: 100, comportamiento: "especial", activo: true, orden: 4 },
+  citas: { id: "demo-addon-citas", clave: "citas", nombre: "Citas por WhatsApp", descripcion: "Botón para agendar cita por WhatsApp con mensaje prellenado.", icono: "📅", precio: 100, comportamiento: "especial", activo: true, orden: 5 },
   qrMesa: { id: "demo-addon-qr-mesa", clave: "qr_mesa", nombre: "Pide desde tu mesa (QR)", descripcion: "Código QR en mesa para pedir sin esperar mesero.", icono: "📱", precio: 100, comportamiento: "chip", activo: true, orden: 5 },
   lealtad: { id: "demo-addon-lealtad", clave: "lealtad", nombre: "Programa de lealtad", descripcion: "Programa de puntos o visitas para clientes frecuentes.", icono: "⭐", precio: 100, comportamiento: "chip", activo: true, orden: 6 },
   multiSucursal: { id: "demo-addon-multi-sucursal", clave: "multi_sucursal", nombre: "Varias sucursales", descripcion: "Indica que el negocio tiene más de una ubicación.", icono: "🏬", precio: 100, comportamiento: "chip", activo: true, orden: 7 },
@@ -34,10 +35,12 @@ export const SAMPLE_NEGOCIOS: Negocio[] = [
     fotoPortada:
       "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=1000&q=85",
     colorAcento: "#C8FF3D",
+    degradadoInferior: "negro",
     estado: "destacado",
     telefono: "6681234501",
     whatsapp: "6681234501",
     mensajeWhatsapp: "Hola 👋, quiero hacer un pedido.",
+    mensajeCitas: "Hola 👋, quiero agendar una mesa para un evento.",
     direccion: "Blvd. Rosendo G. Castro 1450, Zona Dorada, Los Mochis, Sinaloa",
     lat: 25.7912,
     lng: -108.9908,
@@ -54,6 +57,7 @@ export const SAMPLE_NEGOCIOS: Negocio[] = [
       CATALOGO_ADDONS_DEMO.mapas,
       CATALOGO_ADDONS_DEMO.galeria,
       CATALOGO_ADDONS_DEMO.pedidos,
+      CATALOGO_ADDONS_DEMO.citas,
     ],
     lealtadModo: "visitas",
     lealtadPorcentaje: 0,
@@ -74,6 +78,7 @@ export const SAMPLE_NEGOCIOS: Negocio[] = [
     fotoPortada:
       "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1000&q=85",
     colorAcento: "#E8B84B",
+    degradadoInferior: "negro",
     estado: "destacado",
     telefono: "6681234502",
     whatsapp: "6681234502",
@@ -115,6 +120,7 @@ export const SAMPLE_NEGOCIOS: Negocio[] = [
     fotoPortada:
       "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=1000&q=85",
     colorAcento: "#FF5A3C",
+    degradadoInferior: "negro",
     estado: "destacado",
     telefono: "6681234503",
     whatsapp: "6681234503",
@@ -155,6 +161,7 @@ export const SAMPLE_NEGOCIOS: Negocio[] = [
     fotoPortada:
       "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=1000&q=85",
     colorAcento: "#FF7BAC",
+    degradadoInferior: "negro",
     estado: "destacado",
     telefono: "6681234504",
     whatsapp: "6681234504",

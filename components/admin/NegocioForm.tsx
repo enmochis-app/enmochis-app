@@ -29,6 +29,12 @@ const FORMAS_LOGO: { value: LogoForma; label: string }[] = [
   { value: "rectangular", label: "Rectangular" },
 ];
 
+const DEGRADADOS_INFERIORES: { value: "negro" | "blanco" | "beige"; label: string }[] = [
+  { value: "negro", label: "Negro" },
+  { value: "blanco", label: "Blanco" },
+  { value: "beige", label: "Beige" },
+];
+
 export default function NegocioForm({
   negocio,
   catalogoAddons,
@@ -58,6 +64,7 @@ export default function NegocioForm({
   const [telefono, setTelefono] = useState(negocio?.telefono ?? "");
   const [whatsapp, setWhatsapp] = useState(negocio?.whatsapp ?? "");
   const [mensajeWhatsapp, setMensajeWhatsapp] = useState(negocio?.mensajeWhatsapp ?? "");
+  const [mensajeCitas, setMensajeCitas] = useState(negocio?.mensajeCitas ?? "");
   const [direccion, setDireccion] = useState(negocio?.direccion ?? "");
   const [lat, setLat] = useState(negocio?.lat !== undefined ? String(negocio.lat) : "");
   const [lng, setLng] = useState(negocio?.lng !== undefined ? String(negocio.lng) : "");
@@ -68,12 +75,17 @@ export default function NegocioForm({
   const [lealtadModo, setLealtadModo] = useState<"visitas" | "puntos">(negocio?.lealtadModo ?? "visitas");
   const [lealtadPorcentaje, setLealtadPorcentaje] = useState(negocio ? String(negocio.lealtadPorcentaje) : "0");
   const [lealtadMeta, setLealtadMeta] = useState(negocio ? String(negocio.lealtadMeta) : "10");
+  const [calificacionModo, setCalificacionModo] = useState<"" | "google" | "interno">(negocio?.calificacionModo ?? "");
+  const [googleResenasUrl, setGoogleResenasUrl] = useState(negocio?.googleResenasUrl ?? "");
   const [portalPassword, setPortalPassword] = useState("");
   const [portalGuardando, setPortalGuardando] = useState(false);
   const [portalOk, setPortalOk] = useState(false);
 
   const [logoForma, setLogoForma] = useState<LogoForma>(negocio?.logoForma ?? "circular");
   const [colorAcento, setColorAcento] = useState(negocio?.colorAcento ?? "#C8FF3D");
+  const [degradadoInferior, setDegradadoInferior] = useState<"negro" | "blanco" | "beige">(
+    negocio?.degradadoInferior ?? "negro"
+  );
   const [galeria1Nombre, setGaleria1Nombre] = useState(negocio?.galeria[0]?.nombre ?? "");
   const [galeria1Precio, setGaleria1Precio] = useState(negocio?.galeria[0]?.precio ?? "");
   const [galeria1Unidad, setGaleria1Unidad] = useState(negocio?.galeria[0]?.unidad ?? "");
@@ -120,6 +132,28 @@ export default function NegocioForm({
     // eslint-disable-next-line react-hooks/set-state-in-effect -- carga inicial de datos al montar
     cargarMetricas();
   }, [cargarMetricas]);
+
+  type CalificacionAdmin = { id: string; estrellas: number; comentario?: string; visible: boolean; createdAt: string };
+  const [calificacionesLista, setCalificacionesLista] = useState<CalificacionAdmin[] | null>(null);
+  const cargarCalificaciones = useCallback(async () => {
+    if (!negocio) return;
+    const res = await fetch(`/api/admin/negocios/${negocio.id}/calificaciones`);
+    const body = await res.json();
+    setCalificacionesLista(body.calificaciones ?? []);
+  }, [negocio]);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- carga inicial de datos al montar
+    cargarCalificaciones();
+  }, [cargarCalificaciones]);
+
+  async function alternarVisibilidadCalificacion(id: string, visible: boolean) {
+    await fetch(`/api/admin/negocios/${negocio!.id}/calificaciones`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ calificacionId: id, visible }),
+    });
+    cargarCalificaciones();
+  }
 
   const [menuItems, setMenuItems] = useState<MenuItemInput[]>([]);
   const cargarMenu = useCallback(async () => {
@@ -173,6 +207,7 @@ export default function NegocioForm({
           telefono,
           whatsapp,
           mensajeWhatsapp,
+          mensajeCitas,
           direccion,
           lat: lat.trim() === "" ? undefined : Number(lat),
           lng: lng.trim() === "" ? undefined : Number(lng),
@@ -182,8 +217,11 @@ export default function NegocioForm({
           lealtadModo,
           lealtadPorcentaje: Number(lealtadPorcentaje) || 0,
           lealtadMeta: Number(lealtadMeta) || 10,
+          calificacionModo,
+          googleResenasUrl,
           logoForma,
           colorAcento,
+          degradadoInferior,
           galeria_1_nombre: galeria1Nombre,
           galeria_1_precio: galeria1Precio,
           galeria_1_unidad: galeria1Unidad,
@@ -376,6 +414,13 @@ export default function NegocioForm({
           </div>
         </div>
         <div className="admin-field">
+          <label>Mensaje de citas (addon &quot;Citas por WhatsApp&quot;)</label>
+          <input value={mensajeCitas} onChange={(e) => setMensajeCitas(e.target.value)} placeholder="Hola 👋, quiero agendar una cita." />
+          <div style={{ fontSize: 11, color: "#666", marginTop: 4 }}>
+            Solo se muestra si el negocio tiene activo el addon &quot;Citas por WhatsApp&quot;.
+          </div>
+        </div>
+        <div className="admin-field">
           <label>Dirección</label>
           <input value={direccion} onChange={(e) => setDireccion(e.target.value)} />
         </div>
@@ -430,6 +475,22 @@ export default function NegocioForm({
               style={{ height: 42, padding: 4 }}
             />
           </div>
+          <div className="admin-field">
+            <label>Degradado inferior</label>
+            <select
+              value={degradadoInferior}
+              onChange={(e) => setDegradadoInferior(e.target.value as "negro" | "blanco" | "beige")}
+            >
+              {DEGRADADOS_INFERIORES.map((d) => (
+                <option key={d.value} value={d.value}>
+                  {d.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className="admin-small" style={{ fontSize: 12, color: "#666", marginBottom: 10 }}>
+          El degradado superior se calcula solo a partir del color del logo al subirlo.
         </div>
         <ImageUploadField
           label="Logo"
@@ -591,6 +652,63 @@ export default function NegocioForm({
           <div className="admin-field">
             <label>Porcentaje de la compra en puntos</label>
             <input value={lealtadPorcentaje} onChange={(e) => setLealtadPorcentaje(e.target.value)} inputMode="numeric" placeholder="Ej. 6" />
+          </div>
+        )}
+      </div>
+
+      <div className="admin-section">
+        <h2>Calificaciones</h2>
+        <div className="admin-small" style={{ fontSize: 12, color: "#666", marginBottom: 10 }}>
+          Solo aplica si el addon &quot;Sistema de Calificación&quot; está activo. El promedio que se
+          muestra siempre es el promedio real de todas las reseñas — ocultar un comentario nunca
+          cambia el promedio.
+        </div>
+        <div className="admin-grid-2">
+          <div className="admin-field">
+            <label>Modo</label>
+            <select
+              value={calificacionModo}
+              onChange={(e) => setCalificacionModo(e.target.value as "" | "google" | "interno")}
+            >
+              <option value="">Sin activar</option>
+              <option value="interno">Interno (reseñas en EnMochis)</option>
+              <option value="google">Google (enlaza a la Ficha de Google)</option>
+            </select>
+          </div>
+          {calificacionModo === "google" && (
+            <div className="admin-field">
+              <label>Link a reseñas de Google</label>
+              <input value={googleResenasUrl} onChange={(e) => setGoogleResenasUrl(e.target.value)} placeholder="https://g.page/r/..." />
+            </div>
+          )}
+        </div>
+        {calificacionModo === "interno" && (
+          <div style={{ marginTop: 10 }}>
+            <label style={{ fontSize: 12, fontWeight: 600, display: "block", marginBottom: 6 }}>
+              Reseñas recibidas
+            </label>
+            {calificacionesLista === null ? (
+              <p style={{ fontSize: 12, color: "#666" }}>Cargando...</p>
+            ) : calificacionesLista.length === 0 ? (
+              <p style={{ fontSize: 12, color: "#666" }}>Todavía no hay reseñas.</p>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {calificacionesLista.map((c) => (
+                  <div
+                    key={c.id}
+                    style={{ border: "1px solid #eee", borderRadius: 8, padding: 10, fontSize: 12.5, opacity: c.visible ? 1 : 0.5 }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <strong>{"★".repeat(c.estrellas)}</strong>
+                      <button type="button" onClick={() => alternarVisibilidadCalificacion(c.id, !c.visible)}>
+                        {c.visible ? "Ocultar comentario" : "Mostrar comentario"}
+                      </button>
+                    </div>
+                    {c.comentario && <p style={{ margin: "6px 0 0" }}>{c.comentario}</p>}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -59,6 +59,8 @@ export type Negocio = {
   logoForma: LogoForma;
   fotoPortada?: string;
   colorAcento: string;
+  degradadoSuperior?: string;
+  degradadoInferior: "negro" | "blanco" | "beige";
   estado: Estado;
   plan?: "top20" | "estandar" | "gratuita";
   fechaProximaRenovacion?: string;
@@ -66,6 +68,7 @@ export type Negocio = {
   telefono?: string;
   whatsapp?: string;
   mensajeWhatsapp?: string;
+  mensajeCitas?: string;
   direccion?: string;
   lat?: number;
   lng?: number;
@@ -78,6 +81,8 @@ export type Negocio = {
   lealtadPorcentaje: number;
   lealtadMeta: number;
   tienePortal: boolean;
+  calificacionModo?: "google" | "interno";
+  googleResenasUrl?: string;
 };
 
 function u(v: string | null | undefined): string | undefined {
@@ -102,6 +107,8 @@ function mapNegocio(row: NegocioRow, addonsDelNegocio: Addon[]): Negocio {
     logoForma: row.logoForma as LogoForma,
     fotoPortada: u(row.fotoPortada),
     colorAcento: row.colorAcento,
+    degradadoSuperior: u(row.degradadoSuperior),
+    degradadoInferior: (row.degradadoInferior as Negocio["degradadoInferior"]) ?? "negro",
     estado: row.estado as Estado,
     plan: (row.plan as Negocio["plan"]) ?? undefined,
     fechaProximaRenovacion: u(row.fechaProximaRenovacion),
@@ -109,6 +116,7 @@ function mapNegocio(row: NegocioRow, addonsDelNegocio: Addon[]): Negocio {
     telefono: u(row.telefono),
     whatsapp: u(row.whatsapp),
     mensajeWhatsapp: u(row.mensajeWhatsapp),
+    mensajeCitas: u(row.mensajeCitas),
     direccion: u(row.direccion),
     lat: row.lat ?? undefined,
     lng: row.lng ?? undefined,
@@ -121,6 +129,8 @@ function mapNegocio(row: NegocioRow, addonsDelNegocio: Addon[]): Negocio {
     lealtadPorcentaje: row.lealtadPorcentaje ?? 0,
     lealtadMeta: row.lealtadMeta ?? 10,
     tienePortal: !!row.portalPasswordHash,
+    calificacionModo: (row.calificacionModo as Negocio["calificacionModo"]) ?? undefined,
+    googleResenasUrl: u(row.googleResenasUrl),
   };
 }
 
@@ -292,12 +302,14 @@ export type DatosNegocio = {
   descripcionLarga: string;
   logoForma?: LogoForma;
   colorAcento?: string;
+  degradadoInferior?: "negro" | "blanco" | "beige";
   estado: Estado;
   plan?: "top20" | "estandar" | "gratuita";
   fechaProximaRenovacion?: string;
   telefono?: string;
   whatsapp?: string;
   mensajeWhatsapp?: string;
+  mensajeCitas?: string;
   direccion?: string;
   lat?: number;
   lng?: number;
@@ -319,6 +331,8 @@ export type DatosNegocio = {
   lealtadModo?: "visitas" | "puntos";
   lealtadPorcentaje?: number;
   lealtadMeta?: number;
+  calificacionModo?: "google" | "interno" | "";
+  googleResenasUrl?: string;
   /** Claves del catálogo de addons (ver getCatalogoAddons) que debe tener activos este negocio. */
   addons?: string[];
 };
@@ -331,12 +345,14 @@ function filaParaGuardar(datos: Partial<DatosNegocio>) {
   if (datos.descripcionLarga !== undefined) fila.descripcionLarga = datos.descripcionLarga;
   if (datos.logoForma !== undefined) fila.logoForma = datos.logoForma;
   if (datos.colorAcento !== undefined) fila.colorAcento = datos.colorAcento;
+  if (datos.degradadoInferior !== undefined) fila.degradadoInferior = datos.degradadoInferior;
   if (datos.estado !== undefined) fila.estado = datos.estado;
   if (datos.plan !== undefined) fila.plan = datos.plan;
   if (datos.fechaProximaRenovacion !== undefined) fila.fechaProximaRenovacion = datos.fechaProximaRenovacion || null;
   if (datos.telefono !== undefined) fila.telefono = datos.telefono;
   if (datos.whatsapp !== undefined) fila.whatsapp = datos.whatsapp;
   if (datos.mensajeWhatsapp !== undefined) fila.mensajeWhatsapp = datos.mensajeWhatsapp;
+  if (datos.mensajeCitas !== undefined) fila.mensajeCitas = datos.mensajeCitas;
   if (datos.direccion !== undefined) fila.direccion = datos.direccion;
   if (datos.lat !== undefined) fila.lat = datos.lat;
   if (datos.lng !== undefined) fila.lng = datos.lng;
@@ -358,6 +374,8 @@ function filaParaGuardar(datos: Partial<DatosNegocio>) {
   if (datos.lealtadModo !== undefined) fila.lealtadModo = datos.lealtadModo;
   if (datos.lealtadPorcentaje !== undefined) fila.lealtadPorcentaje = datos.lealtadPorcentaje;
   if (datos.lealtadMeta !== undefined) fila.lealtadMeta = datos.lealtadMeta;
+  if (datos.calificacionModo !== undefined) fila.calificacionModo = datos.calificacionModo || null;
+  if (datos.googleResenasUrl !== undefined) fila.googleResenasUrl = datos.googleResenasUrl;
   return fila;
 }
 
@@ -435,7 +453,8 @@ const CAMPO_A_COLUMNA: Record<string, "logoUrl" | "fotoPortada" | "galeria1Foto"
 export async function subirAdjunto(
   recordId: string,
   campo: string,
-  archivo: { filename: string; contentType: string; base64: string }
+  archivo: { filename: string; contentType: string; base64: string },
+  colorDominante?: string
 ): Promise<void> {
   const columna = CAMPO_A_COLUMNA[campo];
   if (!columna) {
@@ -451,9 +470,13 @@ export async function subirAdjunto(
     contentType: archivo.contentType,
     token,
   });
+  const cambios: Record<string, unknown> = { [columna]: url, updatedAt: new Date() };
+  if (campo === "logo" && colorDominante) {
+    cambios.degradadoSuperior = colorDominante;
+  }
   await db()
     .update(negocios)
-    .set({ [columna]: url, updatedAt: new Date() })
+    .set(cambios)
     .where(eq(negocios.id, recordId));
 }
 
@@ -526,6 +549,7 @@ export const TIPOS_EVENTO = [
   { tipo: "whatsapp", label: "WhatsApp" },
   { tipo: "mapa", label: "Cómo llegar / Mapa" },
   { tipo: "pedido", label: "Pedidos enviados" },
+  { tipo: "cita", label: "Citas agendadas" },
 ] as const;
 
 export type TipoEvento = (typeof TIPOS_EVENTO)[number]["tipo"];
