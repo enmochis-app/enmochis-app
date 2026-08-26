@@ -30,19 +30,19 @@ body {
 .hero-scrim-top {
   position: fixed; top: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto; height: 55vh; z-index: 1;
   background: linear-gradient(180deg,
-    rgba(10,10,10,0.95) 0%,
-    rgba(10,10,10,0.65) 30%,
-    rgba(10,10,10,0.25) 65%,
-    rgba(10,10,10,0) 100%);
+    rgb(var(--degradado-superior-rgb, 10 10 10) / 0.95) 0%,
+    rgb(var(--degradado-superior-rgb, 10 10 10) / 0.65) 30%,
+    rgb(var(--degradado-superior-rgb, 10 10 10) / 0.25) 65%,
+    rgb(var(--degradado-superior-rgb, 10 10 10) / 0) 100%);
   transition: opacity 0.15s linear;
 }
 .hero-scrim-bottom {
   position: fixed; bottom: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto; height: 40vh; z-index: 1;
   background: linear-gradient(0deg,
-    rgba(10,10,10,0.97) 0%,
-    rgba(10,10,10,0.85) 35%,
-    rgba(10,10,10,0.4) 70%,
-    rgba(10,10,10,0) 100%);
+    rgb(var(--degradado-inferior-rgb, 10 10 10) / 0.97) 0%,
+    rgb(var(--degradado-inferior-rgb, 10 10 10) / 0.85) 35%,
+    rgb(var(--degradado-inferior-rgb, 10 10 10) / 0.4) 70%,
+    rgb(var(--degradado-inferior-rgb, 10 10 10) / 0) 100%);
 }
 .hero-content {
   position: relative; z-index: 2; padding-top: 22px;
@@ -191,7 +191,7 @@ body {
 
 .sticky-bar {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 20;
-  background: #000; border-top: 1px solid #1a1a1a;
+  background: rgb(var(--degradado-inferior-rgb, 0 0 0)); border-top: 1px solid rgba(128,128,128,0.2);
   display: flex; max-width: 480px; margin: 0 auto; padding: 10px 8px 14px;
 }
 .sticky-bar a, .sticky-bar button {
@@ -199,7 +199,7 @@ body {
   text-align: center; background: none; border: none;
   padding: 6px 4px;
   font-family: 'Space Grotesk'; font-weight: 700; font-size: 10px;
-  text-decoration: none; color: #666; cursor: pointer;
+  text-decoration: none; color: var(--degradado-inferior-texto, #666); cursor: pointer;
 }
 .sticky-bar .icon-ic { font-size: 17px; }
 .sticky-bar .activo { color: var(--accent, #C8FF3D); }

@@ -34,6 +34,7 @@ export const SAMPLE_NEGOCIOS: Negocio[] = [
     fotoPortada:
       "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=1000&q=85",
     colorAcento: "#C8FF3D",
+    degradadoInferior: "negro",
     estado: "destacado",
     telefono: "6681234501",
     whatsapp: "6681234501",
@@ -74,6 +75,7 @@ export const SAMPLE_NEGOCIOS: Negocio[] = [
     fotoPortada:
       "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1000&q=85",
     colorAcento: "#E8B84B",
+    degradadoInferior: "negro",
     estado: "destacado",
     telefono: "6681234502",
     whatsapp: "6681234502",
@@ -115,6 +117,7 @@ export const SAMPLE_NEGOCIOS: Negocio[] = [
     fotoPortada:
       "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=1000&q=85",
     colorAcento: "#FF5A3C",
+    degradadoInferior: "negro",
     estado: "destacado",
     telefono: "6681234503",
     whatsapp: "6681234503",
@@ -155,6 +158,7 @@ export const SAMPLE_NEGOCIOS: Negocio[] = [
     fotoPortada:
       "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=1000&q=85",
     colorAcento: "#FF7BAC",
+    degradadoInferior: "negro",
     estado: "destacado",
     telefono: "6681234504",
     whatsapp: "6681234504",

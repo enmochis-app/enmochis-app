@@ -59,6 +59,8 @@ export type Negocio = {
   logoForma: LogoForma;
   fotoPortada?: string;
   colorAcento: string;
+  degradadoSuperior?: string;
+  degradadoInferior: "negro" | "blanco" | "beige";
   estado: Estado;
   plan?: "top20" | "estandar" | "gratuita";
   fechaProximaRenovacion?: string;
@@ -102,6 +104,8 @@ function mapNegocio(row: NegocioRow, addonsDelNegocio: Addon[]): Negocio {
     logoForma: row.logoForma as LogoForma,
     fotoPortada: u(row.fotoPortada),
     colorAcento: row.colorAcento,
+    degradadoSuperior: u(row.degradadoSuperior),
+    degradadoInferior: (row.degradadoInferior as Negocio["degradadoInferior"]) ?? "negro",
     estado: row.estado as Estado,
     plan: (row.plan as Negocio["plan"]) ?? undefined,
     fechaProximaRenovacion: u(row.fechaProximaRenovacion),
@@ -292,6 +296,7 @@ export type DatosNegocio = {
   descripcionLarga: string;
   logoForma?: LogoForma;
   colorAcento?: string;
+  degradadoInferior?: "negro" | "blanco" | "beige";
   estado: Estado;
   plan?: "top20" | "estandar" | "gratuita";
   fechaProximaRenovacion?: string;
@@ -331,6 +336,7 @@ function filaParaGuardar(datos: Partial<DatosNegocio>) {
   if (datos.descripcionLarga !== undefined) fila.descripcionLarga = datos.descripcionLarga;
   if (datos.logoForma !== undefined) fila.logoForma = datos.logoForma;
   if (datos.colorAcento !== undefined) fila.colorAcento = datos.colorAcento;
+  if (datos.degradadoInferior !== undefined) fila.degradadoInferior = datos.degradadoInferior;
   if (datos.estado !== undefined) fila.estado = datos.estado;
   if (datos.plan !== undefined) fila.plan = datos.plan;
   if (datos.fechaProximaRenovacion !== undefined) fila.fechaProximaRenovacion = datos.fechaProximaRenovacion || null;
@@ -435,7 +441,8 @@ const CAMPO_A_COLUMNA: Record<string, "logoUrl" | "fotoPortada" | "galeria1Foto"
 export async function subirAdjunto(
   recordId: string,
   campo: string,
-  archivo: { filename: string; contentType: string; base64: string }
+  archivo: { filename: string; contentType: string; base64: string },
+  colorDominante?: string
 ): Promise<void> {
   const columna = CAMPO_A_COLUMNA[campo];
   if (!columna) {
@@ -451,9 +458,13 @@ export async function subirAdjunto(
     contentType: archivo.contentType,
     token,
   });
+  const cambios: Record<string, unknown> = { [columna]: url, updatedAt: new Date() };
+  if (campo === "logo" && colorDominante) {
+    cambios.degradadoSuperior = colorDominante;
+  }
   await db()
     .update(negocios)
-    .set({ [columna]: url, updatedAt: new Date() })
+    .set(cambios)
     .where(eq(negocios.id, recordId));
 }
 

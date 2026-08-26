@@ -29,6 +29,12 @@ const FORMAS_LOGO: { value: LogoForma; label: string }[] = [
   { value: "rectangular", label: "Rectangular" },
 ];
 
+const DEGRADADOS_INFERIORES: { value: "negro" | "blanco" | "beige"; label: string }[] = [
+  { value: "negro", label: "Negro" },
+  { value: "blanco", label: "Blanco" },
+  { value: "beige", label: "Beige" },
+];
+
 export default function NegocioForm({
   negocio,
   catalogoAddons,
@@ -74,6 +80,9 @@ export default function NegocioForm({
 
   const [logoForma, setLogoForma] = useState<LogoForma>(negocio?.logoForma ?? "circular");
   const [colorAcento, setColorAcento] = useState(negocio?.colorAcento ?? "#C8FF3D");
+  const [degradadoInferior, setDegradadoInferior] = useState<"negro" | "blanco" | "beige">(
+    negocio?.degradadoInferior ?? "negro"
+  );
   const [galeria1Nombre, setGaleria1Nombre] = useState(negocio?.galeria[0]?.nombre ?? "");
   const [galeria1Precio, setGaleria1Precio] = useState(negocio?.galeria[0]?.precio ?? "");
   const [galeria1Unidad, setGaleria1Unidad] = useState(negocio?.galeria[0]?.unidad ?? "");
@@ -184,6 +193,7 @@ export default function NegocioForm({
           lealtadMeta: Number(lealtadMeta) || 10,
           logoForma,
           colorAcento,
+          degradadoInferior,
           galeria_1_nombre: galeria1Nombre,
           galeria_1_precio: galeria1Precio,
           galeria_1_unidad: galeria1Unidad,
@@ -430,6 +440,22 @@ export default function NegocioForm({
               style={{ height: 42, padding: 4 }}
             />
           </div>
+          <div className="admin-field">
+            <label>Degradado inferior</label>
+            <select
+              value={degradadoInferior}
+              onChange={(e) => setDegradadoInferior(e.target.value as "negro" | "blanco" | "beige")}
+            >
+              {DEGRADADOS_INFERIORES.map((d) => (
+                <option key={d.value} value={d.value}>
+                  {d.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className="admin-small" style={{ fontSize: 12, color: "#666", marginBottom: 10 }}>
+          El degradado superior se calcula solo a partir del color del logo al subirlo.
         </div>
         <ImageUploadField
           label="Logo"

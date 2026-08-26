@@ -20,6 +20,25 @@ function urlAppleMaps(lat: number, lng: number, nombre: string) {
   return `https://maps.apple.com/?ll=${lat},${lng}&q=${encodeURIComponent(nombre)}`;
 }
 
+function hexARgb(hex?: string): string | undefined {
+  if (!hex) return undefined;
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
+  if (!m) return undefined;
+  const n = parseInt(m[1], 16);
+  return `${(n >> 16) & 255} ${(n >> 8) & 255} ${n & 255}`;
+}
+
+const DEGRADADO_INFERIOR_RGB: Record<Negocio["degradadoInferior"], string> = {
+  negro: "10 10 10",
+  blanco: "255 255 255",
+  beige: "245 235 220",
+};
+const DEGRADADO_INFERIOR_TEXTO: Record<Negocio["degradadoInferior"], string> = {
+  negro: "#666",
+  blanco: "#999",
+  beige: "#8a8272",
+};
+
 function registrarEvento(negocioId: string, tipo: string) {
   const body = JSON.stringify({ negocioId, tipo });
   if (navigator.sendBeacon) {
@@ -108,6 +127,9 @@ export default function NegocioDetalle({ negocio, menuItems }: { negocio: Negoci
   }, [negocio.id]);
 
   const accent = negocio.colorAcento || "#C8FF3D";
+  const degradadoSuperiorRgb = hexARgb(negocio.degradadoSuperior) ?? "10 10 10";
+  const degradadoInferiorRgb = DEGRADADO_INFERIOR_RGB[negocio.degradadoInferior] ?? "10 10 10";
+  const degradadoInferiorTexto = DEGRADADO_INFERIOR_TEXTO[negocio.degradadoInferior] ?? "#666";
   const tieneAddon = (clave: string) => negocio.addons.some((a) => a.clave === clave);
 
   const tieneMapa = tieneAddon("mapas") && negocio.lat !== undefined && negocio.lng !== undefined;
@@ -161,7 +183,17 @@ export default function NegocioDetalle({ negocio, menuItems }: { negocio: Negoci
   }
 
   return (
-    <div className="mini-wrap" style={{ "--accent": accent } as React.CSSProperties}>
+    <div
+      className="mini-wrap"
+      style={
+        {
+          "--accent": accent,
+          "--degradado-superior-rgb": degradadoSuperiorRgb,
+          "--degradado-inferior-rgb": degradadoInferiorRgb,
+          "--degradado-inferior-texto": degradadoInferiorTexto,
+        } as React.CSSProperties
+      }
+    >
       <a className="mini-tag" href="https://enmochis.app" target="_blank" rel="noopener noreferrer">
         enmochis · directorio
       </a>

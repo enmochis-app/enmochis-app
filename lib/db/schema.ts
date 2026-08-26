@@ -15,6 +15,8 @@ export const negocios = pgTable("negocios", {
   logoForma: text("logo_forma").notNull().default("circular"),
   fotoPortada: text("foto_portada"),
   colorAcento: text("color_acento").notNull().default("#C8FF3D"),
+  degradadoSuperior: text("degradado_superior"),
+  degradadoInferior: text("degradado_inferior").notNull().default("negro"),
 
   estado: text("estado").notNull().default("solicitud"),
   plan: text("plan"),
