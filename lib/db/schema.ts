@@ -27,6 +27,7 @@ export const negocios = pgTable("negocios", {
   telefono: text("telefono"),
   whatsapp: text("whatsapp"),
   mensajeWhatsapp: text("mensaje_whatsapp"),
+  mensajeCitas: text("mensaje_citas"),
   direccion: text("direccion"),
   lat: doublePrecision("lat"),
   lng: doublePrecision("lng"),

@@ -64,6 +64,7 @@ export default function NegocioForm({
   const [telefono, setTelefono] = useState(negocio?.telefono ?? "");
   const [whatsapp, setWhatsapp] = useState(negocio?.whatsapp ?? "");
   const [mensajeWhatsapp, setMensajeWhatsapp] = useState(negocio?.mensajeWhatsapp ?? "");
+  const [mensajeCitas, setMensajeCitas] = useState(negocio?.mensajeCitas ?? "");
   const [direccion, setDireccion] = useState(negocio?.direccion ?? "");
   const [lat, setLat] = useState(negocio?.lat !== undefined ? String(negocio.lat) : "");
   const [lng, setLng] = useState(negocio?.lng !== undefined ? String(negocio.lng) : "");
@@ -182,6 +183,7 @@ export default function NegocioForm({
           telefono,
           whatsapp,
           mensajeWhatsapp,
+          mensajeCitas,
           direccion,
           lat: lat.trim() === "" ? undefined : Number(lat),
           lng: lng.trim() === "" ? undefined : Number(lng),
@@ -383,6 +385,13 @@ export default function NegocioForm({
           <input value={mensajeWhatsapp} onChange={(e) => setMensajeWhatsapp(e.target.value)} placeholder="Hola 👋, quiero hacer un pedido." />
           <div style={{ fontSize: 11, color: "#666", marginTop: 4 }}>
             Se le agrega solo &quot;Vengo de {negocio.slug}.enmochis.app&quot; al final — nunca hay que escribirlo a mano.
+          </div>
+        </div>
+        <div className="admin-field">
+          <label>Mensaje de citas (addon &quot;Citas por WhatsApp&quot;)</label>
+          <input value={mensajeCitas} onChange={(e) => setMensajeCitas(e.target.value)} placeholder="Hola 👋, quiero agendar una cita." />
+          <div style={{ fontSize: 11, color: "#666", marginTop: 4 }}>
+            Solo se muestra si el negocio tiene activo el addon &quot;Citas por WhatsApp&quot;.
           </div>
         </div>
         <div className="admin-field">

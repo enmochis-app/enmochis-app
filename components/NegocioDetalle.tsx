@@ -145,6 +145,14 @@ export default function NegocioDetalle({ negocio, menuItems }: { negocio: Negoci
   const servicios = negocio.addons.filter((a) => a.comportamiento === "chip");
   const tienePedidos = tieneAddon("pedidos") && menuItems.some((it) => it.ordenable);
   const tieneLealtad = tieneAddon("lealtad");
+  const tieneCitas = tieneAddon("citas") && !!negocio.whatsapp;
+
+  function agendarCita() {
+    if (!negocio.whatsapp) return;
+    registrarEvento(negocio.id, "cita");
+    const base = negocio.mensajeCitas?.trim() || "Hola 👋, quiero agendar una cita.";
+    window.open(waHref(negocio.whatsapp, negocio.slug, base), "_blank");
+  }
 
   function agregarAlCarrito(item: MenuItem) {
     setCarrito((prev) => ({ ...prev, [item.id]: (prev[item.id] ?? 0) + 1 }));
@@ -297,6 +305,16 @@ export default function NegocioDetalle({ negocio, menuItems }: { negocio: Negoci
           >
             ☰ VER MENÚ
           </button>
+          {tieneCitas && (
+            <button
+              type="button"
+              className="cta-btn"
+              onClick={agendarCita}
+              style={{ background: "rgba(10,10,10,0.75)", color: "#fff", border: `1.5px solid ${accent}` }}
+            >
+              📅 AGENDAR CITA
+            </button>
+          )}
         </div>
       </div>
 

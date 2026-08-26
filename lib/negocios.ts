@@ -68,6 +68,7 @@ export type Negocio = {
   telefono?: string;
   whatsapp?: string;
   mensajeWhatsapp?: string;
+  mensajeCitas?: string;
   direccion?: string;
   lat?: number;
   lng?: number;
@@ -113,6 +114,7 @@ function mapNegocio(row: NegocioRow, addonsDelNegocio: Addon[]): Negocio {
     telefono: u(row.telefono),
     whatsapp: u(row.whatsapp),
     mensajeWhatsapp: u(row.mensajeWhatsapp),
+    mensajeCitas: u(row.mensajeCitas),
     direccion: u(row.direccion),
     lat: row.lat ?? undefined,
     lng: row.lng ?? undefined,
@@ -303,6 +305,7 @@ export type DatosNegocio = {
   telefono?: string;
   whatsapp?: string;
   mensajeWhatsapp?: string;
+  mensajeCitas?: string;
   direccion?: string;
   lat?: number;
   lng?: number;
@@ -343,6 +346,7 @@ function filaParaGuardar(datos: Partial<DatosNegocio>) {
   if (datos.telefono !== undefined) fila.telefono = datos.telefono;
   if (datos.whatsapp !== undefined) fila.whatsapp = datos.whatsapp;
   if (datos.mensajeWhatsapp !== undefined) fila.mensajeWhatsapp = datos.mensajeWhatsapp;
+  if (datos.mensajeCitas !== undefined) fila.mensajeCitas = datos.mensajeCitas;
   if (datos.direccion !== undefined) fila.direccion = datos.direccion;
   if (datos.lat !== undefined) fila.lat = datos.lat;
   if (datos.lng !== undefined) fila.lng = datos.lng;
@@ -537,6 +541,7 @@ export const TIPOS_EVENTO = [
   { tipo: "whatsapp", label: "WhatsApp" },
   { tipo: "mapa", label: "Cómo llegar / Mapa" },
   { tipo: "pedido", label: "Pedidos enviados" },
+  { tipo: "cita", label: "Citas agendadas" },
 ] as const;
 
 export type TipoEvento = (typeof TIPOS_EVENTO)[number]["tipo"];
