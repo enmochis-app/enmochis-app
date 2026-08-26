@@ -49,6 +49,37 @@ function registrarEvento(negocioId: string, tipo: string) {
   }
 }
 
+function Reveal({ children, className }: { children: React.ReactNode; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setVisible(true);
+      return;
+    }
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          obs.disconnect();
+        }
+      },
+      { threshold: 0.15 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <div ref={ref} className={`reveal${visible ? " visible" : ""}${className ? ` ${className}` : ""}`}>
+      {children}
+    </div>
+  );
+}
+
 function CarruselGaleria({ galeria }: { galeria: Negocio["galeria"] }) {
   const [activo, setActivo] = useState(0);
   const items = galeria.filter((g) => g.foto);
@@ -301,18 +332,68 @@ export default function NegocioDetalle({
     window.open(`https://wa.me/${negocio.whatsapp.replace(/[^\d]/g, "")}?text=${encodeURIComponent(mensaje)}`, "_blank");
   }
 
-  return (
-    <div
-      className="mini-wrap"
-      style={
-        {
-          "--accent": accent,
-          "--degradado-superior-rgb": degradadoSuperiorRgb,
-          "--degradado-inferior-rgb": degradadoInferiorRgb,
-          "--degradado-inferior-texto": degradadoInferiorTexto,
-        } as React.CSSProperties
-      }
+  const estiloVars = {
+    "--accent": accent,
+    "--degradado-superior-rgb": degradadoSuperiorRgb,
+    "--degradado-inferior-rgb": degradadoInferiorRgb,
+    "--degradado-inferior-texto": degradadoInferiorTexto,
+  } as React.CSSProperties;
+
+  const carritoFlotante = modoPedido && cantidadCarrito > 0 && (
+    <button
+      type="button"
+      className="btn-carrito-flotante"
+      onClick={() => setCarritoAbierto(true)}
+      style={{ background: accent, color: "#0A0A0A" }}
     >
+      <span>
+        🛒 {cantidadCarrito} producto{cantidadCarrito === 1 ? "" : "s"}
+      </span>
+      <span>${totalCarrito}</span>
+    </button>
+  );
+
+  const overlayCarrito = carritoAbierto && (
+    <div className="overlay-carrito" onClick={() => setCarritoAbierto(false)}>
+      <div className="hoja-carrito" onClick={(e) => e.stopPropagation()}>
+        <div className="hoja-carrito-header">
+          <h3>Tu pedido</h3>
+          <button type="button" onClick={() => setCarritoAbierto(false)}>
+            ✕
+          </button>
+        </div>
+        <div className="hoja-carrito-lineas">
+          {lineasCarrito.map((l) => (
+            <div className="linea-carrito" key={l.item.id}>
+              <div className="linea-nombre">
+                {l.cantidad}x {l.item.nombre}
+              </div>
+              <div className="linea-derecha">
+                <span>${l.subtotal}</span>
+                <button type="button" onClick={() => quitarDelCarrito(l.item)}>
+                  Quitar
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+        <textarea
+          className="nota-pedido"
+          placeholder="Nota para tu pedido (opcional)"
+          value={notaPedido}
+          onChange={(e) => setNotaPedido(e.target.value)}
+        />
+        <div className="hoja-carrito-total">Total: ${totalCarrito}</div>
+        <button type="button" className="btn-enviar-pedido" onClick={enviarPedido} style={{ background: accent, color: "#0A0A0A" }}>
+          Enviar pedido por WhatsApp
+        </button>
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+    <div className="mini-wrap" style={estiloVars}>
       <a className="mini-tag" href="https://enmochis.app" target="_blank" rel="noopener noreferrer">
         enmochis · directorio
       </a>
@@ -510,63 +591,6 @@ export default function NegocioDetalle({
         <div style={{ height: 40 }} />
       </div>
 
-      {modoPedido && cantidadCarrito > 0 && (
-        <button
-          type="button"
-          className="btn-carrito-flotante"
-          onClick={() => setCarritoAbierto(true)}
-          style={{ background: accent, color: "#0A0A0A" }}
-        >
-          <span>
-            🛒 {cantidadCarrito} producto{cantidadCarrito === 1 ? "" : "s"}
-          </span>
-          <span>${totalCarrito}</span>
-        </button>
-      )}
-
-      {carritoAbierto && (
-        <div className="overlay-carrito" onClick={() => setCarritoAbierto(false)}>
-          <div className="hoja-carrito" onClick={(e) => e.stopPropagation()}>
-            <div className="hoja-carrito-header">
-              <h3>Tu pedido</h3>
-              <button type="button" onClick={() => setCarritoAbierto(false)}>
-                ✕
-              </button>
-            </div>
-            <div className="hoja-carrito-lineas">
-              {lineasCarrito.map((l) => (
-                <div className="linea-carrito" key={l.item.id}>
-                  <div className="linea-nombre">
-                    {l.cantidad}x {l.item.nombre}
-                  </div>
-                  <div className="linea-derecha">
-                    <span>${l.subtotal}</span>
-                    <button type="button" onClick={() => quitarDelCarrito(l.item)}>
-                      Quitar
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <textarea
-              className="nota-pedido"
-              placeholder="Nota para tu pedido (opcional)"
-              value={notaPedido}
-              onChange={(e) => setNotaPedido(e.target.value)}
-            />
-            <div className="hoja-carrito-total">Total: ${totalCarrito}</div>
-            <button
-              type="button"
-              className="btn-enviar-pedido"
-              onClick={enviarPedido}
-              style={{ background: accent, color: "#0A0A0A" }}
-            >
-              Enviar pedido por WhatsApp
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* ===== BARRA INFERIOR ===== */}
       <div className="sticky-bar">
         <button type="button" className="activo" onClick={() => setPantalla("inicio")}>
@@ -603,5 +627,211 @@ export default function NegocioDetalle({
         </button>
       </div>
     </div>
+
+    {/* ===== VERSIÓN DE ESCRITORIO: scroll único con revelado progresivo ===== */}
+    <div className="escritorio-wrap" style={estiloVars}>
+      <div className="escritorio-grid">
+        <aside className="escritorio-sidebar">
+          <a className="mini-tag" href="https://enmochis.app" target="_blank" rel="noopener noreferrer" style={{ padding: 0, justifyContent: "flex-start" }}>
+            enmochis · directorio
+          </a>
+
+          <div className={`escritorio-logo shape-${negocio.logoForma}`}>
+            {negocio.logoUrl ? <img src={negocio.logoUrl} alt={negocio.nombre} /> : "🍽️"}
+          </div>
+
+          <div>
+            <div className="escritorio-cat">{negocio.categoria}</div>
+            <div className="escritorio-nombre">{negocio.nombre.toUpperCase()}</div>
+            {negocio.descripcionCorta && <div className="escritorio-sub">{negocio.descripcionCorta}</div>}
+          </div>
+
+          {servicios.length > 0 && (
+            <div className="escritorio-servicios">
+              {servicios.map((a) => (
+                <span className="mini-chip" key={a.id}>
+                  {a.icono} {a.nombre}
+                </span>
+              ))}
+            </div>
+          )}
+
+          <div className="escritorio-cta-col">
+            {negocio.telefono && (
+              <a
+                className="cta-btn"
+                href={telHref(negocio.telefono)}
+                onClick={() => registrarEvento(negocio.id, "llamar")}
+                style={{ background: accent, color: "#0A0A0A" }}
+              >
+                ☎ LLAMAR AHORA
+              </a>
+            )}
+            {addonWhatsapp && negocio.whatsapp && (
+              <a
+                className="cta-btn"
+                href={waHref(negocio.whatsapp, negocio.slug, negocio.mensajeWhatsapp)}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => registrarEvento(negocio.id, "whatsapp")}
+                style={{ background: "rgba(255,255,255,0.08)", color: "#fff", border: "1.5px solid rgba(255,255,255,0.25)" }}
+              >
+                💬 WHATSAPP
+              </a>
+            )}
+            {tieneCitas && (
+              <button
+                type="button"
+                className="cta-btn"
+                onClick={agendarCita}
+                style={{ background: "rgba(255,255,255,0.08)", color: "#fff", border: `1.5px solid ${accent}` }}
+              >
+                📅 AGENDAR CITA
+              </button>
+            )}
+          </div>
+
+          {tieneMapa && (
+            <a
+              className="mapa-secundario"
+              href={urlMapaRecomendado}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => registrarEvento(negocio.id, "mapa")}
+              style={{ marginTop: "auto" }}
+            >
+              📍 {negocio.direccion || "Cómo llegar"}
+            </a>
+          )}
+        </aside>
+
+        <main className="escritorio-contenido">
+          <div
+            className="escritorio-hero-foto"
+            style={negocio.fotoPortada ? { backgroundImage: `url(${negocio.fotoPortada})` } : undefined}
+          />
+
+          {negocio.descripcionLarga && (
+            <Reveal className="escritorio-seccion">
+              <p className="land-desc" style={{ padding: 0, fontSize: 15 }}>
+                {negocio.descripcionLarga}
+              </p>
+            </Reveal>
+          )}
+
+          {mostrarGaleria && (
+            <Reveal className="escritorio-seccion">
+              <CarruselGaleria galeria={negocio.galeria} />
+            </Reveal>
+          )}
+
+          <Reveal className="escritorio-seccion">
+            <h2>Menú</h2>
+            {tienePedidos && (
+              <div className="pedido-toggle-wrap" style={{ padding: 0, marginBottom: 20 }}>
+                <button
+                  type="button"
+                  className={`btn-pedido-toggle${modoPedido ? " activo" : ""}`}
+                  onClick={() => setModoPedido((v) => !v)}
+                  style={{ width: "auto", padding: "13px 22px" }}
+                >
+                  🛒 {modoPedido ? "Modo pedido activado" : "Ordenar en línea"}
+                </button>
+              </div>
+            )}
+            <div className="escritorio-menu-cols">
+              {categorias.map((cat, i) => (
+                <div className="menu-cat-block" key={cat.categoria + i}>
+                  <div className="menu-cat-name">{cat.categoria}</div>
+                  {cat.items.map((item) => (
+                    <div className="menu-line" key={item.id}>
+                      <span className="mname">{item.nombre}</span>
+                      <div className="mprice-group">
+                        <span className="mprice">${item.precio}</span>
+                        {modoPedido && item.ordenable && (
+                          <div className="item-stepper">
+                            {carrito[item.id] ? (
+                              <>
+                                <button type="button" onClick={() => quitarDelCarrito(item)}>
+                                  −
+                                </button>
+                                <span>{carrito[item.id]}</span>
+                                <button type="button" onClick={() => agregarAlCarrito(item)}>
+                                  +
+                                </button>
+                              </>
+                            ) : (
+                              <button type="button" className="btn-agregar" onClick={() => agregarAlCarrito(item)}>
+                                +
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </Reveal>
+
+          {tieneMapa && (
+            <Reveal className="escritorio-seccion">
+              <h2>Cómo llegar</h2>
+              <div className="mini-mapas" style={{ padding: 0 }}>
+                {negocio.direccion && <div className="mapas-direccion">{negocio.direccion}</div>}
+                <a
+                  className="cta-btn mapa-principal"
+                  href={urlMapaRecomendado}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => registrarEvento(negocio.id, "mapa")}
+                  style={{ background: accent, color: "#0A0A0A", maxWidth: 320 }}
+                >
+                  📍 Cómo llegar
+                  <span className="chip-recomendado">Recomendado</span>
+                </a>
+                <a
+                  className="mapa-secundario"
+                  href={urlMapaSecundario}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => registrarEvento(negocio.id, "mapa")}
+                >
+                  Prefiero {nombreMapaSecundario}
+                </a>
+              </div>
+            </Reveal>
+          )}
+
+          {tieneLealtad && (
+            <Reveal className="escritorio-seccion">
+              <Link href={`/negocio/${negocio.slug}/tarjeta`} className="mini-lealtad-banner" style={{ margin: 0, maxWidth: 360 }}>
+                ⭐ Obtén tu tarjeta de puntos
+              </Link>
+            </Reveal>
+          )}
+
+          {tieneCalificaciones && (
+            <Reveal className="escritorio-seccion">
+              <h2>Calificaciones</h2>
+              <div style={{ maxWidth: 480 }}>
+                <BloqueCalificaciones
+                  negocioId={negocio.id}
+                  modo={negocio.calificacionModo}
+                  googleUrl={negocio.googleResenasUrl}
+                  resumen={resumenCalificaciones ?? { promedio: 0, total: 0 }}
+                  comentariosIniciales={comentarios ?? []}
+                />
+              </div>
+            </Reveal>
+          )}
+        </main>
+      </div>
+    </div>
+
+    {carritoFlotante}
+    {overlayCarrito}
+    </>
   );
 }

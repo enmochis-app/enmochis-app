@@ -12,6 +12,67 @@ body {
 
 .mini-wrap { max-width: 480px; margin: 0 auto; background: #0A0A0A; min-height: 100vh; padding-bottom: 90px; position: relative; }
 
+/* ===== Versión de escritorio: layout real de dos columnas, no la móvil estirada ===== */
+.escritorio-wrap { display: none; }
+
+@media (min-width: 768px) {
+  .mini-wrap { display: none; }
+  .escritorio-wrap { display: block; background: #0A0A0A; min-height: 100vh; }
+}
+
+.escritorio-grid {
+  display: grid; grid-template-columns: minmax(300px, 360px) 1fr;
+  max-width: 1280px; margin: 0 auto; min-height: 100vh;
+}
+.escritorio-sidebar {
+  position: sticky; top: 0; align-self: start; height: 100vh; overflow-y: auto;
+  padding: 48px 40px; display: flex; flex-direction: column; gap: 18px;
+  border-right: 1px solid #1a1a1a;
+}
+.escritorio-logo {
+  width: 96px; height: 96px; border-radius: 24px; background: #111;
+  border: 3px solid var(--accent, #C8FF3D); overflow: hidden;
+  display: flex; align-items: center; justify-content: center; font-size: 36px;
+}
+.escritorio-logo.shape-circular { border-radius: 50%; }
+.escritorio-logo.shape-cuadrada { border-radius: 18px; }
+.escritorio-logo.shape-rectangular { width: 150px; height: 96px; border-radius: 14px; }
+.escritorio-logo img { width: 100%; height: 100%; object-fit: cover; }
+.escritorio-cat {
+  font-family: 'Space Grotesk'; font-size: 11px; letter-spacing: 0.14em;
+  text-transform: uppercase; font-weight: 700; color: var(--accent, #C8FF3D); margin-bottom: 4px;
+}
+.escritorio-nombre { font-family: 'Anton', sans-serif; font-size: 32px; line-height: 1; text-transform: uppercase; word-break: break-word; }
+.escritorio-sub { font-family: 'Space Grotesk'; font-size: 12px; color: #ccc; letter-spacing: 0.05em; text-transform: uppercase; margin-top: 8px; }
+.escritorio-servicios { display: flex; flex-wrap: wrap; gap: 8px; }
+.escritorio-cta-col { display: flex; flex-direction: column; gap: 10px; }
+.escritorio-cta-col .cta-btn { padding: 15px; font-size: 13.5px; }
+
+.escritorio-contenido { padding-bottom: 100px; }
+.escritorio-hero-foto {
+  height: 46vh; min-height: 320px; background-size: cover; background-position: center;
+  background-color: #151515; position: relative;
+}
+.escritorio-hero-foto::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(10,10,10,0) 55%, rgba(10,10,10,0.95) 100%);
+}
+.escritorio-seccion { padding: 50px 56px; max-width: 900px; }
+.escritorio-seccion h2 {
+  font-family: 'Anton', sans-serif; font-size: 26px; text-transform: uppercase; margin-bottom: 20px;
+}
+.escritorio-menu-cols { columns: 2; column-gap: 48px; }
+.escritorio-menu-cols .menu-cat-block { break-inside: avoid; }
+
+.reveal {
+  opacity: 0; transform: translateY(28px);
+  transition: opacity 0.7s cubic-bezier(.16,1,.3,1), transform 0.7s cubic-bezier(.16,1,.3,1);
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { transition: none; opacity: 1; transform: none; }
+}
+
 .mini-tag {
   display: flex; justify-content: center; padding: 10px 0;
   font-family: 'Space Grotesk'; font-size: 10.5px; color: #555;
