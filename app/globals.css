@@ -102,7 +102,50 @@
 .app.orange .gallery img{border-radius:2px;border:2px solid #111}
 .whatsapp-btn{display:flex;align-items:center;justify-content:center;gap:8px;border:0;width:100%;margin-top:12px;padding:14px;border-radius:999px;background:#25D366;color:#fff;font-weight:800;cursor:pointer;text-decoration:none}
 .app.orange .whatsapp-btn{border-radius:2px;border:2px solid #111}
-@media(min-width:700px){body{padding:80px 0}.app{border-radius:28px;box-shadow:0 30px 80px #0005}}
+/* =====================================================================
+   TABLET/ESCRITORIO — el directorio (tema Naranja) vivía encerrado en un
+   "marco de celular" de 430px sin importar el tamaño de pantalla. Aquí se
+   reacomoda el mismo contenido de siempre para usar el espacio real:
+   la ficha destacada pasa a foto+texto lado a lado, la fila de
+   recomendados deja de ser una tira de scroll horizontal y se acomoda en
+   cuadrícula, las categorías caben en una sola fila, y el directorio
+   completo pasa a 2 columnas. El celular (por debajo de 700px) no cambia.
+   ===================================================================== */
+@media(min-width:700px){
+  body{padding:40px 24px}
+  .app{width:min(92%,860px);border-radius:28px;box-shadow:0 30px 80px #0005}
+  .menu-panel{width:min(92%,860px)}
+
+  .hero{padding:28px 40px 32px}
+  .title{font-size:64px}
+  .intro{max-width:520px}
+  .search{max-width:460px}
+  .cat-scroll{flex-wrap:wrap;overflow:visible}
+
+  .section{padding:24px 40px}
+
+  .feature{display:flex;align-items:stretch}
+  .feature img{width:42%;height:auto}
+  .feature-body{flex:1;padding:22px 26px}
+
+  .row{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));overflow:visible}
+
+  .catgrid{grid-template-columns:repeat(4,1fr)}
+
+  .list{grid-template-columns:1fr 1fr}
+
+  .bottom{max-width:460px;margin:0 auto;border-radius:20px 20px 0 0}
+  .form{max-width:640px}
+}
+
+@media(min-width:1100px){
+  .app{width:min(88%,1180px)}
+  .menu-panel{width:min(88%,1180px)}
+  .title{font-size:78px}
+  .feature img{width:38%}
+  .row{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+  .list{grid-template-columns:repeat(3,1fr)}
+}
 .admin-field{margin-bottom:14px}
 .admin-field label{display:block;font-size:11px;font-weight:800;text-transform:uppercase;margin-bottom:6px}
 .admin-thumb{width:60px;height:60px;object-fit:cover;border-radius:8px}
