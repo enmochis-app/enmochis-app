@@ -319,15 +319,19 @@ export default function NegocioDetalle({
 
       {/* ===== PANTALLA: INICIO ===== */}
       <div className={`screen${pantalla === "inicio" ? " activo" : ""}`}>
-        <div
-          className="hero-bg"
-          style={negocio.fotoPortada ? { backgroundImage: `url(${negocio.fotoPortada})` } : undefined}
-        />
-        {!negocio.fotoPortada && <div className="ph-icon-wrap">🍽️</div>}
-        <div className="hero-scrim-top" ref={scrimRef} />
-        <div className="hero-scrim-bottom" />
-
         <div className="hero-content">
+          {/* Estos 4 van DENTRO del hero (no fijos a toda la pantalla) para que
+              la foto se quede solo en el área del hero y todo lo que sigue
+              (descripción, chips, reseñas) se vea sobre el fondo oscuro de
+              Brutal Food, no encima de la foto. */}
+          <div
+            className="hero-bg"
+            style={negocio.fotoPortada ? { backgroundImage: `url(${negocio.fotoPortada})` } : undefined}
+          />
+          {!negocio.fotoPortada && <div className="ph-icon-wrap">🍽️</div>}
+          <div className="hero-scrim-top" ref={scrimRef} />
+          <div className="hero-scrim-bottom" />
+
           <div className="home-title-block">
             <div className="land-cat">{negocio.categoria}</div>
             <div className="land-name">{negocio.nombre.toUpperCase()}</div>
