@@ -220,6 +220,18 @@ body {
 .screen { display: none; }
 .screen.activo { display: block; }
 
+/* ===== Footer de marca (regresa al directorio) ===== */
+.mini-footer {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin: 40px 20px 0; padding: 16px; border-top: 1px solid #1a1a1a;
+  text-decoration: none; text-align: center;
+}
+.mini-footer-logo { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.mini-footer span {
+  font-family: 'Space Grotesk'; font-size: 11px; color: #777; line-height: 1.5;
+}
+.mini-footer strong { color: var(--accent, #C8FF3D); }
+
 /* ===== Addon: Lealtad (banner en el landing) ===== */
 .mini-lealtad-banner {
   display: block; margin: 18px 20px 0; padding: 14px 16px; text-align: center;
@@ -367,4 +379,96 @@ body {
 .tl-recuperar button {
   background: var(--accent, #C8FF3D); color: #0A0A0A; border: none; border-radius: 8px;
   padding: 10px 16px; font-family: 'Space Grotesk'; font-weight: 700; cursor: pointer;
+}
+
+/* =====================================================================
+   VISTA DE ESCRITORIO / TABLET — mismo contenido de siempre, reacomodado
+   por punto de quiebre. Sin barra lateral ni animaciones de aparición:
+   el hero pasa a 2 columnas, el menú a 2 columnas, la galería a
+   cuadrícula. El celular (por debajo de 768px) no cambia en nada.
+   ===================================================================== */
+@media (min-width: 768px) {
+  .mini-wrap { max-width: 720px; }
+  .hero-bg, .hero-scrim-top, .hero-scrim-bottom, .ph-icon-wrap { max-width: 720px; }
+
+  .hero-content {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 200px;
+    align-items: center;
+    column-gap: 32px;
+    padding: 56px 40px 32px;
+    min-height: 46vh; min-height: 46svh;
+  }
+  .home-title-block { padding: 0; }
+  .hero-logo-center { margin: 0; justify-self: center; }
+
+  /* position:relative es necesario aquí (aunque no se mueva nada) para que
+     estos bloques se dibujen encima del fondo fijo del hero (.hero-bg) —
+     si no, el navegador los pinta por debajo y quedan invisibles aunque el
+     texto exista y esté bien escrito. En celular se dejan como estaban
+     (con este mismo bug) porque ahí el hero es mucho más alto y agregar
+     esto los haría empalmarse con los botones flotantes de abajo — se
+     puede corregir aparte, avisando antes por si cambia algo ya aprobado. */
+  .land-desc { position: relative; padding: 32px 40px 0; }
+  .mini-servicios { position: relative; padding: 18px 40px 0; }
+  .mini-mapas { padding: 0 40px; }
+  .mini-lealtad-banner,
+  .mini-calificaciones-google,
+  .mini-calificaciones { position: relative; margin-left: 40px; margin-right: 40px; }
+  .mini-footer { margin-left: 40px; margin-right: 40px; }
+  .cta-float { padding: 0 40px; }
+
+  .menu-topbar { padding-left: 40px; padding-right: 40px; }
+  .galeria-eyebrow, .galeria-titulo { padding-left: 40px; padding-right: 40px; }
+  .pedido-toggle-wrap { padding-left: 40px; padding-right: 40px; }
+
+  /* Galería: de carrusel horizontal a cuadrícula fija */
+  .carrusel-track {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+    overflow-x: visible; padding: 4px 40px 12px;
+  }
+  .tarjeta { flex: unset; }
+  .dots { display: none; }
+
+  /* Menú: de una columna a dos, cada categoría cae en la que tenga espacio */
+  .menu-section { padding: 0 40px; columns: 2; column-gap: 48px; }
+  .menu-main-title { column-span: all; margin-bottom: 26px; }
+  .menu-cat-block { break-inside: avoid; }
+}
+
+/* =====================================================================
+   ESCRITORIO — a partir de aquí ya hay espacio real de sobra a los
+   lados: la barra de contacto (llamar/ver menú/agendar + mapa/whatsapp)
+   deja de estar anclada abajo y se convierte en un panel fijo a la
+   derecha. En tablet (arriba) se queda abajo porque ahí no cabe.
+   ===================================================================== */
+@media (min-width: 1100px) {
+  .mini-wrap { max-width: 860px; padding-bottom: 60px; }
+  .hero-bg, .hero-scrim-top, .hero-scrim-bottom, .ph-icon-wrap { max-width: 860px; }
+  .land-name { font-size: 58px; }
+  .hero-cta-spacer { height: 24px !important; }
+  /* El degradado inferior fijo existía para desvanecer el contenido detrás
+     de la barra de contacto anclada abajo. En escritorio esa barra ya no
+     está ahí (se movió al panel de la derecha), así que ya no aplica. */
+  .hero-scrim-bottom { display: none; }
+
+  .cta-float {
+    position: fixed; left: auto; top: auto;
+    right: 48px; bottom: 132px;
+    width: 300px; max-width: 300px;
+    flex-direction: column; gap: 12px;
+    background: #111111; border: 1.5px solid #262626; border-radius: 20px;
+    padding: 18px; box-shadow: 0 24px 60px rgba(0,0,0,0.55);
+  }
+  .home-thumbs { padding: 0 0 4px; }
+  .home-thumb { height: 72px; }
+  .home-thumb:nth-child(2) { height: 80px; }
+
+  .sticky-bar {
+    position: fixed; left: auto; top: auto;
+    right: 48px; bottom: 48px;
+    width: 300px; max-width: 300px; margin: 0;
+    border-radius: 16px; border: 1.5px solid #262626;
+    padding: 10px 6px 12px;
+  }
 }
