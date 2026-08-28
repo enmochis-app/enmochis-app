@@ -1,8 +1,8 @@
 import type { Addon, Negocio } from "./negocios";
 import type { MenuItem } from "./menuItems";
 
-/** Espejo del catálogo inicial que se siembra en la base real (scripts/migrar-addons.mts). */
-const CATALOGO_ADDONS_DEMO = {
+/** Espejo del catálogo inicial que se siembra en la base real (ver /api/admin/sembrar-prueba). */
+export const CATALOGO_ADDONS_DEMO = {
   whatsapp: { id: "demo-addon-whatsapp", clave: "whatsapp", nombre: "WhatsApp", descripcion: "Botón directo de WhatsApp en vez de solo llamada.", icono: "💬", precio: 100, comportamiento: "especial", activo: true, orden: 1 },
   mapas: { id: "demo-addon-mapas", clave: "mapas", nombre: "Mapas", descripcion: "Botón \"Cómo llegar\" con Google/Apple Maps.", icono: "📍", precio: 100, comportamiento: "especial", activo: true, orden: 2 },
   galeria: { id: "demo-addon-galeria", clave: "galeria", nombre: "Galería", descripcion: "Carrusel de fotos de producto en el minisitio.", icono: "🖼️", precio: 100, comportamiento: "especial", activo: true, orden: 3 },
