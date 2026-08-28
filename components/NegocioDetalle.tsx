@@ -5,21 +5,7 @@ import Link from "next/link";
 import type { Negocio } from "@/lib/negocios";
 import { agruparPorCategoria, type MenuItem } from "@/lib/menuItems";
 import type { Calificacion, ResumenCalificaciones } from "@/lib/calificaciones";
-
-function telHref(numero: string) {
-  return `tel:${numero.replace(/[^\d+]/g, "")}`;
-}
-function waHref(numero: string, slug: string, mensajeBase?: string) {
-  const base = mensajeBase?.trim() || "Hola 👋, quiero hacer un pedido.";
-  const mensaje = `${base} Vengo de ${slug}.enmochis.app`;
-  return `https://wa.me/${numero.replace(/[^\d]/g, "")}?text=${encodeURIComponent(mensaje)}`;
-}
-function urlGoogleMaps(lat: number, lng: number, nombre: string) {
-  return `https://maps.google.com/maps?q=${lat},${lng}(${encodeURIComponent(nombre)})`;
-}
-function urlAppleMaps(lat: number, lng: number, nombre: string) {
-  return `https://maps.apple.com/?ll=${lat},${lng}&q=${encodeURIComponent(nombre)}`;
-}
+import { telHref, waHref, urlGoogleMaps, urlAppleMaps } from "@/lib/addonLinks";
 
 function hexARgb(hex?: string): string | undefined {
   if (!hex) return undefined;
