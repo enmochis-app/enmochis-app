@@ -23,6 +23,9 @@ export default function UnetePage() {
           contactoNombre: data.get("contactoNombre"),
           telefono: data.get("telefono"),
           descripcion: data.get("descripcion"),
+          colonia: data.get("colonia"),
+          instagram: data.get("instagram"),
+          facebook: data.get("facebook"),
         }),
       });
       if (!res.ok) {
@@ -42,58 +45,50 @@ export default function UnetePage() {
       <div className="hero">
         <div className="eyebrow">PARA NEGOCIOS LOCALES</div>
         <h1 className="title">
-          Tu negocio.
+          Afíliate
           <br />
-          Tu lugar
-          <br />
-          en EnMochis.
+          ya.
         </h1>
         <p className="intro">
           Crea un minisitio para que tus clientes encuentren tu menú, ubicación, teléfono
           y todo lo que necesitan para visitarte.
         </p>
       </div>
-      <div className="cta">
-        <h2>Haz que te encuentren.</h2>
-        <p>Tu página, tu identidad y tu información. Sin competir con menús de otros negocios.</p>
-        <a className="btn" href="#joinForm">
-          QUIERO UNIRME →
-        </a>
-      </div>
+
       <section className="section">
         <div className="head">
-          <h2>¿Qué incluye?</h2>
+          <h2>¿Cómo funciona?</h2>
         </div>
-        <div className="list">
-          <div className="listitem" style={{ cursor: "default" }}>
-            <div className="number" style={{ fontSize: 28 }}>
-              01
-            </div>
+        <div className="steps">
+          <div className="step">
+            <div className="step-num">01</div>
             <div>
-              <h3>MiniSitio</h3>
-              <div className="small">Una página diseñada para tu negocio.</div>
+              <div className="step-name">Cuéntanos de tu negocio</div>
+              <div className="step-desc">Llena el formulario de abajo con tus datos básicos de contacto.</div>
             </div>
           </div>
-          <div className="listitem" style={{ cursor: "default" }}>
-            <div className="number" style={{ fontSize: 28 }}>
-              02
-            </div>
+          <div className="step">
+            <div className="step-num">02</div>
             <div>
-              <h3>Menú digital</h3>
-              <div className="small">Tus productos siempre visibles y actualizados.</div>
+              <div className="step-name">Arrancas con prueba gratuita</div>
+              <div className="step-desc">Tu minisitio queda listo y visible mientras decides si te quedas.</div>
             </div>
           </div>
-          <div className="listitem" style={{ cursor: "default" }}>
-            <div className="number" style={{ fontSize: 28 }}>
-              03
-            </div>
+          <div className="step">
+            <div className="step-num">03</div>
             <div>
-              <h3>Descubrimiento</h3>
-              <div className="small">Aparece en búsquedas, categorías y recomendaciones.</div>
+              <div className="step-name">Te contactamos</div>
+              <div className="step-desc">Te mostramos los paquetes y addons opcionales para tu negocio.</div>
             </div>
           </div>
         </div>
       </section>
+
+      <div className="trial-note">
+        <strong>Empiezas gratis.</strong> No pedimos tarjeta ni pagos por adelantado — al enviar tu
+        solicitud comienza tu prueba gratuita y después te contactamos con los detalles.
+      </div>
+
       <form className="form" id="joinForm" onSubmit={submitJoin}>
         <div className="head">
           <h2>Empieza aquí.</h2>
@@ -116,6 +111,10 @@ export default function UnetePage() {
           </select>
         </div>
         <div className="field">
+          <label>Colonia / zona</label>
+          <input name="colonia" placeholder="Ej. Centro, Las Fuentes..." />
+        </div>
+        <div className="field">
           <label>Tu nombre</label>
           <input name="contactoNombre" required placeholder="Nombre y apellido" />
         </div>
@@ -124,11 +123,19 @@ export default function UnetePage() {
           <input name="telefono" required placeholder="+52..." />
         </div>
         <div className="field">
+          <label>Instagram (opcional)</label>
+          <input name="instagram" placeholder="@tunegocio" />
+        </div>
+        <div className="field">
+          <label>Facebook (opcional)</label>
+          <input name="facebook" placeholder="facebook.com/tunegocio" />
+        </div>
+        <div className="field">
           <label>Cuéntanos sobre tu negocio</label>
           <textarea
             name="descripcion"
             className="textarea"
-            placeholder="Tipo de negocio, categoría, qué quieres mostrar..."
+            placeholder="Tipo de negocio, qué vendes, qué te hace especial..."
           />
         </div>
         <button className="btn" type="submit" disabled={estado === "enviando"}>
@@ -140,7 +147,7 @@ export default function UnetePage() {
           </p>
         )}
         {estado === "error" && (
-          <p className="small" style={{ marginTop: 10, color: "#c0392b" }}>
+          <p className="small" style={{ marginTop: 10, color: "var(--coral)" }}>
             {errorMsg}
           </p>
         )}

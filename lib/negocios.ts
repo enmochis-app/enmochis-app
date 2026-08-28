@@ -8,10 +8,10 @@ import { hashearPassword, passwordValido } from "./portalAuth";
 export type Categoria = "Restaurantes" | "Cafeterías" | "Snacks" | "Panaderías";
 
 export const CATEGORIAS: { slug: string; nombre: Categoria; emoji: string; color: string }[] = [
-  { slug: "restaurantes", nombre: "Restaurantes", emoji: "🍽️", color: "#2f6fed" },
-  { slug: "cafeterias", nombre: "Cafeterías", emoji: "☕", color: "#c9852c" },
-  { slug: "snacks", nombre: "Snacks", emoji: "🌮", color: "#e0553c" },
-  { slug: "panaderias", nombre: "Panaderías", emoji: "🥐", color: "#8a5cd6" },
+  { slug: "restaurantes", nombre: "Restaurantes", emoji: "🍽️", color: "#00847A" },
+  { slug: "cafeterias", nombre: "Cafeterías", emoji: "☕", color: "#C81458" },
+  { slug: "snacks", nombre: "Snacks", emoji: "🌮", color: "#D93A1F" },
+  { slug: "panaderias", nombre: "Panaderías", emoji: "🥐", color: "#0E2E29" },
 ];
 
 export function categoriaPorSlug(slug: string) {
@@ -213,6 +213,16 @@ export async function getRecomendados(): Promise<Negocio[]> {
   }
 }
 
+/** Trae todos los negocios visibles al público, sin límite — usado por el buscador del inicio. */
+export async function getTodosPublicos(): Promise<Negocio[]> {
+  try {
+    const filas = await db().select().from(negocios).where(inArray(negocios.estado, ESTADOS_PUBLICOS));
+    return await mapNegociosConAddons(filas);
+  } catch {
+    return SAMPLE_NEGOCIOS;
+  }
+}
+
 export async function getNegociosPorCategoria(categoriaSlug: string): Promise<Negocio[]> {
   const cat = categoriaPorSlug(categoriaSlug);
   if (!cat) return [];
@@ -273,6 +283,9 @@ export type NuevaSolicitud = {
   contactoNombre: string;
   telefono: string;
   descripcion: string;
+  colonia?: string;
+  instagram?: string;
+  facebook?: string;
 };
 
 export async function crearSolicitud(datos: NuevaSolicitud): Promise<{ id: string; slug: string }> {
@@ -287,6 +300,9 @@ export async function crearSolicitud(datos: NuevaSolicitud): Promise<{ id: strin
       estado: "solicitud",
       telefono: datos.telefono,
       contactoNombre: datos.contactoNombre,
+      direccion: datos.colonia || undefined,
+      instagram: datos.instagram || undefined,
+      facebook: datos.facebook || undefined,
       fechaAfiliacion: new Date().toISOString().slice(0, 10),
     })
     .returning({ id: negocios.id });
