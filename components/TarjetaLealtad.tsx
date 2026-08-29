@@ -33,6 +33,14 @@ export default function TarjetaLealtad({ negocio }: { negocio: Negocio }) {
   const [fechaNacimiento, setFechaNacimiento] = useState("");
 
   useEffect(() => {
+    const bg = { negro: "#0A0A0A", blanco: "#FFFFFF", beige: "#F3EAD9" }[negocio.degradadoInferior] ?? "#0A0A0A";
+    document.body.style.background = bg;
+    return () => {
+      document.body.style.background = "";
+    };
+  }, [negocio.degradadoInferior]);
+
+  useEffect(() => {
     const existente = localStorage.getItem(claveLocal);
     const activo = existente || generarCodigo();
     if (!existente) localStorage.setItem(claveLocal, activo);
@@ -90,7 +98,11 @@ export default function TarjetaLealtad({ negocio }: { negocio: Negocio }) {
     .toUpperCase();
 
   return (
-    <div className="mini-wrap" style={{ "--accent": accent, padding: "28px 20px 60px" } as React.CSSProperties}>
+    <div
+      className="mini-wrap"
+      data-tema={negocio.degradadoInferior}
+      style={{ "--accent": accent, padding: "28px 20px 60px" } as React.CSSProperties}
+    >
       <div className="tl-header">
         <p className="tl-eyebrow">Tarjeta de puntos</p>
         <h1 className="tl-titulo">{negocio.nombre}</h1>

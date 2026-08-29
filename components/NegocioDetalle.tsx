@@ -210,6 +210,17 @@ export default function NegocioDetalle({
     registrarEvento(negocio.id, "visita");
   }, [negocio.id]);
 
+  // Sincroniza el fondo de <body> con el tema del negocio (negro/blanco/beige)
+  // para que en escritorio los márgenes fuera del minisitio no se queden
+  // negros cuando el tema elegido es claro.
+  useEffect(() => {
+    const bg = { negro: "#0A0A0A", blanco: "#FFFFFF", beige: "#F3EAD9" }[negocio.degradadoInferior] ?? "#0A0A0A";
+    document.body.style.background = bg;
+    return () => {
+      document.body.style.background = "";
+    };
+  }, [negocio.degradadoInferior]);
+
   // Anima con un fundido hacia arriba cada sección (.reveal) la primera vez que
   // entra en pantalla al hacer scroll — así el minisitio de una sola página se
   // siente vivo en vez de aparecer todo de golpe.
@@ -305,6 +316,7 @@ export default function NegocioDetalle({
     <div
       ref={wrapRef}
       className="mini-wrap"
+      data-tema={negocio.degradadoInferior}
       style={
         {
           "--accent": accent,
