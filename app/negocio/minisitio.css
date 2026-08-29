@@ -35,10 +35,14 @@ body {
 .hero-scrim-top {
   position: absolute; top: 0; left: 0; right: 0; height: 68%;
   background: linear-gradient(180deg,
-    color-mix(in srgb, var(--accent, #C8FF3D) 34%, #05050a 66%) 0%,
-    color-mix(in srgb, var(--accent, #C8FF3D) 26%, #05050a 74%) 42%,
-    color-mix(in srgb, var(--accent, #C8FF3D) 14%, transparent 86%) 75%,
+    color-mix(in srgb, var(--accent, #C8FF3D) 40%, #05050a 60%) 0%,
+    color-mix(in srgb, var(--accent, #C8FF3D) 32%, #05050a 68%) 42%,
+    color-mix(in srgb, var(--accent, #C8FF3D) 16%, transparent 84%) 75%,
     transparent 100%);
+  /* multiply en vez de una capa opaca plana: dejamos que las luces y sombras
+     de la foto se sigan viendo por debajo del color, así se siente teñido
+     sobre la imagen y no un rectángulo sólido encima. */
+  mix-blend-mode: multiply;
   transition: opacity 0.15s linear;
 }
 .hero-scrim-bottom {
@@ -51,7 +55,7 @@ body {
 }
 .hero-content {
   position: relative; overflow: hidden; padding-top: 22px;
-  min-height: 82vh; min-height: 82svh;
+  min-height: 72vh; min-height: 72svh;
   display: flex; flex-direction: column;
 }
 /* position:relative (con z-index:auto) basta para que estos dos se dibujen
@@ -77,14 +81,24 @@ body {
   font-family: 'Space Grotesk'; font-size: 12px; letter-spacing: 0.1em;
   text-transform: uppercase; color: #ccc; margin-top: 10px;
 }
+.hero-acciones { display: flex; align-items: center; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
 .hero-llamar {
-  display: inline-flex; align-items: center; gap: 7px; margin-top: 16px;
+  display: inline-flex; align-items: center; gap: 7px;
   background: var(--accent, #C8FF3D); color: #0A0A0A; text-decoration: none;
   font-family: 'Space Grotesk'; font-weight: 700; font-size: 13px;
   padding: 11px 20px; border-radius: 100px; box-shadow: 0 8px 20px rgba(0,0,0,0.35);
   transition: transform 0.15s ease;
 }
 .hero-llamar:active { transform: scale(0.96); }
+.hero-social {
+  width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.3);
+  color: #fff; text-decoration: none; font-size: 17px; font-weight: 800;
+  font-family: 'Space Grotesk'; transition: transform 0.15s ease, background 0.15s ease;
+}
+.hero-social:active { transform: scale(0.92); }
+@media (hover: hover) { .hero-social:hover { background: rgba(255,255,255,0.18); } }
 
 .hero-logo-center {
   width: 190px; height: 190px; border-radius: 28px;
@@ -101,7 +115,7 @@ body {
 /* ===== Mini galería: se ancla ("sticky") un tramo corto al bajar del hero y
    se despega justo al llegar al degradado inferior, quedando sobre el texto
    descriptivo — nunca tapa los botones de más abajo. ===== */
-.thumbs-stick-wrap { position: relative; height: 220px; margin-top: -86px; z-index: 6; pointer-events: none; }
+.thumbs-stick-wrap { position: relative; height: 190px; margin-top: -50px; z-index: 6; pointer-events: none; }
 .home-thumbs { position: sticky; top: 14px; display: flex; gap: 10px; padding: 0 20px; pointer-events: auto; }
 .home-thumb {
   flex: 1; height: 150px; border-radius: 16px; background: rgba(28,28,28,0.85);

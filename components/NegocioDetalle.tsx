@@ -333,15 +333,39 @@ export default function NegocioDetalle({
           <div className="land-cat">{negocio.categoria}</div>
           <div className="land-name">{negocio.nombre.toUpperCase()}</div>
           {negocio.descripcionCorta && <div className="land-sub">{negocio.descripcionCorta}</div>}
-          {negocio.telefono && (
-            <a
-              className="hero-llamar"
-              href={telHref(negocio.telefono)}
-              onClick={() => registrarEvento(negocio.id, "llamar")}
-            >
-              ☎ Llamar ahora
-            </a>
-          )}
+          <div className="hero-acciones">
+            {negocio.telefono && (
+              <a
+                className="hero-llamar"
+                href={telHref(negocio.telefono)}
+                onClick={() => registrarEvento(negocio.id, "llamar")}
+              >
+                ☎ Llamar ahora
+              </a>
+            )}
+            {negocio.instagram && (
+              <a
+                className="hero-social"
+                href={`https://instagram.com/${negocio.instagram.replace(/^@/, "")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+              >
+                📷
+              </a>
+            )}
+            {negocio.facebook && (
+              <a
+                className="hero-social"
+                href={`https://facebook.com/${negocio.facebook}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+              >
+                f
+              </a>
+            )}
+          </div>
         </div>
 
         <div className={`hero-logo-center shape-${negocio.logoForma}`}>
