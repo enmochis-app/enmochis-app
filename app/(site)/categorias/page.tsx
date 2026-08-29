@@ -1,7 +1,11 @@
 import Link from "next/link";
-import { CATEGORIAS } from "@/lib/negocios";
+import { CATEGORIAS, getNegociosPorCategoria } from "@/lib/negocios";
 
-export default function CategoriasPage() {
+export const revalidate = 60;
+
+export default async function CategoriasPage() {
+  const conteos = await Promise.all(CATEGORIAS.map((c) => getNegociosPorCategoria(c.slug)));
+
   return (
     <>
       <div className="hero">
@@ -18,7 +22,7 @@ export default function CategoriasPage() {
       </div>
       <section className="section">
         <div className="catgrid">
-          {CATEGORIAS.map((c) => (
+          {CATEGORIAS.map((c, i) => (
             <Link
               key={c.slug}
               href={`/categoria/${c.slug}`}
@@ -28,6 +32,7 @@ export default function CategoriasPage() {
               <div className="cc-emoji">{c.emoji}</div>
               <div>
                 <div className="cc-label">{c.nombre}</div>
+                <div className="cc-count">{conteos[i].length} lugares</div>
               </div>
             </Link>
           ))}

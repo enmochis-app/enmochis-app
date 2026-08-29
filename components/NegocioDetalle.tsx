@@ -5,29 +5,7 @@ import Link from "next/link";
 import type { Negocio } from "@/lib/negocios";
 import { agruparPorCategoria, type MenuItem } from "@/lib/menuItems";
 import type { Calificacion, ResumenCalificaciones } from "@/lib/calificaciones";
-
-function telHref(numero: string) {
-  return `tel:${numero.replace(/[^\d+]/g, "")}`;
-}
-function waHref(numero: string, slug: string, mensajeBase?: string) {
-  const base = mensajeBase?.trim() || "Hola 👋, quiero hacer un pedido.";
-  const mensaje = `${base} Vengo de ${slug}.enmochis.app`;
-  return `https://wa.me/${numero.replace(/[^\d]/g, "")}?text=${encodeURIComponent(mensaje)}`;
-}
-function urlGoogleMaps(lat: number, lng: number, nombre: string) {
-  return `https://maps.google.com/maps?q=${lat},${lng}(${encodeURIComponent(nombre)})`;
-}
-function urlAppleMaps(lat: number, lng: number, nombre: string) {
-  return `https://maps.apple.com/?ll=${lat},${lng}&q=${encodeURIComponent(nombre)}`;
-}
-
-function hexARgb(hex?: string): string | undefined {
-  if (!hex) return undefined;
-  const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
-  if (!m) return undefined;
-  const n = parseInt(m[1], 16);
-  return `${(n >> 16) & 255} ${(n >> 8) & 255} ${n & 255}`;
-}
+import { telHref, waHref, urlGoogleMaps, urlAppleMaps } from "@/lib/addonLinks";
 
 const DEGRADADO_INFERIOR_RGB: Record<Negocio["degradadoInferior"], string> = {
   negro: "10 10 10",
@@ -202,27 +180,23 @@ export default function NegocioDetalle({
   resumenCalificaciones?: ResumenCalificaciones;
   comentarios?: Calificacion[];
 }) {
-  const [pantalla, setPantalla] = useState<"inicio" | "menu">("inicio");
   const [appleRecomendado, setAppleRecomendado] = useState(false);
   const [modoPedido, setModoPedido] = useState(false);
   const [carrito, setCarrito] = useState<Record<string, number>>({});
   const [carritoAbierto, setCarritoAbierto] = useState(false);
   const [notaPedido, setNotaPedido] = useState("");
   const scrimRef = useRef<HTMLDivElement>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function onScroll() {
       if (!scrimRef.current) return;
-      const op = Math.max(0, 1 - window.scrollY / 180);
+      const op = Math.max(0, 1 - window.scrollY / 220);
       scrimRef.current.style.opacity = String(op);
     }
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pantalla]);
 
   useEffect(() => {
     const ios =
@@ -236,8 +210,45 @@ export default function NegocioDetalle({
     registrarEvento(negocio.id, "visita");
   }, [negocio.id]);
 
+  // Sincroniza el fondo de <body> con el tema del negocio (negro/blanco/beige)
+  // para que en escritorio los márgenes fuera del minisitio no se queden
+  // negros cuando el tema elegido es claro.
+  useEffect(() => {
+    const bg = { negro: "#0A0A0A", blanco: "#FFFFFF", beige: "#F3EAD9" }[negocio.degradadoInferior] ?? "#0A0A0A";
+    document.body.style.background = bg;
+    return () => {
+      document.body.style.background = "";
+    };
+  }, [negocio.degradadoInferior]);
+
+  // Anima con un fundido hacia arriba cada sección (.reveal) la primera vez que
+  // entra en pantalla al hacer scroll — así el minisitio de una sola página se
+  // siente vivo en vez de aparecer todo de golpe.
+  useEffect(() => {
+    const contenedor = wrapRef.current;
+    if (!contenedor) return;
+    const elementos = contenedor.querySelectorAll<HTMLElement>(".reveal");
+    if (elementos.length === 0) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      elementos.forEach((el) => el.classList.add("in"));
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entradas) => {
+        for (const entrada of entradas) {
+          if (entrada.isIntersecting) {
+            entrada.target.classList.add("in");
+            observer.unobserve(entrada.target);
+          }
+        }
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -40px 0px" }
+    );
+    elementos.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
   const accent = negocio.colorAcento || "#C8FF3D";
-  const degradadoSuperiorRgb = hexARgb(negocio.degradadoSuperior) ?? "10 10 10";
   const degradadoInferiorRgb = DEGRADADO_INFERIOR_RGB[negocio.degradadoInferior] ?? "10 10 10";
   const degradadoInferiorTexto = DEGRADADO_INFERIOR_TEXTO[negocio.degradadoInferior] ?? "#666";
   const tieneAddon = (clave: string) => negocio.addons.some((a) => a.clave === clave);
@@ -303,11 +314,12 @@ export default function NegocioDetalle({
 
   return (
     <div
+      ref={wrapRef}
       className="mini-wrap"
+      data-tema={negocio.degradadoInferior}
       style={
         {
           "--accent": accent,
-          "--degradado-superior-rgb": degradadoSuperiorRgb,
           "--degradado-inferior-rgb": degradadoInferiorRgb,
           "--degradado-inferior-texto": degradadoInferiorTexto,
         } as React.CSSProperties
@@ -317,51 +329,97 @@ export default function NegocioDetalle({
         enmochis · directorio
       </a>
 
-      {/* ===== PANTALLA: INICIO ===== */}
-      <div className={`screen${pantalla === "inicio" ? " activo" : ""}`}>
-        <div className="hero-content">
-          {/* Estos 4 van DENTRO del hero (no fijos a toda la pantalla) para que
-              la foto se quede solo en el área del hero y todo lo que sigue
-              (descripción, chips, reseñas) se vea sobre el fondo oscuro de
-              Brutal Food, no encima de la foto. */}
-          <div
-            className="hero-bg"
-            style={negocio.fotoPortada ? { backgroundImage: `url(${negocio.fotoPortada})` } : undefined}
-          />
-          {!negocio.fotoPortada && <div className="ph-icon-wrap">🍽️</div>}
-          <div className="hero-scrim-top" ref={scrimRef} />
-          <div className="hero-scrim-bottom" />
+      {/* ===== HERO ===== */}
+      <div className="hero-content">
+        {/* La foto y los degradados van DENTRO de .hero-content (position:absolute + inset:0)
+            en vez de fijos a toda la pantalla, así se quedan contenidos en el área del hero. */}
+        <div
+          className="hero-bg"
+          style={negocio.fotoPortada ? { backgroundImage: `url(${negocio.fotoPortada})` } : undefined}
+        />
+        {!negocio.fotoPortada && <div className="ph-icon-wrap">🍽️</div>}
+        <div className="hero-scrim-top" ref={scrimRef} />
+        <div className="hero-scrim-bottom" />
 
-          <div className="home-title-block">
-            <div className="land-cat">{negocio.categoria}</div>
-            <div className="land-name">{negocio.nombre.toUpperCase()}</div>
-            {negocio.descripcionCorta && <div className="land-sub">{negocio.descripcionCorta}</div>}
-          </div>
-
-          <div className={`hero-logo-center shape-${negocio.logoForma}`}>
-            {negocio.logoUrl && <img src={negocio.logoUrl} alt={negocio.nombre} />}
+        <div className="home-title-block">
+          <div className="land-cat">{negocio.categoria}</div>
+          <div className="land-name">{negocio.nombre.toUpperCase()}</div>
+          {negocio.descripcionCorta && <div className="land-sub">{negocio.descripcionCorta}</div>}
+          <div className="hero-acciones">
+            {negocio.telefono && (
+              <a
+                className="hero-llamar"
+                href={telHref(negocio.telefono)}
+                onClick={() => registrarEvento(negocio.id, "llamar")}
+              >
+                ☎ Llamar ahora
+              </a>
+            )}
+            {negocio.instagram && (
+              <a
+                className="hero-social"
+                href={`https://instagram.com/${negocio.instagram.replace(/^@/, "")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+              >
+                📷
+              </a>
+            )}
+            {negocio.facebook && (
+              <a
+                className="hero-social"
+                href={`https://facebook.com/${negocio.facebook}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+              >
+                f
+              </a>
+            )}
           </div>
         </div>
 
-        {negocio.descripcionLarga && <p className="land-desc">{negocio.descripcionLarga}</p>}
+        <div className={`hero-logo-center shape-${negocio.logoForma}`}>
+          {negocio.logoUrl && <img src={negocio.logoUrl} alt={negocio.nombre} />}
+        </div>
+      </div>
 
-        {servicios.length > 0 && (
-          <div className="mini-servicios">
-            {servicios.map((a) => (
-              <span className="mini-chip" key={a.id}>
-                {a.icono} {a.nombre}
-              </span>
-            ))}
+      {/* Galería corta: se ancla un tramo corto al hacer scroll y se despega
+          justo al llegar al degradado inferior del hero, quedando sobre la
+          descripción del negocio (ver .thumbs-stick-wrap en el CSS). */}
+      {mostrarGaleria && (
+        <div className="thumbs-stick-wrap">
+          <div className="home-thumbs">
+            {negocio.galeria
+              .filter((g) => g.foto)
+              .map((g, i) => (
+                <div key={i} className="home-thumb" style={{ backgroundImage: `url(${g.foto})` }} />
+              ))}
           </div>
-        )}
+        </div>
+      )}
 
-        {tieneLealtad && (
-          <Link href={`/negocio/${negocio.slug}/tarjeta`} className="mini-lealtad-banner">
-            ⭐ Obtén tu tarjeta de puntos
-          </Link>
-        )}
+      {negocio.descripcionLarga && <p className="land-desc reveal">{negocio.descripcionLarga}</p>}
 
-        {tieneCalificaciones && (
+      {servicios.length > 0 && (
+        <div className="mini-servicios reveal">
+          {servicios.map((a) => (
+            <span className="mini-chip" key={a.id}>
+              {a.icono} {a.nombre}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {tieneLealtad && (
+        <Link href={`/negocio/${negocio.slug}/tarjeta`} className="mini-lealtad-banner reveal">
+          ⭐ Obtén tu tarjeta de puntos
+        </Link>
+      )}
+
+      {tieneCalificaciones && (
+        <div className="reveal">
           <BloqueCalificaciones
             negocioId={negocio.id}
             modo={negocio.calificacionModo}
@@ -369,88 +427,50 @@ export default function NegocioDetalle({
             resumen={resumenCalificaciones ?? { promedio: 0, total: 0 }}
             comentariosIniciales={comentarios ?? []}
           />
-        )}
+        </div>
+      )}
 
-        {tieneMapa && (
-          <div className="mini-mapas">
-            {negocio.direccion && <div className="mapas-direccion">{negocio.direccion}</div>}
-            <a
-              className="cta-btn mapa-principal"
-              href={urlMapaRecomendado}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => registrarEvento(negocio.id, "mapa")}
-              style={{ background: accent, color: "#0A0A0A" }}
-            >
-              📍 Cómo llegar
-              <span className="chip-recomendado">Recomendado</span>
-            </a>
-            <a
-              className="mapa-secundario"
-              href={urlMapaSecundario}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => registrarEvento(negocio.id, "mapa")}
-            >
-              Prefiero {nombreMapaSecundario}
-            </a>
-          </div>
-        )}
-
-        <div className="hero-cta-spacer" style={{ height: 240 }} />
-
-        <div className="cta-float">
-          {mostrarGaleria && (
-            <div className="home-thumbs">
-              {negocio.galeria
-                .filter((g) => g.foto)
-                .map((g, i) => (
-                  <div key={i} className="home-thumb" style={{ backgroundImage: `url(${g.foto})` }} />
-                ))}
-            </div>
-          )}
-          {negocio.telefono && (
-            <a
-              className="cta-btn"
-              href={telHref(negocio.telefono)}
-              onClick={() => registrarEvento(negocio.id, "llamar")}
-              style={{ background: accent, color: "#0A0A0A" }}
-            >
-              ☎ LLAMAR AHORA
-            </a>
-          )}
-          <button
-            type="button"
-            className="cta-btn"
-            onClick={() => {
-              registrarEvento(negocio.id, "ver_menu");
-              setPantalla("menu");
-            }}
-            style={{ background: "rgba(10,10,10,0.75)", color: "#fff", border: "1.5px solid rgba(255,255,255,0.3)" }}
+      {tieneMapa && (
+        <div className="mini-mapas reveal">
+          {negocio.direccion && <div className="mapas-direccion">{negocio.direccion}</div>}
+          <a
+            className="cta-btn mapa-principal"
+            href={urlMapaRecomendado}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => registrarEvento(negocio.id, "mapa")}
+            style={{ background: accent, color: "#0A0A0A" }}
           >
-            ☰ VER MENÚ
-          </button>
-          {tieneCitas && (
-            <button
-              type="button"
-              className="cta-btn"
-              onClick={agendarCita}
-              style={{ background: "rgba(10,10,10,0.75)", color: "#fff", border: `1.5px solid ${accent}` }}
-            >
-              📅 AGENDAR CITA
-            </button>
-          )}
+            📍 Cómo llegar
+            <span className="chip-recomendado">Recomendado</span>
+          </a>
+          <a
+            className="mapa-secundario"
+            href={urlMapaSecundario}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => registrarEvento(negocio.id, "mapa")}
+          >
+            Prefiero {nombreMapaSecundario}
+          </a>
         </div>
-      </div>
+      )}
 
-      {/* ===== PANTALLA: MENÚ ===== */}
-      <div className={`screen${pantalla === "menu" ? " activo" : ""}`}>
-        <div className="menu-topbar">
-          <button type="button" onClick={() => setPantalla("inicio")}>
-            ← Inicio
-          </button>
-          <span className="mt-title">{negocio.nombre.toUpperCase()}</span>
-        </div>
+      {tieneCitas && (
+        <button
+          type="button"
+          className="cta-btn cta-cita reveal"
+          onClick={agendarCita}
+          style={{ background: "transparent", color: accent, border: `1.5px solid ${accent}` }}
+        >
+          📅 Agendar cita
+        </button>
+      )}
+
+      {/* ===== MENÚ (parte de la misma página; el ancla #menu es a donde
+          saltan "VER MENÚ" y el botón inferior) ===== */}
+      <div className="menu-section reveal" id="menu">
+        <div className="menu-main-title">THE MENU</div>
 
         {mostrarGaleria && <CarruselGaleria galeria={negocio.galeria} />}
 
@@ -466,60 +486,47 @@ export default function NegocioDetalle({
           </div>
         )}
 
-        <div className="menu-section">
-          <div className="menu-main-title">THE MENU</div>
-          {categorias.map((cat, i) => (
-            <div className="menu-cat-block" key={cat.categoria + i}>
-              <div className="menu-cat-name">{cat.categoria}</div>
-              {cat.items.map((item) => (
-                <div className="menu-line" key={item.id}>
-                  <span className="mname">{item.nombre}</span>
-                  <div className="mprice-group">
-                    <span className="mprice">${item.precio}</span>
-                    {modoPedido && item.ordenable && (
-                      <div className="item-stepper">
-                        {carrito[item.id] ? (
-                          <>
-                            <button type="button" onClick={() => quitarDelCarrito(item)}>
-                              −
-                            </button>
-                            <span>{carrito[item.id]}</span>
-                            <button type="button" onClick={() => agregarAlCarrito(item)}>
-                              +
-                            </button>
-                          </>
-                        ) : (
-                          <button type="button" className="btn-agregar" onClick={() => agregarAlCarrito(item)}>
+        {categorias.map((cat, i) => (
+          <div className="menu-cat-block" key={cat.categoria + i}>
+            <div className="menu-cat-name">{cat.categoria}</div>
+            {cat.items.map((item) => (
+              <div className="menu-line" key={item.id}>
+                <span className="mname">{item.nombre}</span>
+                <div className="mprice-group">
+                  <span className="mprice">${item.precio}</span>
+                  {modoPedido && item.ordenable && (
+                    <div className="item-stepper">
+                      {carrito[item.id] ? (
+                        <>
+                          <button type="button" onClick={() => quitarDelCarrito(item)}>
+                            −
+                          </button>
+                          <span>{carrito[item.id]}</span>
+                          <button type="button" onClick={() => agregarAlCarrito(item)}>
                             +
                           </button>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                        </>
+                      ) : (
+                        <button type="button" className="btn-agregar" onClick={() => agregarAlCarrito(item)}>
+                          +
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
-              ))}
-            </div>
-          ))}
-        </div>
-
-        {servicios.length > 0 && (
-          <div className="mini-servicios">
-            {servicios.map((a) => (
-              <span className="mini-chip" key={a.id}>
-                {a.icono} {a.nombre}
-              </span>
+              </div>
             ))}
           </div>
-        )}
-
-        <a className="mini-footer" href="https://enmochis.app" target="_blank" rel="noopener noreferrer">
-          {negocio.logoUrl && <img className="mini-footer-logo" src={negocio.logoUrl} alt="" />}
-          <span>
-            Este sitio fue creado en <strong>EnMochis.app</strong> — únete ahora
-          </span>
-        </a>
-        <div style={{ height: 40 }} />
+        ))}
       </div>
+
+      <a className="mini-footer" href="https://enmochis.app" target="_blank" rel="noopener noreferrer">
+        {negocio.logoUrl && <img className="mini-footer-logo" src={negocio.logoUrl} alt="" />}
+        <span>
+          Este sitio fue creado en <strong>EnMochis.app</strong> — únete ahora
+        </span>
+      </a>
+      <div style={{ height: 40 }} />
 
       {modoPedido && cantidadCarrito > 0 && (
         <button
@@ -578,11 +585,12 @@ export default function NegocioDetalle({
         </div>
       )}
 
-      {/* ===== BARRA INFERIOR ===== */}
+      {/* ===== BARRA INFERIOR — dirige al directorio y a este negocio, ya
+          que todo el minisitio es un solo scroll. ===== */}
       <div className="sticky-bar">
-        <button type="button" className="activo" onClick={() => setPantalla("inicio")}>
+        <a href="https://enmochis.app" target="_blank" rel="noopener noreferrer">
           <span className="icon-ic">🏠</span>INICIO
-        </button>
+        </a>
         {tieneMapa && (
           <a href={urlMapaRecomendado} target="_blank" rel="noopener noreferrer" onClick={() => registrarEvento(negocio.id, "mapa")}>
             <span className="icon-ic">📍</span>MAPA
@@ -603,15 +611,9 @@ export default function NegocioDetalle({
             <span className="icon-ic">☎</span>LLAMAR
           </a>
         )}
-        <button
-          type="button"
-          onClick={() => {
-            registrarEvento(negocio.id, "ver_menu");
-            setPantalla("menu");
-          }}
-        >
+        <a href="#menu" onClick={() => registrarEvento(negocio.id, "ver_menu")}>
           <span className="icon-ic">☰</span>MENÚ
-        </button>
+        </a>
       </div>
     </div>
   );

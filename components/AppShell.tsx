@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { ThemeContext, type Theme } from "./theme-context";
 
 function activeNav(pathname: string): "home" | "explorar" | "weekend" | "unete" | null {
   if (pathname === "/") return "home";
@@ -15,65 +14,48 @@ function activeNav(pathname: string): "home" | "explorar" | "weekend" | "unete" 
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [theme, setTheme] = useState<Theme>("blue");
   const [menuOpen, setMenuOpen] = useState(false);
 
   const active = activeNav(pathname);
 
   return (
     <>
-      <div className="switch">
-        <button
-          id="blue"
-          className={theme === "blue" ? "active" : ""}
-          onClick={() => setTheme("blue")}
-        >
-          01 AZUL
-        </button>
-        <button
-          id="orange"
-          className={theme === "orange" ? "active" : ""}
-          onClick={() => setTheme("orange")}
-        >
-          02 NARANJA
-        </button>
-      </div>
-
       <div className={`menu-panel${menuOpen ? " open" : ""}`}>
         <button className="close" onClick={() => setMenuOpen(false)}>
           ×
         </button>
         <h2>
-          EN
-          <br />
-          MOCHIS
+          <span style={{ color: "var(--paper)" }}>En</span>
+          <span style={{ color: "var(--lime)" }}>Mochis</span>
         </h2>
         <Link className="menu-link" href="/" onClick={() => setMenuOpen(false)}>
           Inicio
         </Link>
         <Link className="menu-link" href="/categorias" onClick={() => setMenuOpen(false)}>
-          Lugares destacados
+          El directorio
         </Link>
         <Link className="menu-link" href="/weekend" onClick={() => setMenuOpen(false)}>
-          Este fin de semana
+          Recomendaciones
         </Link>
         <Link className="menu-link" href="/unete" onClick={() => setMenuOpen(false)}>
-          Únete al directorio
+          Afíliate
         </Link>
       </div>
 
-      <main className={`app${theme === "orange" ? " orange" : ""}`}>
+      <main className="app">
         <header className="topbar">
-          <div className="logo">ENMOCHIS</div>
+          <Link href="/" className="logo">
+            <span className="lg-en">En</span>
+            <span className="lg-mochis">Mochis</span>
+          </Link>
           <div className="icons">
-            <button className="icon">⌕</button>
             <button className="icon" onClick={() => setMenuOpen(true)}>
               ☰
             </button>
           </div>
         </header>
 
-        <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>
+        {children}
 
         <nav className="bottom">
           <Link href="/" className={`nav${active === "home" ? " active" : ""}`}>

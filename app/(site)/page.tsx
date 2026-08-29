@@ -1,46 +1,41 @@
-import { getDestacados, getRecomendados } from "@/lib/negocios";
-import HomeHero from "@/components/HomeHero";
-import { FeatureCard, NegocioCard } from "@/components/NegocioCards";
+import { getDestacados, getTodosPublicos, getNegociosPorCategoria, CATEGORIAS } from "@/lib/negocios";
+import HomeExperience from "@/components/HomeExperience";
 import Link from "next/link";
 
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const [destacados, recomendados] = await Promise.all([
+  const [destacados, todos, porCategoria] = await Promise.all([
     getDestacados(),
-    getRecomendados(),
+    getTodosPublicos(),
+    Promise.all(CATEGORIAS.map((c) => getNegociosPorCategoria(c.slug))),
   ]);
+
+  const categorias = CATEGORIAS.map((c, i) => {
+    const negocios = porCategoria[i];
+    const top = negocios.find((n) => n.estado === "destacado") ?? negocios[0];
+    return { slug: c.slug, nombre: c.nombre, emoji: c.emoji, color: c.color, top };
+  });
 
   return (
     <>
-      <HomeHero />
+      <HomeExperience destacados={destacados} categorias={categorias} todos={todos} />
 
       <section className="section">
         <div className="head">
-          <h2>Destacados</h2>
-          <Link href="/categorias">Ver todos →</Link>
+          <h2>Recomendaciones</h2>
+          <Link href="/weekend">Ver más →</Link>
         </div>
-        {destacados.length > 0 ? (
-          <FeatureCard negocio={destacados[0]} />
-        ) : (
-          <div className="small">Todavía no hay negocios destacados.</div>
-        )}
-      </section>
-
-      <section className="section">
-        <div className="head">
-          <h2>Recomendados para ti</h2>
-          <Link href="/categorias">Ver todos →</Link>
-        </div>
-        {recomendados.length > 0 ? (
-          <div className="row">
-            {recomendados.map((n) => (
-              <NegocioCard key={n.id} negocio={n} />
-            ))}
+        <Link href="/weekend" className="feature">
+          <img
+            src="https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=1000&q=85"
+            alt="Recomendaciones de la semana"
+          />
+          <div className="feature-body">
+            <h3>TU PLAN PARA EL WEEKEND</h3>
+            <div className="meta">Brunch, postres y cafés que valen la salida.</div>
           </div>
-        ) : (
-          <div className="small">Todavía no hay negocios activos en el directorio.</div>
-        )}
+        </Link>
       </section>
     </>
   );

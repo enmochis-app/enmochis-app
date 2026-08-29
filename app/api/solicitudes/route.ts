@@ -16,6 +16,9 @@ export async function POST(request: Request) {
   const contactoNombre = String(body.contactoNombre ?? "").trim();
   const telefono = String(body.telefono ?? "").trim();
   const descripcion = String(body.descripcion ?? "").trim();
+  const colonia = String(body.colonia ?? "").trim();
+  const instagram = String(body.instagram ?? "").trim();
+  const facebook = String(body.facebook ?? "").trim();
 
   if (!nombreNegocio || !contactoNombre || !telefono) {
     return NextResponse.json(
@@ -34,6 +37,9 @@ export async function POST(request: Request) {
       contactoNombre,
       telefono,
       descripcion,
+      colonia,
+      instagram,
+      facebook,
     });
     return NextResponse.json({ ok: true, slug }, { status: 201 });
   } catch (err) {

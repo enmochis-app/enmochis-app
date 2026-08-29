@@ -1,8 +1,8 @@
 import type { Addon, Negocio } from "./negocios";
 import type { MenuItem } from "./menuItems";
 
-/** Espejo del catálogo inicial que se siembra en la base real (scripts/migrar-addons.mts). */
-const CATALOGO_ADDONS_DEMO = {
+/** Espejo del catálogo inicial que se siembra en la base real (ver /api/admin/sembrar-prueba). */
+export const CATALOGO_ADDONS_DEMO = {
   whatsapp: { id: "demo-addon-whatsapp", clave: "whatsapp", nombre: "WhatsApp", descripcion: "Botón directo de WhatsApp en vez de solo llamada.", icono: "💬", precio: 100, comportamiento: "especial", activo: true, orden: 1 },
   mapas: { id: "demo-addon-mapas", clave: "mapas", nombre: "Mapas", descripcion: "Botón \"Cómo llegar\" con Google/Apple Maps.", icono: "📍", precio: 100, comportamiento: "especial", activo: true, orden: 2 },
   galeria: { id: "demo-addon-galeria", clave: "galeria", nombre: "Galería", descripcion: "Carrusel de fotos de producto en el minisitio.", icono: "🖼️", precio: 100, comportamiento: "especial", activo: true, orden: 3 },
@@ -187,6 +187,51 @@ export const SAMPLE_NEGOCIOS: Negocio[] = [
     lealtadMeta: 10,
     tienePortal: false,
   },
+  {
+    id: "sample-tacos-el-compa",
+    nombre: "Tacos El Compa",
+    slug: "tacos-el-compa",
+    categoria: "Restaurantes",
+    descripcionCorta: "Tacos de asada · Centro",
+    descripcionLarga:
+      "Minisitio de prueba creado desde el laboratorio de addons — mismos datos genéricos, pero aquí puedes ver el minisitio real completo: portada, menú, pedidos por WhatsApp, mapa, cita y tarjeta de lealtad juntos.",
+    logoUrl:
+      "https://images.unsplash.com/photo-1517244683847-7456b63c5969?auto=format&fit=crop&w=300&q=80",
+    logoForma: "circular",
+    fotoPortada:
+      "https://images.unsplash.com/photo-1613514785940-daed07799d9b?auto=format&fit=crop&w=1000&q=85",
+    colorAcento: "#3DD9FF",
+    degradadoInferior: "negro",
+    estado: "destacado",
+    telefono: "6681234567",
+    whatsapp: "6681234567",
+    mensajeWhatsapp: "Hola 👋, quiero hacer este pedido:",
+    mensajeCitas: "Hola 👋, quiero agendar una cita.",
+    direccion: "Blvd. Antonio Rosales 123, Centro, Los Mochis, Sinaloa",
+    lat: 25.7953,
+    lng: -108.9994,
+    instagram: "@tacoselcompa",
+    facebook: "TacosElCompaLosMochis",
+    horarios: "Lun-Dom 6:00pm - 1:00am",
+    galeria: [
+      { foto: "https://images.unsplash.com/photo-1613514785940-daed07799d9b?auto=format&fit=crop&w=600&q=80", nombre: "Tacos de asada", precio: "$65", unidad: "orden" },
+      { foto: "https://images.unsplash.com/photo-1552332386-f8dd00dc2f85?auto=format&fit=crop&w=600&q=80", nombre: "Volcán especial", precio: "$85", unidad: "c/u", descripcion: "Tortilla crujiente con queso gratinado y carne asada." },
+      { foto: "https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=600&q=80", nombre: "Agua fresca del día", precio: "$20", unidad: "c/u" },
+    ],
+    addons: [
+      CATALOGO_ADDONS_DEMO.whatsapp,
+      CATALOGO_ADDONS_DEMO.mapas,
+      CATALOGO_ADDONS_DEMO.galeria,
+      CATALOGO_ADDONS_DEMO.pedidos,
+      CATALOGO_ADDONS_DEMO.citas,
+      CATALOGO_ADDONS_DEMO.lealtad,
+      CATALOGO_ADDONS_DEMO.qrMesa,
+    ],
+    lealtadModo: "visitas",
+    lealtadPorcentaje: 0,
+    lealtadMeta: 10,
+    tienePortal: false,
+  },
 ];
 
 function itemsDemo(items: { categoria: string; nombre: string; precio: string; ordenable?: boolean }[]): MenuItem[] {
@@ -241,5 +286,14 @@ export const SAMPLE_MENU_ITEMS: Record<string, MenuItem[]> = {
     { categoria: "PAN DULCE", nombre: "Brownie de chocolate", precio: "38", ordenable: true },
     { categoria: "PAN DULCE", nombre: "Galletas de avena (2 pzas)", precio: "25" },
     { categoria: "PAN DULCE", nombre: "Pastelillo de fresa", precio: "35" },
+  ]),
+  "sample-tacos-el-compa": itemsDemo([
+    { categoria: "TACOS", nombre: "Taco de asada", precio: "22", ordenable: true },
+    { categoria: "TACOS", nombre: "Taco de adobada", precio: "20", ordenable: true },
+    { categoria: "TACOS", nombre: "Quesotaco", precio: "25", ordenable: true },
+    { categoria: "TACOS", nombre: "Volcán especial", precio: "85" },
+    { categoria: "ANTOJITOS", nombre: "Orden de papas", precio: "35", ordenable: true },
+    { categoria: "ANTOJITOS", nombre: "Agua fresca del día", precio: "20", ordenable: true },
+    { categoria: "ANTOJITOS", nombre: "Refresco de lata", precio: "18" },
   ]),
 };

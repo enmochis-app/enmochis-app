@@ -25,6 +25,21 @@ export default function TarjetaLealtad({ negocio }: { negocio: Negocio }) {
   const [guardado, setGuardado] = useState(false);
   const tarjetaRef = useRef<HTMLDivElement>(null);
 
+  // Personalización de la tarjeta — solo visual, nunca se guarda ni se envía
+  // a ningún lado (ni base de datos ni localStorage): vive solo en esta vista.
+  const [formListo, setFormListo] = useState(false);
+  const [nombreCliente, setNombreCliente] = useState("");
+  const [apellidoCliente, setApellidoCliente] = useState("");
+  const [fechaNacimiento, setFechaNacimiento] = useState("");
+
+  useEffect(() => {
+    const bg = { negro: "#0A0A0A", blanco: "#FFFFFF", beige: "#F3EAD9" }[negocio.degradadoInferior] ?? "#0A0A0A";
+    document.body.style.background = bg;
+    return () => {
+      document.body.style.background = "";
+    };
+  }, [negocio.degradadoInferior]);
+
   useEffect(() => {
     const existente = localStorage.getItem(claveLocal);
     const activo = existente || generarCodigo();
@@ -83,60 +98,96 @@ export default function TarjetaLealtad({ negocio }: { negocio: Negocio }) {
     .toUpperCase();
 
   return (
-    <div className="mini-wrap" style={{ "--accent": accent, padding: "28px 20px 60px" } as React.CSSProperties}>
+    <div
+      className="mini-wrap"
+      data-tema={negocio.degradadoInferior}
+      style={{ "--accent": accent, padding: "28px 20px 60px" } as React.CSSProperties}
+    >
       <div className="tl-header">
         <p className="tl-eyebrow">Tarjeta de puntos</p>
         <h1 className="tl-titulo">{negocio.nombre}</h1>
       </div>
 
-      <div className="tarjeta-lealtad" ref={tarjetaRef}>
-        <div
-          className="tl-foto"
-          style={negocio.fotoPortada ? { backgroundImage: `url(${negocio.fotoPortada})` } : undefined}
-        >
-          <div className="tl-marca">
-            <div className="tl-logo">{iniciales}</div>
-            <span>{negocio.nombre}</span>
-          </div>
-        </div>
-        <div className="tl-cuerpo">
-          {qrDataUrl && <img className="tl-qr" src={qrDataUrl} alt="Código QR" />}
-          <div className="tl-codigo">{codigo}</div>
-          {saldo && (
-            <div className="tl-progreso">
-              {saldo.total} / {saldo.meta} {saldo.modo === "puntos" ? "puntos" : "visitas"}
-              {saldo.alcanzoMeta && " · ¡Ya puedes canjear! 🎉"}
-            </div>
-          )}
-          <p className="tl-leyenda">
-            Presenta este código QR en tu próxima visita a {negocio.nombre} para sumar {saldo?.modo === "puntos" ? "puntos" : "una visita"} a tu tarjeta de lealtad.
+      {!formListo ? (
+        <div className="tl-form">
+          <p>
+            Cuéntanos cómo se llama tu tarjeta — es solo para personalizarla en esta pantalla, no se guarda en
+            ningún lado.
           </p>
-        </div>
-      </div>
-
-      <div className="tl-nota">El negocio solo escanea el QR — no ve tu nombre, queda solo en tu tarjeta.</div>
-
-      <button type="button" className="cta-btn tl-descargar" style={{ background: accent, color: "#0A0A0A" }} onClick={descargarTarjeta} disabled={descargando}>
-        {descargando ? "Generando..." : "⬇ Descargar a mi galería"}
-      </button>
-      {guardado && <p className="tl-confirmacion">Guardada. Búscala en tu galería.</p>}
-
-      {!mostrarRecuperar ? (
-        <button type="button" className="tl-link" onClick={() => setMostrarRecuperar(true)}>
-          ¿Ya tienes un código?
-        </button>
-      ) : (
-        <div className="tl-recuperar">
-          <input
-            value={codigoRecuperar}
-            onChange={(e) => setCodigoRecuperar(e.target.value)}
-            maxLength={6}
-            placeholder="Tu código de 6 caracteres"
-          />
-          <button type="button" onClick={usarCodigoRecuperado}>
-            Usar
+          <div className="tl-form-field">
+            <label>Nombre</label>
+            <input value={nombreCliente} onChange={(e) => setNombreCliente(e.target.value)} placeholder="Tu nombre" />
+          </div>
+          <div className="tl-form-field">
+            <label>Apellido</label>
+            <input value={apellidoCliente} onChange={(e) => setApellidoCliente(e.target.value)} placeholder="Tu apellido" />
+          </div>
+          <div className="tl-form-field">
+            <label>Fecha de nacimiento (opcional)</label>
+            <input type="date" value={fechaNacimiento} onChange={(e) => setFechaNacimiento(e.target.value)} />
+          </div>
+          <button type="button" style={{ background: accent, color: "#0A0A0A" }} onClick={() => setFormListo(true)}>
+            Ver mi tarjeta
+          </button>
+          <button type="button" className="tl-form-omitir" onClick={() => setFormListo(true)}>
+            Omitir, ver mi tarjeta sin personalizar
           </button>
         </div>
+      ) : (
+        <>
+          <div className="tarjeta-lealtad" ref={tarjetaRef}>
+            <div
+              className="tl-foto"
+              style={negocio.fotoPortada ? { backgroundImage: `url(${negocio.fotoPortada})` } : undefined}
+            >
+              <div className="tl-marca">
+                <div className="tl-logo">{iniciales}</div>
+                <span>{negocio.nombre}</span>
+              </div>
+            </div>
+            <div className="tl-cuerpo">
+              {qrDataUrl && <img className="tl-qr" src={qrDataUrl} alt="Código QR" />}
+              <div className="tl-codigo">{codigo}</div>
+              {(nombreCliente || apellidoCliente) && (
+                <div className="tl-para">Para: {[nombreCliente, apellidoCliente].filter(Boolean).join(" ")}</div>
+              )}
+              {saldo && (
+                <div className="tl-progreso">
+                  {saldo.total} / {saldo.meta} {saldo.modo === "puntos" ? "puntos" : "visitas"}
+                  {saldo.alcanzoMeta && " · ¡Ya puedes canjear! 🎉"}
+                </div>
+              )}
+              <p className="tl-leyenda">
+                Presenta este código QR en tu próxima visita a {negocio.nombre} para sumar {saldo?.modo === "puntos" ? "puntos" : "una visita"} a tu tarjeta de lealtad.
+              </p>
+            </div>
+          </div>
+
+          <div className="tl-nota">El negocio solo escanea el QR — no ve tu nombre, queda solo en tu tarjeta.</div>
+
+          <button type="button" className="cta-btn tl-descargar" style={{ background: accent, color: "#0A0A0A" }} onClick={descargarTarjeta} disabled={descargando}>
+            {descargando ? "Generando..." : "⬇ Descargar a mi galería"}
+          </button>
+          {guardado && <p className="tl-confirmacion">Guardada. Búscala en tu galería.</p>}
+
+          {!mostrarRecuperar ? (
+            <button type="button" className="tl-link" onClick={() => setMostrarRecuperar(true)}>
+              ¿Ya tienes un código?
+            </button>
+          ) : (
+            <div className="tl-recuperar">
+              <input
+                value={codigoRecuperar}
+                onChange={(e) => setCodigoRecuperar(e.target.value)}
+                maxLength={6}
+                placeholder="Tu código de 6 caracteres"
+              />
+              <button type="button" onClick={usarCodigoRecuperado}>
+                Usar
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

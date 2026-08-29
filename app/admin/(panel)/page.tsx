@@ -45,6 +45,8 @@ function CopiarLink({ href }: { href: string }) {
 export default function AdminDashboard() {
   const [negocios, setNegocios] = useState<Negocio[] | null>(null);
   const [origin, setOrigin] = useState("");
+  const [sembrando, setSembrando] = useState(false);
+  const [mensajeSiembra, setMensajeSiembra] = useState("");
 
   const cargar = useCallback(async () => {
     const res = await fetch("/api/admin/negocios");
@@ -57,6 +59,26 @@ export default function AdminDashboard() {
     cargar();
     setOrigin(window.location.origin);
   }, [cargar]);
+
+  async function sembrarPrueba() {
+    setSembrando(true);
+    setMensajeSiembra("");
+    try {
+      const res = await fetch("/api/admin/sembrar-prueba", { method: "POST" });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error || "No se pudo sembrar.");
+      setMensajeSiembra(
+        body.creados > 0
+          ? `Listo: se crearon ${body.creados} negocios de prueba.`
+          : "Los negocios de prueba ya existían — no se duplicó nada."
+      );
+      await cargar();
+    } catch (err) {
+      setMensajeSiembra(err instanceof Error ? err.message : "No se pudo sembrar.");
+    } finally {
+      setSembrando(false);
+    }
+  }
 
   async function publicar(id: string) {
     await fetch(`/api/admin/negocios/${id}`, {
@@ -77,10 +99,16 @@ export default function AdminDashboard() {
     <>
       <div className="admin-head-row">
         <h1 style={{ fontSize: 20 }}>Negocios</h1>
-        <Link href="/admin/negocios/nuevo" className="admin-btn">
-          + Nuevo negocio
-        </Link>
+        <div style={{ display: "flex", gap: 10 }}>
+          <button type="button" className="admin-btn admin-btn-secondary" onClick={sembrarPrueba} disabled={sembrando}>
+            {sembrando ? "Sembrando..." : "🌱 Sembrar negocios de prueba"}
+          </button>
+          <Link href="/admin/negocios/nuevo" className="admin-btn">
+            + Nuevo negocio
+          </Link>
+        </div>
       </div>
+      {mensajeSiembra && <div className="admin-small" style={{ marginBottom: 14 }}>{mensajeSiembra}</div>}
 
       {solicitudes.length > 0 && (
         <div className="admin-section">
