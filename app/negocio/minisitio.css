@@ -19,26 +19,30 @@ body {
 }
 .mini-tag a { color: #777; text-decoration: none; }
 
-/* HERO: la foto y los degradados viven DENTRO de .hero-content (son sus
-   primeros hijos en el JSX) y lo llenan exactamente (position:absolute +
-   inset:0), en vez de quedar fijos a toda la pantalla. Así la foto se queda
-   contenida en el área del hero y todo lo que va después se ve sobre el
-   fondo oscuro sólido de .mini-wrap, no encima de la imagen. */
+/* ===== HERO — minisitio de una sola página estilo Apple: todo vive en el
+   mismo scroll, el espacio se acomoda solo según qué addons estén activos. ===== */
 .hero-bg {
-  position: absolute; inset: 0; z-index: 0;
+  position: absolute; inset: 0;
   background: #151515; background-size: cover; background-position: center 30%;
 }
+/* Degradado superior SÓLIDO a partir del color de acento del negocio (a juego
+   con su logo), no una foto sin filtro — así el título siempre es legible sin
+   importar la imagen. Se desvanece al hacer scroll (ver scrimRef en el JSX).
+   Sin z-index explícito a propósito: el orden de pintado ya lo da el orden
+   en el JSX (foto, luego degradados, luego el texto) — ponerle z-index aquí
+   haría que gane sobre el texto en cuanto éste tenga su propio contexto de
+   apilamiento (p. ej. por las animaciones de aparición). */
 .hero-scrim-top {
-  position: absolute; top: 0; left: 0; right: 0; height: 62%; z-index: 1;
+  position: absolute; top: 0; left: 0; right: 0; height: 68%;
   background: linear-gradient(180deg,
-    rgb(var(--degradado-superior-rgb, 10 10 10) / 0.95) 0%,
-    rgb(var(--degradado-superior-rgb, 10 10 10) / 0.65) 30%,
-    rgb(var(--degradado-superior-rgb, 10 10 10) / 0.25) 65%,
-    rgb(var(--degradado-superior-rgb, 10 10 10) / 0) 100%);
+    color-mix(in srgb, var(--accent, #C8FF3D) 34%, #05050a 66%) 0%,
+    color-mix(in srgb, var(--accent, #C8FF3D) 26%, #05050a 74%) 42%,
+    color-mix(in srgb, var(--accent, #C8FF3D) 14%, transparent 86%) 75%,
+    transparent 100%);
   transition: opacity 0.15s linear;
 }
 .hero-scrim-bottom {
-  position: absolute; bottom: 0; left: 0; right: 0; height: 45%; z-index: 1;
+  position: absolute; bottom: 0; left: 0; right: 0; height: 45%;
   background: linear-gradient(0deg,
     rgb(var(--degradado-inferior-rgb, 10 10 10) / 0.97) 0%,
     rgb(var(--degradado-inferior-rgb, 10 10 10) / 0.85) 35%,
@@ -47,11 +51,7 @@ body {
 }
 .hero-content {
   position: relative; overflow: hidden; padding-top: 22px;
-  /* 100vh (no 78vh) para que lo que sigue (descripción, chips, reseñas)
-     arranque justo debajo de lo que se ve sin hacer scroll — así nunca
-     empalma con los botones flotantes de abajo, sin importar el alto
-     real de la pantalla del celular. */
-  min-height: 100vh; min-height: 100svh;
+  min-height: 82vh; min-height: 82svh;
   display: flex; flex-direction: column;
 }
 /* position:relative (con z-index:auto) basta para que estos dos se dibujen
@@ -59,7 +59,7 @@ body {
 .home-title-block, .hero-logo-center { position: relative; }
 .ph-icon-wrap {
   position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center; z-index: 0;
+  display: flex; align-items: center; justify-content: center;
   opacity: 0.12; font-size: 90px;
 }
 
@@ -77,6 +77,14 @@ body {
   font-family: 'Space Grotesk'; font-size: 12px; letter-spacing: 0.1em;
   text-transform: uppercase; color: #ccc; margin-top: 10px;
 }
+.hero-llamar {
+  display: inline-flex; align-items: center; gap: 7px; margin-top: 16px;
+  background: var(--accent, #C8FF3D); color: #0A0A0A; text-decoration: none;
+  font-family: 'Space Grotesk'; font-weight: 700; font-size: 13px;
+  padding: 11px 20px; border-radius: 100px; box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+  transition: transform 0.15s ease;
+}
+.hero-llamar:active { transform: scale(0.96); }
 
 .hero-logo-center {
   width: 190px; height: 190px; border-radius: 28px;
@@ -90,16 +98,24 @@ body {
 .hero-logo-center.shape-rectangular { width: 240px; height: 150px; border-radius: 20px; }
 .hero-logo-center img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
 
-.home-thumbs { display: flex; gap: 10px; padding: 0 0 10px; }
+/* ===== Mini galería: se ancla ("sticky") un tramo corto al bajar del hero y
+   se despega justo al llegar al degradado inferior, quedando sobre el texto
+   descriptivo — nunca tapa los botones de más abajo. ===== */
+.thumbs-stick-wrap { position: relative; height: 220px; margin-top: -86px; z-index: 6; pointer-events: none; }
+.home-thumbs { position: sticky; top: 14px; display: flex; gap: 10px; padding: 0 20px; pointer-events: auto; }
 .home-thumb {
-  flex: 1; height: 160px; border-radius: 16px; background: rgba(28,28,28,0.85);
+  flex: 1; height: 150px; border-radius: 16px; background: rgba(28,28,28,0.85);
   background-size: cover; background-position: center;
   position: relative; border: 2px solid rgba(255,255,255,0.14);
   box-shadow: 0 8px 18px rgba(0,0,0,0.35);
+  transition: transform 0.25s ease;
 }
 .home-thumb:nth-child(1) { transform: rotate(-4deg); }
-.home-thumb:nth-child(2) { transform: rotate(3deg); height: 178px; }
+.home-thumb:nth-child(2) { transform: rotate(3deg); height: 166px; }
 .home-thumb:nth-child(3) { transform: rotate(-2deg); }
+@media (hover: hover) {
+  .home-thumb:hover { transform: translateY(-6px) rotate(0deg); }
+}
 
 .land-desc { font-size: 13.5px; color: #AAA; line-height: 1.6; padding: 20px 20px 0; }
 
@@ -110,19 +126,14 @@ body {
   padding: 7px 12px; border-radius: 100px;
 }
 
-.cta-float {
-  position: fixed; left: 0; right: 0; margin: 0 auto;
-  bottom: 78px; max-width: 480px; z-index: 21;
-  display: flex; flex-direction: column; gap: 10px; padding: 0 20px;
-}
 .cta-btn {
   display: flex; align-items: center; justify-content: center; gap: 8px;
   text-align: center; text-decoration: none; border: none; cursor: pointer;
   font-family: 'Space Grotesk'; font-weight: 700; font-size: 14.5px;
-  padding: 17px; border-radius: 100px;
+  padding: 17px; border-radius: 100px; transition: transform 0.15s ease;
 }
-.cta-row-pair { display: flex; gap: 10px; }
-.cta-row-pair .cta-btn { flex: 1; font-size: 13px; padding: 15px 10px; }
+.cta-btn:active { transform: scale(0.97); }
+.cta-cita { width: calc(100% - 40px); margin: 18px 20px 0; }
 
 /* ===== Addon: Mapas (Google + Apple, siempre ambos) ===== */
 .mini-mapas { padding: 0 20px; margin-top: 18px; }
@@ -144,24 +155,28 @@ body {
 }
 
 /* ===== Addon: Galería / carrusel (estilo BRUTAL FOOD) ===== */
-.mini-galeria { margin-top: 40px; }
+.mini-galeria { margin-bottom: 30px; }
 .galeria-eyebrow {
   font-family: 'Space Grotesk'; font-size: 11px; font-weight: 700;
   letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent, #C8FF3D);
-  padding: 0 20px; margin-bottom: 4px;
+  margin-bottom: 4px;
 }
 .galeria-titulo {
   font-family: 'Anton', sans-serif; font-size: 26px; text-transform: uppercase;
-  line-height: 1; padding: 0 20px; margin-bottom: 14px;
+  line-height: 1; margin-bottom: 14px;
 }
 .carrusel-track {
   display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory;
-  padding: 4px 20px 12px; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  padding: 4px 0 12px; scrollbar-width: none; -webkit-overflow-scrolling: touch;
 }
 .carrusel-track::-webkit-scrollbar { display: none; }
 .tarjeta {
   scroll-snap-align: start; flex: 0 0 68%; background: #1C1C1C;
   border: 1.5px solid #2C2C2C; border-radius: 4px; position: relative;
+  transition: transform 0.2s ease;
+}
+@media (hover: hover) {
+  .tarjeta:hover { transform: translateY(-4px); }
 }
 .tarjeta .foto-wrap { position: relative; aspect-ratio: 3/4; overflow: hidden; border-radius: 4px 4px 0 0; }
 .tarjeta .foto-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -184,7 +199,7 @@ body {
 .dot { width: 5px; height: 5px; border-radius: 50%; background: #333; transition: background .2s, width .2s; }
 .dot.activo { background: var(--accent, #C8FF3D); width: 18px; border-radius: 3px; }
 
-.menu-section { margin-top: 44px; padding: 0 20px; }
+.menu-section { margin-top: 44px; padding: 0 20px; scroll-margin-top: 20px; }
 .menu-cat-block { margin-bottom: 28px; }
 .menu-cat-name {
   font-family: 'Anton'; font-size: 21px; text-transform: uppercase; margin-bottom: 12px;
@@ -208,25 +223,10 @@ body {
   padding: 6px 4px;
   font-family: 'Space Grotesk'; font-weight: 700; font-size: 10px;
   text-decoration: none; color: var(--degradado-inferior-texto, #666); cursor: pointer;
+  transition: color 0.15s ease;
 }
+.sticky-bar a:active, .sticky-bar button:active { color: var(--accent, #C8FF3D); }
 .sticky-bar .icon-ic { font-size: 17px; }
-.sticky-bar .activo { color: var(--accent, #C8FF3D); }
-
-.menu-topbar {
-  display: flex; align-items: center; gap: 10px;
-  padding: 16px 20px; background: #000;
-}
-.menu-topbar button {
-  background: none; border: 1.5px solid #333; color: #fff;
-  font-family: 'Space Grotesk'; font-size: 12px; font-weight: 700;
-  padding: 8px 14px; border-radius: 100px; cursor: pointer;
-}
-.menu-topbar .mt-title {
-  font-family: 'Anton'; font-size: 18px; text-transform: uppercase;
-}
-
-.screen { display: none; }
-.screen.activo { display: block; }
 
 /* ===== Footer de marca (regresa al directorio) ===== */
 .mini-footer {
@@ -246,7 +246,9 @@ body {
   background: rgba(255,255,255,0.06); border: 1.5px solid var(--accent, #C8FF3D);
   border-radius: 12px; color: var(--accent, #C8FF3D); text-decoration: none;
   font-family: 'Space Grotesk'; font-weight: 700; font-size: 13px;
+  transition: transform 0.15s ease;
 }
+.mini-lealtad-banner:active { transform: scale(0.98); }
 
 /* ===== Addon: Calificaciones (Google o interno) ===== */
 .mini-calificaciones-google {
@@ -271,13 +273,13 @@ body {
   font-family: 'Space Grotesk'; font-weight: 700; font-size: 12.5px;
   padding: 11px; border-radius: 100px; cursor: pointer;
 }
-.calif-form { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+.calif-form { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; animation: apareceSuave 0.3s ease; }
 .calif-picker { display: flex; gap: 6px; justify-content: center; }
 .calif-picker button {
   width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid #333; background: none;
-  color: #555; font-size: 16px; cursor: pointer;
+  color: #555; font-size: 16px; cursor: pointer; transition: transform 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
-.calif-picker button.activo { border-color: var(--accent, #C8FF3D); color: var(--accent, #C8FF3D); }
+.calif-picker button.activo { border-color: var(--accent, #C8FF3D); color: var(--accent, #C8FF3D); transform: scale(1.1); }
 .calif-form textarea {
   width: 100%; min-height: 60px; background: #111; border: 1px solid #2a2a2a; border-radius: 8px;
   color: #eee; font-size: 12.5px; padding: 10px; font-family: inherit; resize: vertical;
@@ -291,12 +293,13 @@ body {
 .calif-gracias { margin-top: 10px; text-align: center; color: var(--accent, #C8FF3D); font-size: 13px; font-weight: 700; font-family: 'Space Grotesk'; }
 
 /* ===== Addon: Pedidos por WhatsApp (carrito) ===== */
-.pedido-toggle-wrap { padding: 0 20px 18px; }
+.pedido-toggle-wrap { padding: 0 0 18px; }
 .btn-pedido-toggle {
   width: 100%; background: #161616; border: 1.5px solid #2a2a2a; color: #ddd;
   font-family: 'Space Grotesk'; font-weight: 700; font-size: 13px;
-  padding: 13px; border-radius: 100px; cursor: pointer;
+  padding: 13px; border-radius: 100px; cursor: pointer; transition: transform 0.15s ease;
 }
+.btn-pedido-toggle:active { transform: scale(0.98); }
 .btn-pedido-toggle.activo { background: var(--accent, #C8FF3D); color: #0A0A0A; border-color: var(--accent, #C8FF3D); }
 
 .mprice-group { display: flex; align-items: center; gap: 10px; }
@@ -310,20 +313,23 @@ body {
 .btn-agregar { width: 24px; height: 24px; border-radius: 50%; }
 
 .btn-carrito-flotante {
-  position: fixed; left: 20px; right: 20px; bottom: 90px; max-width: 440px; margin: 0 auto;
+  position: fixed; left: 20px; right: 20px; bottom: 76px; max-width: 440px; margin: 0 auto;
   z-index: 22; display: flex; align-items: center; justify-content: space-between;
   border: none; border-radius: 12px; padding: 15px 18px; cursor: pointer;
   font-family: 'Space Grotesk'; font-weight: 700; font-size: 14px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  animation: carritoAparece 0.3s ease;
 }
 
 .overlay-carrito {
   position: fixed; inset: 0; z-index: 30; background: rgba(0,0,0,0.6);
   display: flex; align-items: flex-end; justify-content: center;
+  animation: apareceSuave 0.2s ease;
 }
 .hoja-carrito {
   width: 100%; max-width: 480px; max-height: 80vh; overflow-y: auto;
   background: #111; border-radius: 20px 20px 0 0; padding: 20px;
+  animation: hojaSube 0.25s ease;
 }
 .hoja-carrito-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
 .hoja-carrito-header h3 { font-family: 'Anton'; font-size: 20px; text-transform: uppercase; }
@@ -389,81 +395,125 @@ body {
   padding: 10px 16px; font-family: 'Space Grotesk'; font-weight: 700; cursor: pointer;
 }
 
+/* ===== Formulario de personalización de la tarjeta (no se guarda en ningún lado) ===== */
+.tl-form { max-width: 340px; margin: 0 auto; background: #111; border: 1.5px solid #262626; border-radius: 16px; padding: 20px; animation: apareceSuave 0.3s ease; }
+.tl-form p { font-size: 12px; color: #999; line-height: 1.5; margin-bottom: 14px; }
+.tl-form-field { margin-bottom: 12px; }
+.tl-form-field label { display: block; font-family: 'Space Grotesk'; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #888; margin-bottom: 6px; }
+.tl-form-field input {
+  width: 100%; background: #1C1C1C; border: 1.5px solid #2C2C2C; border-radius: 8px; color: #fff;
+  font-family: 'Manrope'; font-size: 13px; padding: 11px;
+}
+.tl-form button {
+  width: 100%; margin-top: 6px; border: none; border-radius: 100px; padding: 14px;
+  font-family: 'Space Grotesk'; font-weight: 700; font-size: 13.5px; cursor: pointer;
+}
+.tl-form-omitir {
+  display: block; width: 100%; margin-top: 10px; background: none; border: none; color: #777;
+  font-family: 'Space Grotesk'; font-size: 11.5px; text-decoration: underline; cursor: pointer;
+}
+.tl-para { font-family: 'Space Grotesk'; font-size: 12px; color: var(--accent, #C8FF3D); margin-top: 6px; }
+
+/* ===== Animaciones ===== */
+@keyframes apareceSuave { from { opacity: 0; } to { opacity: 1; } }
+@keyframes hojaSube { from { transform: translateY(24px); opacity: 0.6; } to { transform: none; opacity: 1; } }
+@keyframes carritoAparece { from { transform: translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes heroFadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: no-preference) {
+  .home-title-block { animation: heroFadeUp 0.6s ease both; }
+  .hero-logo-center { animation: heroFadeUp 0.6s ease 0.12s both; }
+
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.55s ease, transform 0.55s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+}
+
 /* =====================================================================
-   VISTA DE ESCRITORIO / TABLET — mismo contenido de siempre, reacomodado
-   por punto de quiebre. Sin barra lateral ni animaciones de aparición:
-   el hero pasa a 2 columnas, el menú a 2 columnas, la galería a
-   cuadrícula. El celular (por debajo de 768px) no cambia en nada.
+   VISTA DE ESCRITORIO / TABLET — el minisitio deja de ser una columna de
+   celular flotando: el hero pasa a dos columnas de verdad, la descripción
+   y las acciones (mapa, cita, lealtad, reseñas) se acomodan en dos
+   columnas, la galería y el menú usan cuadrícula. El celular (por debajo
+   de 768px) no cambia en nada.
    ===================================================================== */
 @media (min-width: 768px) {
-  .mini-wrap { max-width: 720px; }
+  .mini-wrap { max-width: 900px; padding-bottom: 40px; }
 
   .hero-content {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 200px;
+    grid-template-columns: minmax(0, 1fr) 220px;
     align-items: center;
-    column-gap: 32px;
-    padding: 56px 40px 32px;
-    min-height: 46vh; min-height: 46svh;
+    column-gap: 40px;
+    padding: 60px 48px 40px;
+    min-height: 58vh; min-height: 58svh;
   }
   .home-title-block { padding: 0; }
   .hero-logo-center { margin: 0; justify-self: center; }
+  .land-name { font-size: 60px; }
 
-  .land-desc { padding: 32px 40px 0; }
-  .mini-servicios { padding: 18px 40px 0; }
-  .mini-mapas { padding: 0 40px; }
+  .thumbs-stick-wrap { margin-top: -60px; height: 200px; }
+  .home-thumbs { padding: 0 48px; }
+
+  .land-desc { padding: 32px 48px 0; max-width: 640px; }
+  .mini-servicios { padding: 18px 48px 0; }
+
+  /* Descripción + acciones lado a lado: columna principal a la izquierda,
+     mapa/cita/lealtad/reseñas como panel de contacto a la derecha. */
+  .land-desc { grid-column: 1; }
+  .mini-servicios,
   .mini-lealtad-banner,
   .mini-calificaciones-google,
-  .mini-calificaciones { margin-left: 40px; margin-right: 40px; }
-  .mini-footer { margin-left: 40px; margin-right: 40px; }
-  .cta-float { padding: 0 40px; }
+  .mini-calificaciones,
+  .mini-mapas,
+  .cta-cita {
+    margin-left: 48px; margin-right: 48px;
+  }
+  .cta-cita { width: calc(100% - 96px); }
 
-  .menu-topbar { padding-left: 40px; padding-right: 40px; }
-  .galeria-eyebrow, .galeria-titulo { padding-left: 40px; padding-right: 40px; }
-  .pedido-toggle-wrap { padding-left: 40px; padding-right: 40px; }
+  .menu-section { padding: 0 48px; }
+  .galeria-eyebrow, .galeria-titulo { padding: 0; }
+  .mini-footer { margin-left: 48px; margin-right: 48px; }
 
   /* Galería: de carrusel horizontal a cuadrícula fija */
   .carrusel-track {
     display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
-    overflow-x: visible; padding: 4px 40px 12px;
+    overflow-x: visible; padding: 4px 0 12px;
   }
   .tarjeta { flex: unset; }
   .dots { display: none; }
 
   /* Menú: de una columna a dos, cada categoría cae en la que tenga espacio */
-  .menu-section { padding: 0 40px; columns: 2; column-gap: 48px; }
+  .menu-section { columns: 2; column-gap: 56px; }
   .menu-main-title { column-span: all; margin-bottom: 26px; }
   .menu-cat-block { break-inside: avoid; }
+  .pedido-toggle-wrap { column-span: all; }
+  .mini-galeria { column-span: all; }
+
+  .sticky-bar { max-width: 900px; }
 }
 
 /* =====================================================================
-   ESCRITORIO — a partir de aquí ya hay espacio real de sobra a los
-   lados: la barra de contacto (llamar/ver menú/agendar + mapa/whatsapp)
-   deja de estar anclada abajo y se convierte en un panel fijo a la
-   derecha. En tablet (arriba) se queda abajo porque ahí no cabe.
+   ESCRITORIO GRANDE — más aire, tipografía más grande, barra inferior
+   centrada (ya no hace falta un panel flotante: todas las acciones viven
+   en el flujo normal de la página).
    ===================================================================== */
 @media (min-width: 1100px) {
-  .mini-wrap { max-width: 860px; padding-bottom: 60px; }
-  .land-name { font-size: 58px; }
-  .hero-cta-spacer { height: 24px !important; }
-
-  .cta-float {
-    position: fixed; left: auto; top: auto;
-    right: 48px; bottom: 132px;
-    width: 300px; max-width: 300px;
-    flex-direction: column; gap: 12px;
-    background: #111111; border: 1.5px solid #262626; border-radius: 20px;
-    padding: 18px; box-shadow: 0 24px 60px rgba(0,0,0,0.55);
-  }
-  .home-thumbs { padding: 0 0 4px; }
-  .home-thumb { height: 72px; }
-  .home-thumb:nth-child(2) { height: 80px; }
-
-  .sticky-bar {
-    position: fixed; left: auto; top: auto;
-    right: 48px; bottom: 48px;
-    width: 300px; max-width: 300px; margin: 0;
-    border-radius: 16px; border: 1.5px solid #262626;
-    padding: 10px 6px 12px;
-  }
+  .mini-wrap { max-width: 1080px; }
+  .land-name { font-size: 68px; }
+  .hero-content { min-height: 62vh; min-height: 62svh; padding: 72px 60px 48px; }
+  .thumbs-stick-wrap { height: 210px; }
+  .home-thumbs { padding: 0 60px; }
+  .home-thumb { height: 170px; }
+  .home-thumb:nth-child(2) { height: 188px; }
+  .land-desc { padding: 32px 60px 0; }
+  .mini-servicios,
+  .mini-lealtad-banner,
+  .mini-calificaciones-google,
+  .mini-calificaciones,
+  .mini-mapas,
+  .cta-cita { margin-left: 60px; margin-right: 60px; }
+  .cta-cita { width: calc(100% - 120px); max-width: 460px; }
+  .mini-mapas .cta-btn, .mini-mapas { max-width: 460px; }
+  .menu-section { padding: 0 60px; }
+  .mini-footer { margin-left: 60px; margin-right: 60px; }
+  .sticky-bar { max-width: 1080px; }
 }
