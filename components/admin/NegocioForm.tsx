@@ -156,6 +156,7 @@ export default function NegocioForm({
   const [error, setError] = useState("");
   const [ok, setOk] = useState(false);
   const [categorias, setCategorias] = useState<CategoriaOpcion[]>(categoriasIniciales);
+  const [confirmarPeligro, setConfirmarPeligro] = useState<"archivar" | "eliminar" | null>(null);
 
   // Datos básicos (usados tanto para crear como editar)
   const [nombre, setNombre] = useState(negocio?.nombre ?? "");
@@ -410,7 +411,7 @@ export default function NegocioForm({
 
   async function archivar() {
     if (!negocio) return;
-    if (!confirm(`¿Quitar "${negocio.nombre}" del directorio? (se puede reactivar después)`)) return;
+    setConfirmarPeligro(null);
     setGuardando(true);
     try {
       await fetch(`/api/admin/negocios/${negocio.id}`, {
@@ -426,19 +427,14 @@ export default function NegocioForm({
 
   async function eliminar() {
     if (!negocio) return;
-    if (
-      !confirm(
-        `¿Eliminar "${negocio.nombre}" para siempre? Esto borra su menú, galería, calificaciones y toda su información — no se puede deshacer. Si solo quieres ocultarlo, usa "Archivar" en su lugar.`
-      )
-    )
-      return;
+    setConfirmarPeligro(null);
     setGuardando(true);
     try {
       const res = await fetch(`/api/admin/negocios/${negocio.id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("No se pudo eliminar el negocio.");
       router.push("/admin");
     } catch (err) {
-      alert(err instanceof Error ? err.message : "No se pudo eliminar el negocio.");
+      setError(err instanceof Error ? err.message : "No se pudo eliminar el negocio.");
       setGuardando(false);
     }
   }
@@ -564,16 +560,54 @@ export default function NegocioForm({
             </div>
           )}
         </div>
-        <div style={{ display: "flex", gap: 10 }}>
+        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
           <Link className="admin-btn admin-btn-secondary" href={`/admin/vista-previa/${negocio.id}`} target="_blank">
             Ver vista previa
           </Link>
-          <button type="button" className="admin-btn admin-btn-danger" onClick={archivar} disabled={guardando}>
-            Archivar
-          </button>
-          <button type="button" className="admin-btn admin-btn-danger" onClick={eliminar} disabled={guardando}>
-            Eliminar
-          </button>
+          {confirmarPeligro === null && (
+            <>
+              <button
+                type="button"
+                className="admin-btn admin-btn-danger"
+                onClick={() => setConfirmarPeligro("archivar")}
+                disabled={guardando}
+              >
+                Archivar
+              </button>
+              <button
+                type="button"
+                className="admin-btn admin-btn-danger"
+                onClick={() => setConfirmarPeligro("eliminar")}
+                disabled={guardando}
+              >
+                Eliminar
+              </button>
+            </>
+          )}
+          {confirmarPeligro === "archivar" && (
+            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+              <span style={{ fontSize: 13 }}>¿Quitar del directorio? (se puede reactivar después)</span>
+              <button type="button" className="admin-btn admin-btn-danger" onClick={archivar} disabled={guardando}>
+                Sí, archivar
+              </button>
+              <button type="button" className="admin-btn admin-btn-secondary" onClick={() => setConfirmarPeligro(null)} disabled={guardando}>
+                Cancelar
+              </button>
+            </div>
+          )}
+          {confirmarPeligro === "eliminar" && (
+            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+              <span style={{ fontSize: 13 }}>
+                ¿Eliminar para siempre? Se borra su menú, galería y calificaciones — no se puede deshacer.
+              </span>
+              <button type="button" className="admin-btn admin-btn-danger" onClick={eliminar} disabled={guardando}>
+                Sí, eliminar
+              </button>
+              <button type="button" className="admin-btn admin-btn-secondary" onClick={() => setConfirmarPeligro(null)} disabled={guardando}>
+                Cancelar
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
