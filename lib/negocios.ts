@@ -523,6 +523,10 @@ export async function archivarNegocio(id: string): Promise<void> {
   await actualizarNegocio(id, { estado: "archivado" });
 }
 
+export async function eliminarNegocio(id: string): Promise<void> {
+  await db().delete(negocios).where(eq(negocios.id, id));
+}
+
 const CAMPO_A_COLUMNA: Record<string, "logoUrl" | "fotoPortada" | "galeria1Foto" | "galeria2Foto" | "galeria3Foto"> = {
   logo: "logoUrl",
   foto_portada: "fotoPortada",

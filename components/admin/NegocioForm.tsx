@@ -424,6 +424,25 @@ export default function NegocioForm({
     }
   }
 
+  async function eliminar() {
+    if (!negocio) return;
+    if (
+      !confirm(
+        `¿Eliminar "${negocio.nombre}" para siempre? Esto borra su menú, galería, calificaciones y toda su información — no se puede deshacer. Si solo quieres ocultarlo, usa "Archivar" en su lugar.`
+      )
+    )
+      return;
+    setGuardando(true);
+    try {
+      const res = await fetch(`/api/admin/negocios/${negocio.id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("No se pudo eliminar el negocio.");
+      router.push("/admin");
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "No se pudo eliminar el negocio.");
+      setGuardando(false);
+    }
+  }
+
   // --- Modo crear: formulario dividido por secciones, con solo lo indispensable requerido ---
   if (!negocio) {
     return (
@@ -551,6 +570,9 @@ export default function NegocioForm({
           </Link>
           <button type="button" className="admin-btn admin-btn-danger" onClick={archivar} disabled={guardando}>
             Archivar
+          </button>
+          <button type="button" className="admin-btn admin-btn-danger" onClick={eliminar} disabled={guardando}>
+            Eliminar
           </button>
         </div>
       </div>
