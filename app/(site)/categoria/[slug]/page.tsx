@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { categoriaPorSlug, getNegociosPorCategoria } from "@/lib/negocios";
+import { getCategoriaPorSlug, getNegociosPorCategoria } from "@/lib/negocios";
 import { NegocioCard, NegocioListItem } from "@/components/NegocioCards";
 
 export const revalidate = 60;
@@ -11,7 +11,7 @@ export default async function CategoriaPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const categoria = categoriaPorSlug(slug);
+  const categoria = await getCategoriaPorSlug(slug);
   if (!categoria) notFound();
 
   const negocios = await getNegociosPorCategoria(slug);

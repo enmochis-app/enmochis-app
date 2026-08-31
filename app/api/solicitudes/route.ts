@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import { crearSolicitud, CATEGORIAS, type Categoria } from "@/lib/negocios";
-
-const CATEGORIAS_VALIDAS = new Set<string>(CATEGORIAS.map((c) => c.nombre));
+import { crearSolicitud, getCategorias, type Categoria } from "@/lib/negocios";
 
 export async function POST(request: Request) {
   let body: Record<string, unknown>;
@@ -26,7 +24,8 @@ export async function POST(request: Request) {
       { status: 400 }
     );
   }
-  if (!CATEGORIAS_VALIDAS.has(categoria)) {
+  const categorias = await getCategorias();
+  if (!categorias.some((c) => c.nombre === categoria)) {
     return NextResponse.json({ error: "Selecciona una categoría válida." }, { status: 400 });
   }
 

@@ -1,17 +1,18 @@
-import { getDestacados, getTodosPublicos, getNegociosPorCategoria, CATEGORIAS } from "@/lib/negocios";
+import { getDestacados, getTodosPublicos, getNegociosPorCategoria, getCategorias } from "@/lib/negocios";
 import HomeExperience from "@/components/HomeExperience";
 import Link from "next/link";
 
 export const revalidate = 60;
 
 export default async function HomePage() {
+  const listaCategorias = await getCategorias();
   const [destacados, todos, porCategoria] = await Promise.all([
     getDestacados(),
     getTodosPublicos(),
-    Promise.all(CATEGORIAS.map((c) => getNegociosPorCategoria(c.slug))),
+    Promise.all(listaCategorias.map((c) => getNegociosPorCategoria(c.slug))),
   ]);
 
-  const categorias = CATEGORIAS.map((c, i) => {
+  const categorias = listaCategorias.map((c, i) => {
     const negocios = porCategoria[i];
     const top = negocios.find((n) => n.estado === "destacado") ?? negocios[0];
     return { slug: c.slug, nombre: c.nombre, emoji: c.emoji, color: c.color, top };

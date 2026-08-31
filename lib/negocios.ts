@@ -1,11 +1,16 @@
 import { put } from "@vercel/blob";
 import { and, eq, gte, inArray, sql } from "drizzle-orm";
 import { db } from "./db";
-import { negocios, addons, negocioAddons, eventos, type NegocioRow } from "./db/schema";
+import { negocios, addons, negocioAddons, eventos, categorias, type NegocioRow } from "./db/schema";
 import { SAMPLE_NEGOCIOS } from "./sample-data";
 import { hashearPassword, passwordValido } from "./portalAuth";
 
-export type Categoria = "Restaurantes" | "Cafeterías" | "Snacks" | "Panaderías";
+/** Antes era un enum fijo — ahora cualquier texto es válido: las categorías
+ * se pueden crear desde el admin (ver getCategorias/crearCategoria) y viven
+ * en la base de datos. Esta lista solo sirve de respaldo cuando la base no
+ * responde, o para el enrutado por subdominio (que no puede consultar la
+ * base en cada solicitud). */
+export type Categoria = string;
 
 export const CATEGORIAS: { slug: string; nombre: Categoria; emoji: string; color: string }[] = [
   { slug: "restaurantes", nombre: "Restaurantes", emoji: "🍽️", color: "#00847A" },
@@ -20,6 +25,66 @@ export function categoriaPorSlug(slug: string) {
 
 export function slugPorCategoria(nombre: Categoria) {
   return CATEGORIAS.find((c) => c.nombre === nombre)?.slug ?? "";
+}
+
+/** Lista completa de categorías: las de la base de datos (creadas desde el
+ * admin) primero, y si todavía no existen ahí, las de respaldo de arriba. */
+export async function getCategorias(): Promise<{ slug: string; nombre: string; emoji: string; color: string }[]> {
+  try {
+    const filas = await db().select().from(categorias).orderBy(categorias.orden, categorias.nombre);
+    if (filas.length === 0) return CATEGORIAS;
+    return filas.map((f) => ({ slug: f.slug, nombre: f.nombre, emoji: f.icono, color: f.color }));
+  } catch {
+    return CATEGORIAS;
+  }
+}
+
+export async function getCategoriaPorSlug(slug: string) {
+  const lista = await getCategorias();
+  return lista.find((c) => c.slug === slug);
+}
+
+function slugifyCategoria(nombre: string): string {
+  return nombre
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+/** Crea una categoría nueva desde el admin. Si el nombre ya existe (mismo
+ * slug), regresa la existente en vez de duplicarla. La primera vez que se
+ * usa, siembra las categorías originales en la base de datos — así no
+ * desaparecen al agregar la primera categoría personalizada. */
+export async function crearCategoria(datos: { nombre: string; emoji?: string; color?: string }): Promise<{ slug: string; nombre: string; emoji: string; color: string }> {
+  let existentes = await db().select().from(categorias);
+  if (existentes.length === 0) {
+    await db()
+      .insert(categorias)
+      .values(CATEGORIAS.map((c, i) => ({ slug: c.slug, nombre: c.nombre, icono: c.emoji, color: c.color, orden: i })));
+    existentes = await db().select().from(categorias);
+  }
+
+  const base = slugifyCategoria(datos.nombre) || "categoria";
+  let candidato = base;
+  let contador = 2;
+  while (existentes.some((c) => c.slug === candidato)) {
+    candidato = `${base}-${contador}`;
+    contador += 1;
+  }
+  const [fila] = await db()
+    .insert(categorias)
+    .values({
+      slug: candidato,
+      nombre: datos.nombre,
+      icono: datos.emoji?.trim() || "🏷️",
+      color: datos.color?.trim() || "#00847A",
+      orden: existentes.length,
+    })
+    .returning();
+  return { slug: fila.slug, nombre: fila.nombre, emoji: fila.icono, color: fila.color };
 }
 
 export type Estado =
@@ -224,7 +289,7 @@ export async function getTodosPublicos(): Promise<Negocio[]> {
 }
 
 export async function getNegociosPorCategoria(categoriaSlug: string): Promise<Negocio[]> {
-  const cat = categoriaPorSlug(categoriaSlug);
+  const cat = await getCategoriaPorSlug(categoriaSlug);
   if (!cat) return [];
   try {
     const filas = await db()

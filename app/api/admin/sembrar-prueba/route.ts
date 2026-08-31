@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { negocios, addons, negocioAddons, menuItems } from "@/lib/db/schema";
+import { negocios, addons, negocioAddons, menuItems, categorias } from "@/lib/db/schema";
 import { SAMPLE_NEGOCIOS, SAMPLE_MENU_ITEMS, CATALOGO_ADDONS_DEMO } from "@/lib/sample-data";
+import { CATEGORIAS } from "@/lib/negocios";
 
 /**
  * Siembra el catálogo de addons y los negocios de ejemplo (los mismos que se ven
@@ -12,6 +13,13 @@ import { SAMPLE_NEGOCIOS, SAMPLE_MENU_ITEMS, CATALOGO_ADDONS_DEMO } from "@/lib/
  */
 export async function POST() {
   try {
+    const categoriasActuales = await db().select().from(categorias);
+    if (categoriasActuales.length === 0) {
+      await db()
+        .insert(categorias)
+        .values(CATEGORIAS.map((c, i) => ({ slug: c.slug, nombre: c.nombre, icono: c.emoji, color: c.color, orden: i })));
+    }
+
     const catalogoActual = await db().select().from(addons);
     const clavesExistentes = new Set(catalogoActual.map((a) => a.clave));
 
