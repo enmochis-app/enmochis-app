@@ -3,10 +3,12 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { CATEGORIAS, TIPOS_EVENTO, type Negocio, type Estado, type Categoria, type LogoForma, type Addon } from "@/lib/negocios";
+import { TIPOS_EVENTO, type Negocio, type Estado, type Categoria, type LogoForma, type Addon } from "@/lib/negocios";
 import type { MenuItemInput } from "@/lib/menuItems";
 import ImageUploadField from "@/components/ImageUploadField";
 import MenuEditor from "@/components/MenuEditor";
+
+type CategoriaOpcion = { slug: string; nombre: string; emoji: string; color: string };
 
 function hoyMasDias(dias: number): string {
   const d = new Date();
@@ -35,24 +37,140 @@ const DEGRADADOS_INFERIORES: { value: "negro" | "blanco" | "beige"; label: strin
   { value: "beige", label: "Beige" },
 ];
 
+const CREAR_NUEVA = "__crear_nueva__";
+
+/** Selector de categoría con la opción de crear una nueva sin salir del formulario. */
+function SelectorCategoria({
+  categorias,
+  valor,
+  onChange,
+  onCategoriaCreada,
+}: {
+  categorias: CategoriaOpcion[];
+  valor: string;
+  onChange: (nombre: string) => void;
+  onCategoriaCreada: (categoria: CategoriaOpcion) => void;
+}) {
+  const [creando, setCreando] = useState(false);
+  const [nuevoNombre, setNuevoNombre] = useState("");
+  const [nuevoEmoji, setNuevoEmoji] = useState("🏷️");
+  const [guardando, setGuardando] = useState(false);
+  const [error, setError] = useState("");
+
+  async function crearCategoria() {
+    if (!nuevoNombre.trim()) return;
+    setGuardando(true);
+    setError("");
+    try {
+      const res = await fetch("/api/admin/categorias", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre: nuevoNombre.trim(), emoji: nuevoEmoji.trim() || undefined }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error || "No se pudo crear la categoría.");
+      onCategoriaCreada(body.categoria);
+      onChange(body.categoria.nombre);
+      setCreando(false);
+      setNuevoNombre("");
+      setNuevoEmoji("🏷️");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "No se pudo crear la categoría.");
+    } finally {
+      setGuardando(false);
+    }
+  }
+
+  if (creando) {
+    return (
+      <div className="admin-field">
+        <label>Nueva categoría</label>
+        <div style={{ display: "flex", gap: 8 }}>
+          <input
+            value={nuevoEmoji}
+            onChange={(e) => setNuevoEmoji(e.target.value)}
+            style={{ width: 54 }}
+            placeholder="🏷️"
+            aria-label="Ícono de la categoría"
+          />
+          <input
+            value={nuevoNombre}
+            onChange={(e) => setNuevoNombre(e.target.value)}
+            placeholder="Nombre de la categoría"
+            style={{ flex: 1 }}
+            spellCheck
+            lang="es"
+            autoFocus
+          />
+        </div>
+        <div style={{ display: "flex", gap: 12, alignItems: "center", marginTop: 8 }}>
+          <button type="button" className="admin-btn" onClick={crearCategoria} disabled={guardando || !nuevoNombre.trim()}>
+            {guardando ? "Creando..." : "Crear categoría"}
+          </button>
+          <button type="button" className="admin-link" onClick={() => setCreando(false)}>
+            Cancelar
+          </button>
+        </div>
+        {error && <div className="admin-error">{error}</div>}
+      </div>
+    );
+  }
+
+  return (
+    <div className="admin-field">
+      <label>Categoría</label>
+      <select
+        value={valor}
+        onChange={(e) => {
+          if (e.target.value === CREAR_NUEVA) {
+            setCreando(true);
+            return;
+          }
+          onChange(e.target.value);
+        }}
+      >
+        {categorias.map((c) => (
+          <option key={c.slug} value={c.nombre}>
+            {c.emoji} {c.nombre}
+          </option>
+        ))}
+        <option value={CREAR_NUEVA}>+ Crear nueva categoría...</option>
+      </select>
+    </div>
+  );
+}
+
 export default function NegocioForm({
   negocio,
   catalogoAddons,
+  categorias: categoriasIniciales,
   onRecargar,
 }: {
   negocio: Negocio | null;
   catalogoAddons: Addon[];
+  categorias: CategoriaOpcion[];
   onRecargar?: () => void;
 }) {
   const router = useRouter();
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState("");
   const [ok, setOk] = useState(false);
+  const [categorias, setCategorias] = useState<CategoriaOpcion[]>(categoriasIniciales);
+  const [confirmarPeligro, setConfirmarPeligro] = useState<"archivar" | "eliminar" | null>(null);
 
   // Datos básicos (usados tanto para crear como editar)
   const [nombre, setNombre] = useState(negocio?.nombre ?? "");
-  const [categoria, setCategoria] = useState<Categoria>(negocio?.categoria ?? "Restaurantes");
+  const [categoria, setCategoria] = useState<Categoria>(negocio?.categoria ?? categoriasIniciales[0]?.nombre ?? "");
   const [descripcionCorta, setDescripcionCorta] = useState(negocio?.descripcionCorta ?? "");
+
+  // Solo se piden al crear (opcionales, para no bloquear un alta rápida)
+  const [telefonoNuevo, setTelefonoNuevo] = useState("");
+  const [whatsappNuevo, setWhatsappNuevo] = useState("");
+  const [direccionNueva, setDireccionNueva] = useState("");
+  const [latNuevo, setLatNuevo] = useState("");
+  const [lngNuevo, setLngNuevo] = useState("");
+  const [instagramNuevo, setInstagramNuevo] = useState("");
+  const [facebookNuevo, setFacebookNuevo] = useState("");
 
   // Solo aplican una vez que el negocio ya existe (modo editar)
   const [descripcionLarga, setDescripcionLarga] = useState(negocio?.descripcionLarga ?? "");
@@ -104,6 +222,10 @@ export default function NegocioForm({
     for (const a of negocio?.addons ?? []) inicial[a.clave] = true;
     return inicial;
   });
+
+  function registrarCategoriaCreada(cat: CategoriaOpcion) {
+    setCategorias((prev) => (prev.some((c) => c.slug === cat.slug) ? prev : [...prev, cat]));
+  }
 
   const enPrueba = estado === "prueba";
   function activarPrueba() {
@@ -175,7 +297,19 @@ export default function NegocioForm({
       const res = await fetch("/api/admin/negocios", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nombre, categoria, descripcionCorta, estado: "prueba" }),
+        body: JSON.stringify({
+          nombre,
+          categoria,
+          descripcionCorta,
+          estado: "prueba",
+          telefono: telefonoNuevo || undefined,
+          whatsapp: whatsappNuevo || undefined,
+          direccion: direccionNueva || undefined,
+          lat: latNuevo.trim() === "" ? undefined : Number(latNuevo),
+          lng: lngNuevo.trim() === "" ? undefined : Number(lngNuevo),
+          instagram: instagramNuevo || undefined,
+          facebook: facebookNuevo || undefined,
+        }),
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error || "No se pudo crear el negocio.");
@@ -277,7 +411,7 @@ export default function NegocioForm({
 
   async function archivar() {
     if (!negocio) return;
-    if (!confirm(`¿Quitar "${negocio.nombre}" del directorio? (se puede reactivar después)`)) return;
+    setConfirmarPeligro(null);
     setGuardando(true);
     try {
       await fetch(`/api/admin/negocios/${negocio.id}`, {
@@ -291,29 +425,95 @@ export default function NegocioForm({
     }
   }
 
-  // --- Modo crear: formulario mínimo ---
+  async function eliminar() {
+    if (!negocio) return;
+    setConfirmarPeligro(null);
+    setGuardando(true);
+    try {
+      const res = await fetch(`/api/admin/negocios/${negocio.id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("No se pudo eliminar el negocio.");
+      router.push("/admin");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "No se pudo eliminar el negocio.");
+      setGuardando(false);
+    }
+  }
+
+  // --- Modo crear: formulario dividido por secciones, con solo lo indispensable requerido ---
   if (!negocio) {
     return (
-      <form className="admin-section" onSubmit={crear}>
-        <h2>Nuevo negocio</h2>
-        <div className="admin-field">
-          <label>Nombre</label>
-          <input value={nombre} onChange={(e) => setNombre(e.target.value)} required />
+      <form onSubmit={crear} lang="es">
+        <div className="admin-head-row">
+          <h1 style={{ fontSize: 20 }}>Nuevo negocio</h1>
         </div>
-        <div className="admin-field">
-          <label>Categoría</label>
-          <select value={categoria} onChange={(e) => setCategoria(e.target.value as Categoria)}>
-            {CATEGORIAS.map((c) => (
-              <option key={c.slug} value={c.nombre}>
-                {c.nombre}
-              </option>
-            ))}
-          </select>
+
+        <div className="admin-section">
+          <h2>Datos básicos</h2>
+          <div className="admin-field">
+            <label>Nombre</label>
+            <input value={nombre} onChange={(e) => setNombre(e.target.value)} required spellCheck autoFocus />
+          </div>
+          <SelectorCategoria
+            categorias={categorias}
+            valor={categoria}
+            onChange={setCategoria}
+            onCategoriaCreada={registrarCategoriaCreada}
+          />
+          <div className="admin-field">
+            <label>Descripción corta</label>
+            <input value={descripcionCorta} onChange={(e) => setDescripcionCorta(e.target.value)} spellCheck />
+          </div>
         </div>
-        <div className="admin-field">
-          <label>Descripción corta</label>
-          <input value={descripcionCorta} onChange={(e) => setDescripcionCorta(e.target.value)} />
+
+        <div className="admin-section">
+          <h2>Contacto</h2>
+          <div className="admin-small" style={{ fontSize: 12, color: "#666", marginBottom: 10 }}>
+            Opcional aquí — lo puedes completar después, pero si ya lo tienes a la mano ahorras un paso.
+          </div>
+          <div className="admin-grid-2">
+            <div className="admin-field">
+              <label>Teléfono</label>
+              <input value={telefonoNuevo} onChange={(e) => setTelefonoNuevo(e.target.value)} />
+            </div>
+            <div className="admin-field">
+              <label>WhatsApp</label>
+              <input value={whatsappNuevo} onChange={(e) => setWhatsappNuevo(e.target.value)} />
+            </div>
+          </div>
         </div>
+
+        <div className="admin-section">
+          <h2>Ubicación</h2>
+          <div className="admin-field">
+            <label>Dirección</label>
+            <input value={direccionNueva} onChange={(e) => setDireccionNueva(e.target.value)} spellCheck />
+          </div>
+          <div className="admin-grid-2">
+            <div className="admin-field">
+              <label>Latitud</label>
+              <input value={latNuevo} onChange={(e) => setLatNuevo(e.target.value)} placeholder="25.7920" inputMode="decimal" />
+            </div>
+            <div className="admin-field">
+              <label>Longitud</label>
+              <input value={lngNuevo} onChange={(e) => setLngNuevo(e.target.value)} placeholder="-108.9930" inputMode="decimal" />
+            </div>
+          </div>
+        </div>
+
+        <div className="admin-section">
+          <h2>Redes sociales</h2>
+          <div className="admin-grid-2">
+            <div className="admin-field">
+              <label>Instagram</label>
+              <input value={instagramNuevo} onChange={(e) => setInstagramNuevo(e.target.value)} placeholder="usuario" />
+            </div>
+            <div className="admin-field">
+              <label>Facebook</label>
+              <input value={facebookNuevo} onChange={(e) => setFacebookNuevo(e.target.value)} placeholder="usuario o página" />
+            </div>
+          </div>
+        </div>
+
         <button className="admin-btn" type="submit" disabled={guardando}>
           {guardando ? "Creando..." : "Crear y continuar →"}
         </button>
@@ -326,7 +526,7 @@ export default function NegocioForm({
   const uploadUrl = `/api/admin/negocios/${negocio.id}/adjuntos`;
 
   return (
-    <form onSubmit={guardar}>
+    <form onSubmit={guardar} lang="es">
       <div className="admin-head-row">
         <div>
           <h1 style={{ fontSize: 20 }}>{negocio.nombre}</h1>
@@ -360,13 +560,54 @@ export default function NegocioForm({
             </div>
           )}
         </div>
-        <div style={{ display: "flex", gap: 10 }}>
+        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
           <Link className="admin-btn admin-btn-secondary" href={`/admin/vista-previa/${negocio.id}`} target="_blank">
             Ver vista previa
           </Link>
-          <button type="button" className="admin-btn admin-btn-danger" onClick={archivar} disabled={guardando}>
-            Archivar
-          </button>
+          {confirmarPeligro === null && (
+            <>
+              <button
+                type="button"
+                className="admin-btn admin-btn-danger"
+                onClick={() => setConfirmarPeligro("archivar")}
+                disabled={guardando}
+              >
+                Archivar
+              </button>
+              <button
+                type="button"
+                className="admin-btn admin-btn-danger"
+                onClick={() => setConfirmarPeligro("eliminar")}
+                disabled={guardando}
+              >
+                Eliminar
+              </button>
+            </>
+          )}
+          {confirmarPeligro === "archivar" && (
+            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+              <span style={{ fontSize: 13 }}>¿Quitar del directorio? (se puede reactivar después)</span>
+              <button type="button" className="admin-btn admin-btn-danger" onClick={archivar} disabled={guardando}>
+                Sí, archivar
+              </button>
+              <button type="button" className="admin-btn admin-btn-secondary" onClick={() => setConfirmarPeligro(null)} disabled={guardando}>
+                Cancelar
+              </button>
+            </div>
+          )}
+          {confirmarPeligro === "eliminar" && (
+            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+              <span style={{ fontSize: 13 }}>
+                ¿Eliminar para siempre? Se borra su menú, galería y calificaciones — no se puede deshacer.
+              </span>
+              <button type="button" className="admin-btn admin-btn-danger" onClick={eliminar} disabled={guardando}>
+                Sí, eliminar
+              </button>
+              <button type="button" className="admin-btn admin-btn-secondary" onClick={() => setConfirmarPeligro(null)} disabled={guardando}>
+                Cancelar
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -375,26 +616,22 @@ export default function NegocioForm({
         <div className="admin-grid-2">
           <div className="admin-field">
             <label>Nombre</label>
-            <input value={nombre} onChange={(e) => setNombre(e.target.value)} required />
+            <input value={nombre} onChange={(e) => setNombre(e.target.value)} required spellCheck />
           </div>
-          <div className="admin-field">
-            <label>Categoría</label>
-            <select value={categoria} onChange={(e) => setCategoria(e.target.value as Categoria)}>
-              {CATEGORIAS.map((c) => (
-                <option key={c.slug} value={c.nombre}>
-                  {c.nombre}
-                </option>
-              ))}
-            </select>
-          </div>
+          <SelectorCategoria
+            categorias={categorias}
+            valor={categoria}
+            onChange={setCategoria}
+            onCategoriaCreada={registrarCategoriaCreada}
+          />
         </div>
         <div className="admin-field">
           <label>Descripción corta</label>
-          <input value={descripcionCorta} onChange={(e) => setDescripcionCorta(e.target.value)} />
+          <input value={descripcionCorta} onChange={(e) => setDescripcionCorta(e.target.value)} spellCheck />
         </div>
         <div className="admin-field">
           <label>Descripción larga</label>
-          <textarea value={descripcionLarga} onChange={(e) => setDescripcionLarga(e.target.value)} />
+          <textarea value={descripcionLarga} onChange={(e) => setDescripcionLarga(e.target.value)} spellCheck />
         </div>
         <div className="admin-grid-2">
           <div className="admin-field">
@@ -408,21 +645,21 @@ export default function NegocioForm({
         </div>
         <div className="admin-field">
           <label>Mensaje de WhatsApp</label>
-          <input value={mensajeWhatsapp} onChange={(e) => setMensajeWhatsapp(e.target.value)} placeholder="Hola 👋, quiero hacer un pedido." />
+          <input value={mensajeWhatsapp} onChange={(e) => setMensajeWhatsapp(e.target.value)} placeholder="Hola 👋, quiero hacer un pedido." spellCheck />
           <div style={{ fontSize: 11, color: "#666", marginTop: 4 }}>
             Se le agrega solo &quot;Vengo de {negocio.slug}.enmochis.app&quot; al final — nunca hay que escribirlo a mano.
           </div>
         </div>
         <div className="admin-field">
           <label>Mensaje de citas (addon &quot;Citas por WhatsApp&quot;)</label>
-          <input value={mensajeCitas} onChange={(e) => setMensajeCitas(e.target.value)} placeholder="Hola 👋, quiero agendar una cita." />
+          <input value={mensajeCitas} onChange={(e) => setMensajeCitas(e.target.value)} placeholder="Hola 👋, quiero agendar una cita." spellCheck />
           <div style={{ fontSize: 11, color: "#666", marginTop: 4 }}>
             Solo se muestra si el negocio tiene activo el addon &quot;Citas por WhatsApp&quot;.
           </div>
         </div>
         <div className="admin-field">
           <label>Dirección</label>
-          <input value={direccion} onChange={(e) => setDireccion(e.target.value)} />
+          <input value={direccion} onChange={(e) => setDireccion(e.target.value)} spellCheck />
         </div>
         <div className="admin-grid-2">
           <div className="admin-field">
@@ -449,7 +686,7 @@ export default function NegocioForm({
         </div>
         <div className="admin-field">
           <label>Horarios</label>
-          <input value={horarios} onChange={(e) => setHorarios(e.target.value)} />
+          <input value={horarios} onChange={(e) => setHorarios(e.target.value)} spellCheck />
         </div>
       </div>
 
@@ -533,7 +770,7 @@ export default function NegocioForm({
             <div className="admin-grid-2">
               <div className="admin-field">
                 <label>Nombre</label>
-                <input value={g.nombre} onChange={(e) => g.setNombre(e.target.value)} />
+                <input value={g.nombre} onChange={(e) => g.setNombre(e.target.value)} spellCheck />
               </div>
               <div className="admin-field">
                 <label>Precio</label>
@@ -547,7 +784,7 @@ export default function NegocioForm({
               </div>
               <div className="admin-field">
                 <label>Descripción corta</label>
-                <input value={g.descripcion} onChange={(e) => g.setDescripcion(e.target.value)} />
+                <input value={g.descripcion} onChange={(e) => g.setDescripcion(e.target.value)} spellCheck />
               </div>
             </div>
           </div>

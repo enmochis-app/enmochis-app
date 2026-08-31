@@ -68,6 +68,23 @@ export const negocios = pgTable("negocios", {
 export type NegocioRow = typeof negocios.$inferSelect;
 export type NuevoNegocioRow = typeof negocios.$inferInsert;
 
+export const categorias = pgTable("categorias", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+
+  slug: text("slug").notNull().unique(),
+  nombre: text("nombre").notNull(),
+  icono: text("icono").notNull().default("🏷️"),
+  color: text("color").notNull().default("#00847A"),
+  orden: integer("orden").notNull().default(0),
+
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export type CategoriaRow = typeof categorias.$inferSelect;
+export type NuevaCategoriaRow = typeof categorias.$inferInsert;
+
 export const addons = pgTable("addons", {
   id: text("id")
     .primaryKey()

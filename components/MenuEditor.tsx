@@ -37,11 +37,11 @@ export default function MenuEditor({
           <div className="admin-grid-2">
             <div className="admin-field">
               <label>Categoría</label>
-              <input value={item.categoria} onChange={(e) => actualizar(i, { categoria: e.target.value })} placeholder="Ej. TACOS" />
+              <input value={item.categoria} onChange={(e) => actualizar(i, { categoria: e.target.value })} placeholder="Ej. TACOS" spellCheck />
             </div>
             <div className="admin-field">
               <label>Nombre</label>
-              <input value={item.nombre} onChange={(e) => actualizar(i, { nombre: e.target.value })} placeholder="Nombre del producto" />
+              <input value={item.nombre} onChange={(e) => actualizar(i, { nombre: e.target.value })} placeholder="Nombre del producto" spellCheck />
             </div>
           </div>
           <div className="admin-grid-2">

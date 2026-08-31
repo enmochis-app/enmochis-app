@@ -187,10 +187,10 @@ export default function CompletarPage({
         </p>
       </div>
 
-      <form className="form" onSubmit={enviar}>
+      <form className="form" onSubmit={enviar} lang="es">
         <div className="field">
           <label>Descripción corta</label>
-          <input value={descripcionCorta} onChange={(e) => setDescripcionCorta(e.target.value)} />
+          <input value={descripcionCorta} onChange={(e) => setDescripcionCorta(e.target.value)} spellCheck />
         </div>
         <div className="field">
           <label>Cuéntanos de tu negocio</label>
@@ -198,6 +198,7 @@ export default function CompletarPage({
             className="textarea"
             value={descripcionLarga}
             onChange={(e) => setDescripcionLarga(e.target.value)}
+            spellCheck
           />
         </div>
         <div className="field">
@@ -218,7 +219,7 @@ export default function CompletarPage({
         </div>
         <div className="field">
           <label>Dirección</label>
-          <input value={direccion} onChange={(e) => setDireccion(e.target.value)} />
+          <input value={direccion} onChange={(e) => setDireccion(e.target.value)} spellCheck />
         </div>
         <div className="field">
           <label>Instagram</label>
@@ -230,7 +231,7 @@ export default function CompletarPage({
         </div>
         <div className="field">
           <label>Horarios</label>
-          <input value={horarios} onChange={(e) => setHorarios(e.target.value)} />
+          <input value={horarios} onChange={(e) => setHorarios(e.target.value)} spellCheck />
         </div>
 
         <section className="section" style={{ padding: "12px 0" }}>
@@ -295,7 +296,7 @@ export default function CompletarPage({
               />
               <div className="field">
                 <label>Nombre</label>
-                <input value={g.nombre} onChange={(e) => g.setNombre(e.target.value)} />
+                <input value={g.nombre} onChange={(e) => g.setNombre(e.target.value)} spellCheck />
               </div>
               <div className="field">
                 <label>Precio</label>
@@ -307,7 +308,7 @@ export default function CompletarPage({
               </div>
               <div className="field">
                 <label>Descripción corta</label>
-                <input value={g.descripcion} onChange={(e) => g.setDescripcion(e.target.value)} />
+                <input value={g.descripcion} onChange={(e) => g.setDescripcion(e.target.value)} spellCheck />
               </div>
             </div>
           ))}

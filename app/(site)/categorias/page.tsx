@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { CATEGORIAS, getNegociosPorCategoria } from "@/lib/negocios";
+import { getCategorias, getNegociosPorCategoria } from "@/lib/negocios";
 
 export const revalidate = 60;
 
 export default async function CategoriasPage() {
-  const conteos = await Promise.all(CATEGORIAS.map((c) => getNegociosPorCategoria(c.slug)));
+  const categorias = await getCategorias();
+  const conteos = await Promise.all(categorias.map((c) => getNegociosPorCategoria(c.slug)));
 
   return (
     <>
@@ -22,7 +23,7 @@ export default async function CategoriasPage() {
       </div>
       <section className="section">
         <div className="catgrid">
-          {CATEGORIAS.map((c, i) => (
+          {categorias.map((c, i) => (
             <Link
               key={c.slug}
               href={`/categoria/${c.slug}`}

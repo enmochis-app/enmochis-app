@@ -12,6 +12,7 @@ export default function EditarNegocioPage({
   const { id } = use(params);
   const [negocio, setNegocio] = useState<Negocio | null>(null);
   const [catalogoAddons, setCatalogoAddons] = useState<Addon[]>([]);
+  const [categorias, setCategorias] = useState<{ slug: string; nombre: string; emoji: string; color: string }[]>([]);
   const [cargando, setCargando] = useState(true);
   const [noEncontrado, setNoEncontrado] = useState(false);
 
@@ -33,10 +34,13 @@ export default function EditarNegocioPage({
     fetch("/api/admin/addons")
       .then((r) => r.json())
       .then((body) => setCatalogoAddons(body.addons ?? []));
+    fetch("/api/admin/categorias")
+      .then((r) => r.json())
+      .then((body) => setCategorias(body.categorias ?? []));
   }, [cargar]);
 
   if (cargando) return <p>Cargando...</p>;
   if (noEncontrado || !negocio) return <p>No se encontró ese negocio.</p>;
 
-  return <NegocioForm negocio={negocio} catalogoAddons={catalogoAddons} onRecargar={cargar} />;
+  return <NegocioForm negocio={negocio} catalogoAddons={catalogoAddons} categorias={categorias} onRecargar={cargar} />;
 }

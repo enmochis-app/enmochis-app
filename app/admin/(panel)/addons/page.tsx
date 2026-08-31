@@ -42,10 +42,10 @@ function FilaAddon({ addon, onGuardado }: { addon: Addon; onGuardado: () => void
           <input value={icono} onChange={(e) => setIcono(e.target.value)} style={{ width: 44 }} />
         </td>
         <td>
-          <input value={nombre} onChange={(e) => setNombre(e.target.value)} style={{ width: "100%" }} />
+          <input value={nombre} onChange={(e) => setNombre(e.target.value)} style={{ width: "100%" }} lang="es" spellCheck />
         </td>
         <td>
-          <input value={descripcion} onChange={(e) => setDescripcion(e.target.value)} style={{ width: "100%" }} />
+          <input value={descripcion} onChange={(e) => setDescripcion(e.target.value)} style={{ width: "100%" }} lang="es" spellCheck />
         </td>
         <td>
           <input
@@ -145,18 +145,18 @@ export default function AddonsPage() {
           Un addon nuevo queda disponible de inmediato para activarse en cualquier negocio, y
           aparece como una píldora de servicio en su minisitio — sin que se necesite tocar código.
         </div>
-        <form onSubmit={crear} style={{ display: "flex", gap: 12, alignItems: "flex-end", flexWrap: "wrap" }}>
+        <form onSubmit={crear} lang="es" style={{ display: "flex", gap: 12, alignItems: "flex-end", flexWrap: "wrap" }}>
           <div className="admin-field" style={{ width: 60 }}>
             <label>Ícono</label>
             <input value={icono} onChange={(e) => setIcono(e.target.value)} />
           </div>
           <div className="admin-field" style={{ flex: 1, minWidth: 160 }}>
             <label>Nombre</label>
-            <input value={nombre} onChange={(e) => setNombre(e.target.value)} required />
+            <input value={nombre} onChange={(e) => setNombre(e.target.value)} required spellCheck />
           </div>
           <div className="admin-field" style={{ flex: 2, minWidth: 220 }}>
             <label>Características (descripción corta)</label>
-            <input value={descripcion} onChange={(e) => setDescripcion(e.target.value)} />
+            <input value={descripcion} onChange={(e) => setDescripcion(e.target.value)} spellCheck />
           </div>
           <div className="admin-field" style={{ width: 100 }}>
             <label>Precio/mes</label>
